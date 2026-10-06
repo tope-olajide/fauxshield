@@ -1,0 +1,9 @@
+enum: VerificationOutcome
+serialized: byName
+values:
+  - authentic
+  - alreadyVerified
+  - invalidPin
+  - fraudSuspected
+  - highRisk
+  - recalled

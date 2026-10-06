@@ -1,0 +1,23 @@
+### Aggregated dashboard payload powering the operator command center.
+class: DashboardSummary
+fields:
+  windowDays: int
+  totalVerifications: int
+  authentic: int
+  alreadyVerified: int
+  invalidPin: int
+  fraudSuspected: int
+  highRisk: int
+  recalled: int
+  openAlerts: int
+  criticalAlerts: int
+  identitiesTotal: int
+  identitiesLocked: int
+  identitiesRecalled: int
+  batchesTotal: int
+  productsTotal: int
+  trend: List<TrendPoint>
+  topCountries: List<CountryStat>
+  outcomes: List<OutcomeBreakdown>
+  recentAlerts: List<FraudAlert>
+  generatedAt: DateTime

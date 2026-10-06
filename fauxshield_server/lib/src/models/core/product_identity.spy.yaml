@@ -1,0 +1,37 @@
+### A serialized identity for one physical unit. The QR token is bound to the
+### workspace, product, and identity through an HMAC-SHA256 signature, so a copy
+### of a token that was moved to another product or tenant fails resolution.
+class: ProductIdentity
+table: product_identity
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  batchId: UuidValue, relation(parent=batch)
+  ### Cryptographically random token printed as the QR payload.
+  qrToken: String, unique
+  ### HMAC-SHA256 signature over workspace, product, identity, and token.
+  hmacSignature: String
+  ### Bcrypt hash of the 6 digit PIN. Server only.
+  pinHash: String?, scope=serverOnly
+  ### AES-256-GCM encrypted PIN for authorized operator retrieval. Server only.
+  pinCiphertext: String?, scope=serverOnly
+  status: IdentityStatus, default=active
+  failedPinAttempts: int, default=0
+  lockedUntil: DateTime?
+  firstVerified: bool, default=false
+  verificationCount: int, default=0
+  firstVerifiedAt: DateTime?
+  lastVerifiedAt: DateTime?
+  recallReason: String?
+  recalledAt: DateTime?
+  ### Identity this token was regenerated from, if the original was compromised.
+  regeneratedFromId: UuidValue?
+  deletedAt: DateTime?
+  deletedBy: String?
+  deleteReason: String?
+  createdAt: DateTime, default=now
+indexes:
+  product_identity_workspace_idx:
+    fields: workspaceId
+  product_identity_batch_idx:
+    fields: batchId

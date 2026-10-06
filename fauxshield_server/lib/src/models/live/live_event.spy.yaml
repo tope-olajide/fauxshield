@@ -1,0 +1,24 @@
+### A live event pushed to connected operator apps over Serverpod's streaming
+### APIs. Events cover verifications, fraud alerts, recalls, offline ingest, and
+### simulation progress so the command center updates in real time.
+class: LiveEvent
+fields:
+  type: LiveEventType
+  workspaceId: UuidValue
+  occurredAt: DateTime
+  title: String
+  subtitle: String?
+  severity: AlertSeverity?
+  outcome: VerificationOutcome?
+  riskScore: RiskScore?
+  country: String?
+  countryCode: String?
+  city: String?
+  latitude: double?
+  longitude: double?
+  identityId: UuidValue?
+  sessionId: UuidValue?
+  alertId: UuidValue?
+  batchId: UuidValue?
+  ### Event specific structured extras serialized as JSON.
+  payloadJson: String?

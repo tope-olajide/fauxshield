@@ -1,0 +1,4 @@
+exception: ServiceUnavailableException
+extends: ApiException
+fields:
+  reason: String

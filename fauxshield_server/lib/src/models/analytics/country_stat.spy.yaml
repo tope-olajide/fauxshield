@@ -1,0 +1,6 @@
+class: CountryStat
+fields:
+  country: String
+  countryCode: String?
+  verifications: int
+  fraud: int

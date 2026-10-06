@@ -1,0 +1,7 @@
+enum: ActorType
+serialized: byName
+values:
+  - user
+  - apiKey
+  - system
+  - consumer

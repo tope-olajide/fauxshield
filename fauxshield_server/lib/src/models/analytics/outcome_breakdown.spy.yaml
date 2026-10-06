@@ -1,0 +1,4 @@
+class: OutcomeBreakdown
+fields:
+  outcome: VerificationOutcome
+  count: int

@@ -1,0 +1,9 @@
+### The authoritative verdict for an offline scan after the server processed it.
+class: OfflineScanVerdict
+fields:
+  localId: String
+  outcome: VerificationOutcome?
+  riskScore: RiskScore?
+  sessionId: UuidValue?
+  processedAt: DateTime
+  message: String

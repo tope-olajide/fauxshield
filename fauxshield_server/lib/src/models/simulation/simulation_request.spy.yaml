@@ -1,0 +1,12 @@
+### Parameters for starting an attack simulation.
+class: SimulationRequest
+fields:
+  type: SimulationType
+  ### Optional label shown in the command center.
+  label: String?
+  ### Optional batch to target. When omitted a batch is picked automatically.
+  batchId: UuidValue?
+  ### Number of simulated scan steps. Defaults per scenario when null.
+  steps: int?
+  ### Delay between steps in seconds. Defaults to a fast demo pace.
+  stepDelaySeconds: int?

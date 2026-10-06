@@ -1,0 +1,29 @@
+### A brand product. Products group manufacturing batches, and each batch holds
+### serialized identities for individual physical units.
+class: Product
+table: product
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  name: String
+  ### Stock keeping unit or internal product code.
+  sku: String?
+  category: String?
+  description: String?
+  ### Public image URLs shown on consumer verification pages.
+  imageUrls: List<String>?
+  ### Packaging description shown to consumers.
+  packaging: String?
+  ### Shelf life guidance shown to consumers.
+  shelfLife: String?
+  ### Country codes where this product may not be sold.
+  countryRestrictions: List<String>?
+  ### Safety and usage instructions shown to consumers.
+  safetyInstructions: String?
+  createdBy: String?
+  archivedAt: DateTime?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  product_workspace_idx:
+    fields: workspaceId

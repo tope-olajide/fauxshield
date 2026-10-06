@@ -1,0 +1,23 @@
+### One fraud signal produced by the fraud engine for a verification session.
+### Signals are immutable evidence and may be linked to alerts.
+class: FraudSignalRecord
+table: fraud_signal_record
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  sessionId: UuidValue, relation(parent=verification_session)
+  ### Denormalized for fast batch level queries.
+  identityId: UuidValue
+  batchId: UuidValue
+  type: SignalType
+  severity: RiskScore
+  ### Signal specific structured evidence serialized as JSON.
+  dataJson: String, default='{}'
+  detectedAt: DateTime, default=now
+indexes:
+  fraud_signal_record_session_idx:
+    fields: sessionId
+  fraud_signal_record_batch_idx:
+    fields: batchId
+  fraud_signal_record_workspace_idx:
+    fields: workspaceId

@@ -1,0 +1,11 @@
+### Brand presentation for consumer-facing verification pages and app screens.
+class: Branding
+fields:
+  ### Display name shown to consumers. Falls back to the workspace name.
+  displayName: String?
+  ### Public URL of the brand logo.
+  logoUrl: String?
+  ### Primary theme color as a hex string, for example #126B4F.
+  themeColor: String?
+  ### Short tagline shown under the brand name.
+  tagline: String?

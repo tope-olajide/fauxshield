@@ -1,0 +1,13 @@
+### Identity level statistics for one batch, used by the batch detail screen.
+class: BatchStats
+fields:
+  batchId: UuidValue
+  totalIdentities: int
+  active: int
+  verified: int
+  locked: int
+  recalled: int
+  deleted: int
+  ### Distinct units in this batch that carry fraud signals.
+  flagged: int
+  generatedAt: DateTime

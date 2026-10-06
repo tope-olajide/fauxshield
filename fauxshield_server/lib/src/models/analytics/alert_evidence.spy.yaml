@@ -1,0 +1,17 @@
+### Everything an investigator or an AI agent needs to understand one alert in a
+### single call: the alert, the identity, the batch and product, every related
+### session, the detected signals, consumer reports, and recall history.
+class: AlertEvidence
+fields:
+  alert: FraudAlert
+  identity: ProductIdentity?
+  batch: Batch?
+  product: Product?
+  ### Sessions directly linked to the alert.
+  sessions: List<VerificationSession>
+  ### All sessions for the identity, newest first.
+  identitySessions: List<VerificationSession>
+  signals: List<FraudSignalRecord>
+  reports: List<FakeReport>
+  recall: RecallRecord?
+  generatedAt: DateTime

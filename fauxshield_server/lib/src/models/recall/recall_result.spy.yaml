@@ -1,0 +1,5 @@
+### Result of issuing or lifting a recall, including how many units changed state.
+class: RecallResult
+fields:
+  recall: RecallRecord
+  affected: int

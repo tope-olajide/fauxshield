@@ -1,0 +1,22 @@
+### An immutable record of a recall action, either for a whole batch or for a
+### single identity. Verification returns the recalled outcome while active.
+class: RecallRecord
+table: recall_record
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  batchId: UuidValue
+  identityId: UuidValue?
+  scope: RecallScope
+  reason: String
+  issuedBy: String
+  issuedAt: DateTime, default=now
+  lifted: bool, default=false
+  liftedAt: DateTime?
+  liftedBy: String?
+  notes: String?
+indexes:
+  recall_record_workspace_idx:
+    fields: workspaceId
+  recall_record_batch_idx:
+    fields: batchId

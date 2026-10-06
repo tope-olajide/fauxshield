@@ -1,0 +1,28 @@
+### Outbox record for one webhook delivery attempt chain. A recurring scheduled
+### task drains due deliveries and applies the retry schedule.
+class: WebhookDelivery
+table: webhook_delivery
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue
+  endpointId: UuidValue, relation(parent=webhook_endpoint)
+  eventType: WebhookEventType
+  payloadJson: String
+  status: DeliveryStatus, default=pending
+  attemptCount: int, default=0
+  maxAttempts: int, default=5
+  lastAttemptAt: DateTime?
+  nextAttemptAt: DateTime, default=now
+  lastHttpStatus: int?
+  lastError: String?
+  responseTimeMs: int?
+  processingStartedAt: DateTime?
+  createdAt: DateTime, default=now
+  deliveredAt: DateTime?
+indexes:
+  webhook_delivery_endpoint_idx:
+    fields: endpointId
+  webhook_delivery_workspace_idx:
+    fields: workspaceId
+  webhook_delivery_status_idx:
+    fields: status

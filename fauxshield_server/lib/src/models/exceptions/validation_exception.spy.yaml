@@ -1,0 +1,4 @@
+exception: ValidationException
+extends: ApiException
+fields:
+  field: String?

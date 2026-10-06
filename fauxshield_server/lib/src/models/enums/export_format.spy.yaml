@@ -1,0 +1,5 @@
+enum: ExportFormat
+serialized: byName
+values:
+  - csv
+  - tsv

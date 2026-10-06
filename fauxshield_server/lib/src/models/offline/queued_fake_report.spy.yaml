@@ -1,0 +1,16 @@
+### A fake product report queued on the device while offline and sent when
+### connectivity returns.
+class: QueuedFakeReport
+table: queued_fake_report
+database: client
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  identityId: UuidValue
+  qrToken: String
+  reason: String
+  comment: String?
+  photoLocalPath: String?
+  createdAt: DateTime, default=now
+  synced: bool, default=false
+  syncedAt: DateTime?
+  lastError: String?

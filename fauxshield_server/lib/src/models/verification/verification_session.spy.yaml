@@ -1,0 +1,37 @@
+### A stateful consumer verification attempt. Sessions are bound to a device
+### fingerprint and expire after 15 minutes of inactivity. Fraud evaluation runs
+### before the session can advance to PIN entry.
+class: VerificationSession
+table: verification_session
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  identityId: UuidValue, relation(parent=product_identity)
+  qrToken: String
+  ### Random per device identifier supplied by the client and revalidated on every state change.
+  deviceFingerprint: String?
+  ipAddress: String?
+  country: String?
+  countryCode: String?
+  city: String?
+  latitude: double?
+  longitude: double?
+  state: VerificationState, default=tokenResolved
+  outcome: VerificationOutcome?
+  riskScore: RiskScore?
+  source: ScanSource, default=consumerWeb
+  ### Set when this session was created from an offline field scan.
+  offlineScanId: UuidValue?
+  ### Set when this session was created by an attack simulation run.
+  simulationId: UuidValue?
+  createdAt: DateTime, default=now
+  lastStateChange: DateTime, default=now
+  expiresAt: DateTime
+  completedAt: DateTime?
+indexes:
+  verification_session_identity_idx:
+    fields: identityId
+  verification_session_workspace_idx:
+    fields: workspaceId
+  verification_session_token_idx:
+    fields: qrToken

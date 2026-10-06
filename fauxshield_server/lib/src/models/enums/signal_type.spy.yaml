@@ -1,0 +1,11 @@
+enum: SignalType
+serialized: byName
+values:
+  - cloneDetection
+  - velocityAnomaly
+  - pinAttack
+  - batchDuplication
+  - distributorLeakage
+  - greyMarket
+  - offlineBackfill
+  - pinLockout

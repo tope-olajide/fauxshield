@@ -1,0 +1,7 @@
+### Result of an authorized PIN reveal. Every reveal is recorded in the audit
+### log with the acting user.
+class: RevealedPin
+fields:
+  identityId: UuidValue
+  pin: String
+  revealedAt: DateTime

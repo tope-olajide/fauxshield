@@ -1,0 +1,11 @@
+enum: LiveEventType
+serialized: byName
+values:
+  - verificationCompleted
+  - fraudAlertCreated
+  - fraudAlertUpdated
+  - batchRecalled
+  - identityStatusChanged
+  - offlineScanIngested
+  - simulationProgress
+  - fakeReportCreated

@@ -1,0 +1,23 @@
+### An API key for machine access to the workspace. Only a hash of the key is
+### stored; the plaintext is shown exactly once when the key is created.
+class: ApiKey
+table: api_key
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  label: String
+  keyHash: String?, scope=serverOnly
+  ### First characters of the key so operators can identify it, for example fs_live_ab12.
+  keyPrefix: String
+  scopes: List<ApiScope>
+  rateLimitPerMinute: int, default=120
+  lastUsedAt: DateTime?
+  revoked: bool, default=false
+  createdBy: String?
+  createdAt: DateTime, default=now
+  revokedAt: DateTime?
+indexes:
+  api_key_workspace_idx:
+    fields: workspaceId
+  api_key_prefix_idx:
+    fields: keyPrefix

@@ -1,0 +1,14 @@
+enum: VerificationErrorReason
+serialized: byName
+values:
+  - tokenNotFound
+  - tokenInvalid
+  - sessionNotFound
+  - sessionExpired
+  - invalidState
+  - pinRequired
+  - pinLockout
+  - identityLocked
+  - identityRecalled
+  - alreadyDetermined
+  - evaluationUnavailable

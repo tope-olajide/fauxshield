@@ -1,0 +1,6 @@
+### Result of inviting a teammate. The invite code is shown exactly once.
+class: InvitationCreated
+fields:
+  invitation: Invitation
+  code: String
+  warning: String

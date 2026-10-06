@@ -1,0 +1,5 @@
+exception: AuthenticationException
+extends: ApiException
+fields:
+  ### Either notAuthenticated or forbidden.
+  reason: String

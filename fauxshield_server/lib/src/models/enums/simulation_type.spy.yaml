@@ -1,0 +1,7 @@
+enum: SimulationType
+serialized: byName
+values:
+  - cloneAttack
+  - pinBruteForce
+  - scanBurst
+  - greyMarketLeak

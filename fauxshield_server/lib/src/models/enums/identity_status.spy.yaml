@@ -1,0 +1,8 @@
+enum: IdentityStatus
+serialized: byName
+values:
+  - active
+  - locked
+  - recalled
+  - regenerated
+  - deleted

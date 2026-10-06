@@ -1,0 +1,33 @@
+### A field scan captured while offline by an inspector device. The table is
+### synchronized between the device and the server with Serverpod's offline sync,
+### and a recurring task converts pending scans into real verification sessions,
+### so fraud intelligence sees activity that happened without connectivity.
+class: OfflineScanRecord
+table: offline_scan_record
+database: sync
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ### Workspace the inspector belongs to. Null only for legacy rows.
+  workspaceId: UuidValue?
+  ### Stable id for the device that captured the scan.
+  deviceId: String
+  deviceFingerprint: String?
+  ### Null when the device could not resolve the token from its cached catalog.
+  identityId: UuidValue?
+  qrToken: String
+  scannedAt: DateTime
+  latitude: double?
+  longitude: double?
+  country: String?
+  city: String?
+  ### Provisional outcome computed on the device from the cached catalog.
+  provisionalOutcome: String?
+  ### Set by the server after the scan is converted into a verification session.
+  processed: bool, default=false
+  processedAt: DateTime?
+  ### Verdict returned by the server after processing, serialized as JSON.
+  verdictJson: String?
+  createdAt: DateTime, default=now
+indexes:
+  offline_scan_processed_idx:
+    fields: processed

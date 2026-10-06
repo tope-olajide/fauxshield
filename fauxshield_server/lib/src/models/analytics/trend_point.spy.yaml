@@ -1,0 +1,5 @@
+class: TrendPoint
+fields:
+  date: DateTime
+  verifications: int
+  fraud: int

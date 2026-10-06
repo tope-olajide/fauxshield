@@ -1,0 +1,23 @@
+### Per-workspace fraud detection policy. Every threshold can be tuned per brand.
+class: FraudPolicy
+fields:
+  ### Time window for velocity checks in minutes.
+  velocityWindowMinutes: int, default=60
+  ### Verification attempts for one identity within the window before a velocity signal.
+  velocityThreshold: int, default=10
+  ### Failed PIN attempts on one identity before a pin attack signal.
+  pinAttackThreshold: int, default=5
+  ### Fraud flagged identities in one batch before a batch duplication signal.
+  batchDuplicationThreshold: int, default=3
+  ### Time window for clone detection in minutes.
+  cloneWindowMinutes: int, default=60
+  ### Distance in kilometers between two scans of one identity that counts as impossible travel.
+  cloneDistanceThresholdKm: int, default=100
+  ### Geo lookup budget in milliseconds.
+  geoIpTimeoutMs: int, default=500
+  ### Total fraud evaluation budget in milliseconds.
+  evaluationBudgetMs: int, default=2000
+  ### Automatically lock identities when fraud is suspected.
+  autoLockOnFraud: bool, default=true
+  ### Create fraud alerts for high risk results.
+  alertOnHigh: bool, default=true

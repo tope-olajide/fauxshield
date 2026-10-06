@@ -1,0 +1,8 @@
+### Result of generating identities for a batch.
+class: IdentityGenerationResult
+fields:
+  batchId: UuidValue
+  requested: int
+  created: int
+  startedAt: DateTime
+  completedAt: DateTime

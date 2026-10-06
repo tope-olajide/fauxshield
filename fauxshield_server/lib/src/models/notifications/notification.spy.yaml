@@ -1,0 +1,21 @@
+### In-app notification delivered to one workspace member. New notifications are
+### also pushed over the live stream for instant display in the app.
+class: Notification
+table: notification
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  ### Auth user identifier of the recipient.
+  userIdentifier: String
+  type: NotificationType
+  title: String
+  body: String
+  targetType: String?
+  targetId: UuidValue?
+  read: bool, default=false
+  createdAt: DateTime, default=now
+indexes:
+  notification_recipient_idx:
+    fields: userIdentifier
+  notification_workspace_idx:
+    fields: workspaceId

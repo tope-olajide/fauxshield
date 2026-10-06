@@ -1,0 +1,24 @@
+### A webhook receiver registered by the brand. Payloads are signed with an
+### HMAC-SHA256 secret that is stored encrypted with AES-256-GCM and bound to
+### the workspace and endpoint.
+class: WebhookEndpoint
+table: webhook_endpoint
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  url: String
+  description: String?
+  subscribedEvents: List<WebhookEventType>
+  enabled: bool, default=true
+  consecutiveFailures: int, default=0
+  ### AES-256-GCM encrypted signing secret. Server only.
+  encryptedSecret: String?, scope=serverOnly
+  ### Previous secret kept during rotation so in-flight deliveries still verify.
+  previousEncryptedSecret: String?, scope=serverOnly
+  secretRotatedAt: DateTime?
+  deletedAt: DateTime?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  webhook_endpoint_workspace_idx:
+    fields: workspaceId

@@ -1,0 +1,26 @@
+### Device-local cache of catalog entries for offline inspector checks. This
+### table lives only in the app's SQLite database and is refreshed from the
+### server catalog endpoint.
+class: InspectorCacheEntry
+table: inspector_cache_entry
+database: client
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  identityId: UuidValue, unique
+  qrToken: String
+  productName: String
+  sku: String?
+  productDescription: String?
+  imageUrlsJson: String?
+  packaging: String?
+  shelfLife: String?
+  countryRestrictionsJson: String?
+  safetyInstructions: String?
+  batchReference: String
+  batchStatus: BatchStatus
+  manufactureDate: DateTime?
+  distributionRegion: String
+  identityStatus: IdentityStatus
+  recallReason: String?
+  recalledAt: DateTime?
+  refreshedAt: DateTime

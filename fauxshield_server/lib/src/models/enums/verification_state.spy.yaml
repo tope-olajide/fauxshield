@@ -1,0 +1,7 @@
+enum: VerificationState
+serialized: byName
+values:
+  - tokenResolved
+  - pinPrompted
+  - pinSubmitted
+  - resultDetermined

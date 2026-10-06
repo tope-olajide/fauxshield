@@ -1,0 +1,21 @@
+### An invitation for a new teammate. The invite code is shared out of band and
+### redeemed inside the app after signing in.
+class: Invitation
+table: invitation
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  email: String
+  role: MembershipRole, default=member
+  ### Single use invite code. Stored hashed, shown once at creation time.
+  codeHash: String?, scope=serverOnly
+  codePrefix: String
+  status: InvitationStatus, default=pending
+  invitedBy: String
+  expiresAt: DateTime
+  acceptedAt: DateTime?
+  acceptedBy: String?
+  createdAt: DateTime, default=now
+indexes:
+  invitation_code_prefix_idx:
+    fields: codePrefix

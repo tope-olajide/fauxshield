@@ -1,0 +1,247 @@
+:root {
+  --brand: #0f766e;
+  --ink: #14231f;
+  --muted: #5d6d68;
+  --paper: #f5f7f4;
+  --card: #ffffff;
+  --line: #dde5e0;
+  --ok: #0f7b4d;
+  --warn: #b45309;
+  --danger: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body.verify-body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--brand) 16%, transparent), transparent 45%),
+    linear-gradient(160deg, #f6f8f5 0%, #eef3ee 100%);
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 16px 48px;
+}
+
+.verify-card {
+  width: 100%;
+  max-width: 560px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 18px 50px rgba(20, 35, 31, 0.12);
+  overflow: hidden;
+}
+
+.brand {
+  padding: 28px 28px 20px;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--brand) 12%, white), white 70%);
+}
+
+.brand-kicker {
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.brand-logo {
+  max-height: 44px;
+  margin-bottom: 10px;
+}
+
+.tagline {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.panel,
+.result,
+.report {
+  padding: 24px 28px;
+}
+
+.panel h2,
+.result-badge {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.muted {
+  color: var(--muted);
+  margin-top: 0;
+}
+
+.stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  font-size: 16px;
+  background: #fbfdfb;
+}
+
+.input:focus {
+  outline: 2px solid color-mix(in srgb, var(--brand) 45%, transparent);
+  border-color: var(--brand);
+}
+
+.input-pin {
+  letter-spacing: 0.4em;
+  font-size: 22px;
+  text-align: center;
+}
+
+.button {
+  display: inline-block;
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 18px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+}
+
+.button-secondary {
+  background: #eef3ee;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+.result {
+  border-top: 4px solid var(--brand);
+}
+
+.result.authentic {
+  border-top-color: var(--ok);
+}
+
+.result.already {
+  border-top-color: #2563eb;
+}
+
+.result.warning {
+  border-top-color: var(--warn);
+}
+
+.result.danger {
+  border-top-color: var(--danger);
+}
+
+.result.authentic .result-badge {
+  color: var(--ok);
+}
+
+.result.danger .result-badge {
+  color: var(--danger);
+}
+
+.result.warning .result-badge {
+  color: var(--warn);
+}
+
+.result-message {
+  color: #29332f;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.callout {
+  background: #f7f8f6;
+  border-left: 4px solid var(--brand);
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #37423e;
+}
+
+.facts {
+  margin: 18px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.facts div {
+  background: #f8faf8;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.facts dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.facts dd {
+  margin: 0;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.report {
+  border-top: 1px solid var(--line);
+  background: #fbfdfb;
+}
+
+.report summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.verify-footer {
+  padding: 16px 28px 22px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .brand,
+  .panel,
+  .result,
+  .report {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}

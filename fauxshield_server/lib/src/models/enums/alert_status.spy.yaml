@@ -1,0 +1,7 @@
+enum: AlertStatus
+serialized: byName
+values:
+  - open
+  - investigating
+  - resolved
+  - dismissed

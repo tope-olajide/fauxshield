@@ -1,0 +1,11 @@
+enum: WebhookEventType
+serialized: byName
+values:
+  - verificationCompleted
+  - fraudAlertCreated
+  - fraudAlertUpdated
+  - batchStatusChanged
+  - identityStatusChanged
+  - recallIssued
+  - fakeReportCreated
+  - testEvent

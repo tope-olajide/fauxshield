@@ -1,0 +1,4 @@
+exception: ConflictException
+extends: ApiException
+fields:
+  resource: String

@@ -1,0 +1,27 @@
+# Files and directories created by pub
+.dart_tool/
+.packages
+
+# Pubspec overrides
+pubspec_overrides.yaml
+
+# Agents
+.dart_skills/
+.agents/
+.claude/
+.gemini/
+.cursor/
+.vscode/mcp.json
+.codex/
+.mcp.json
+
+# Serverpod Cloud CLI
+.scloud/
+
+# Prior-art reference material used for domain research. Kept locally only;
+# it is deliberately not part of the submitted project.
+references/
+
+# Stale snapshot of server sources from an earlier session, superseded by
+# fauxshield_server/lib. Kept on disk, never committed.
+.staging/
