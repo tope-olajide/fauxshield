@@ -1,0 +1,13 @@
+type: server
+
+client_package_path: ../fauxshield_client
+server_test_tools_path: test/integration/test_tools
+
+# The experimental offline sync feature powers the field inspector mode:
+# OfflineScanRecord rows captured without connectivity sync to the server,
+# where a recurring task turns them into real verification sessions.
+modules:
+  serverpod_offline_sync:
+    nickname: offline_sync
+experimental_features:
+  databaseSync: true

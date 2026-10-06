@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FauxShield · Anti-counterfeit command center</title>
+    <link rel="stylesheet" href="{{{@/web/css/landing.css}}}" />
+  </head>
+  <body class="landing">
+    <header class="hero">
+      <div class="shell">
+        <p class="eyebrow">Serverpod 4 · Flutter · Live fraud intelligence</p>
+        <h1>FauxShield</h1>
+        <p class="lede">
+          Serialize every physical unit with signed QR codes and PINs, catch
+          cloned and grey-market stock in real time, and run field inspections
+          that work offline. Built as a full-stack Flutter + Serverpod app.
+        </p>
+        <div class="cta-row">
+          <a class="button" href="/app">Open the operator app</a>
+          <a class="button button-ghost" href="/verify">Verify a product</a>
+          {{#hasDemo}}
+          <a class="button button-ghost" href="/verify?t={{demoToken}}">
+            Try demo code
+          </a>
+          {{/hasDemo}}
+        </div>
+        {{#hasDemo}}
+        <p class="demo-note">
+          Demo code from {{demoBrandName}}{{#demoProductName}} · {{demoProductName}}{{/demoProductName}}.
+          {{#hasDemoPin}}
+          Walk the whole flow: tap <strong>Try demo code</strong>, then enter
+          the packaging PIN <strong class="demo-pin">{{demoPin}}</strong>.
+          {{/hasDemoPin}}
+          The demo workspace can be reset at any time.
+        </p>
+        {{/hasDemo}}
+      </div>
+    </header>
+
+    <section class="stats">
+      <div class="shell grid">
+        <div class="stat"><span>{{products}}</span><label>Products</label></div>
+        <div class="stat"><span>{{identities}}</span><label>Serialized units</label></div>
+        <div class="stat"><span>{{verifications}}</span><label>Verifications</label></div>
+        <div class="stat"><span>{{alerts}}</span><label>Fraud alerts</label></div>
+        <div class="stat"><span>{{workspaces}}</span><label>Brands onboard</label></div>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="shell grid">
+        <article>
+          <h2>Live command center</h2>
+          <p>
+            Serverpod streaming pushes every scan, signal, and alert to the
+            operator app the moment it happens.
+          </p>
+        </article>
+        <article>
+          <h2>Six fraud signals</h2>
+          <p>
+            Clone detection, velocity anomalies, PIN attacks, batch
+            duplication, distributor leakage, and grey market detection.
+          </p>
+        </article>
+        <article>
+          <h2>Offline-first inspectors</h2>
+          <p>
+            Field scans queue on the device and sync through Serverpod's
+            offline sync; verdicts come back to the device automatically.
+          </p>
+        </article>
+        <article>
+          <h2>Attack rehearsals</h2>
+          <p>
+            Run clone, brute-force, burst, and grey-market simulations through
+            the real pipeline and watch the response unfold live.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <footer class="landing-footer">
+      <div class="shell">
+        <span>FauxShield — built on Serverpod 4 for the Build Something Real hackathon.</span>
+      </div>
+    </footer>
+  </body>
+</html>

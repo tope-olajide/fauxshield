@@ -1,0 +1,27 @@
+# Files and directories created by pub
+.dart_tool/
+.packages
+
+# Conventional directory for build outputs
+build/
+
+# The prebuilt Flutter web app IS committed (web/app). Serverpod Cloud serves
+# it at /app, and the `flutter_build` script in pubspec.yaml refreshes it.
+# Rebuild with:
+#   cd fauxshield_flutter && flutter build web --release --base-href /app/
+#   cp -r build/web/. ../fauxshield_server/web/app/
+
+# Directory created by dartdoc
+doc/api/
+
+# config/passwords.yaml IS committed on purpose: it contains development-only
+# values so a fresh clone boots without setup. Serverpod Cloud deployments set
+# their own managed secrets with `serverpod cloud password set`; rotate
+# everything in this file before running a real production environment.
+config/firebase_service_account_key.json
+
+# Embedded PostgreSQL runtime artifacts (data dir, sockets, pidfiles)
+.serverpod/
+
+# SQLite databases created by the ephemeral test database
+**/sp_*.db*

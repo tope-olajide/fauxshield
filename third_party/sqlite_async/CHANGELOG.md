@@ -1,0 +1,230 @@
+## 0.14.5
+
+- Make `close()` wait for the database to actually be closed.
+
+## 0.14.4
+
+- Native: Add the `NativeSqliteOpenFactory.beforeOpen` method, which can be overridden to configure
+  SQLite asynchronously before opening databases.
+- Web: Upgrade `package:sqlite3_web` to flush IndexedDB writes automatically, deprecate `flush()`.
+- Add `SqliteOptions.preparedStatementCacheSize` to cache prepared statements (disabled by default).
+
+## 0.14.3
+
+- Include identifier of mutexes when a navigator lock attempt is aborted.
+- Support versions `0.9.x` of `package:sqlite3_web`.
+
+## 0.14.2
+
+- Support versions `0.8.x` of `package:sqlite3_web`.
+
+## 0.14.1
+
+- Fix update notifications sometimes firing before a write has completed.
+
+## 0.14.0
+
+- Support versions 3.x of the `sqlite3` package and 0.7.x of `sqlite3_web`.
+- Remove the `sqlite3_open.dart` library, SQLite libraries are no longer loaded through Dart.
+- __Breaking__: Rewrite the native connection pool implementation.
+  - Remove isolate connection factories. Simply open the same database on another isolate, it's safe to do so now.
+  - It is no longer possible to register user-defined functions in Dart. Extensions providing functions in native code can still be used.
+- __Breaking__: Remove `AbstractDefaultSqliteOpenFactory` and `DefaultSqliteOpenFactory`. Use `SqliteOpenFactory` instead.
+  To provide a custom open factory, import `NativeSqliteOpenFactory` or `WebSqliteOpenFactory` with a platform-specific
+  import and extend those classes.
+- __Breaking__: Remove the `maxReaders` parameter on `SqliteDatabase`. Set that parameter on `SqliteOptions` instead.
+- __Breaking__: Remove libraries exporting the `sqlite3` package:
+  - Instead of `package:sqlite_async/sqlite3.dart`, import `package:sqlite3/sqlite3.dart`.
+  - Instead of `package:sqlite_async/sqlite3_common.dart`, import `package:sqlite3/common.dart`.
+  - Instead of `package:sqlite_async/sqlite3_wasm.dart`, import `package:sqlite3/wasm.dart`.
+  - Instead of `package:sqlite_async/sqlite3_web.dart`, import `package:sqlite3_web/sqlite3_web.dart`.
+- __Breaking__: Remove `SqliteDatabaseMixin` and `SqliteQueries`. Extend `SqliteConnection` instead.
+- __Breaking__: Calls locking the database that fail with a timeout now throw an `AbortException` instead of a
+  `TimeoutException`.
+- The `throttle` parameter on `watch` and `onChange` can now be set to `null`. This also introduces `watchUnthrottled`
+  and `onChangeUnthrottled`, which only buffer on paused subscriptions instead of applying a static timeout.
+- Add `abortableReadLock` and `abortableWriteLock`. The methods can be used to acquire a read/write context with a flexible
+  abort signal instead of a static timeout.
+
+## 0.13.1
+
+ - Add `executeMultiple` to run multiple statements not using parameters.
+
+## 0.13.0
+
+ - Update sqlite3_web to 0.4.0
+
+## 0.12.2
+
+ - Add `withAllConnections` method to run statements on all connections in the pool.
+
+## 0.12.1
+
+- Fix distributing updates from shared worker.
+
+## 0.12.0
+
+ - Avoid large transactions creating a large internal update queue.
+
+## 0.11.8
+
+- Support nested transactions (emulated with `SAVEPOINT` statements).
+- Fix web compilation issues with version `2.8.0` of `package:sqlite3`.
+
+## 0.11.7
+
+- Shared worker: Release locks owned by connected client tab when it closes.
+- Fix web concurrency issues: Consistently apply a shared mutex or let a shared
+  worker coordinate access.
+
+## 0.11.6
+
+- Native: Consistently report errors when opening the database instead of
+  causing unhandled exceptions.
+
+## 0.11.5
+
+- Allow profiling queries. Queries are profiled by default in debug and profile builds, the runtime
+  for queries is added to profiling timelines under the `sqlite_async` tag.
+- Fix cancelling `watch()` queries sometimes taking longer than necessary. 
+- Fix web databases not respecting lock timeouts.
+
+## 0.11.4
+
+- Add `SqliteConnection.synchronousWrapper` and `SqliteDatabase.singleConnection`.
+  Together, these can be used to wrap raw `CommonDatabase` instances from `package:sqlite3`
+  as a `Database` (without an automated worker or isolate setup). This can be useful in tests
+  where synchronous access to the underlying database is convenient.
+
+## 0.11.3
+
+- Support being compiled with `package:build_web_compilers`.
+
+## 0.11.2
+
+- Support latest version of `package:sqlite3_web`.
+- Support `dart2wasm`.
+
+## 0.11.1
+
+- Remove remaining `dart:js_util` imports in favor of new interop APIs.
+- Add `WebSqliteOpenFactory` with web-specific behavior for open factories.
+
+## 0.11.0
+
+ - Automatically flush IndexedDB storage to fix durability issues
+
+## 0.10.1
+
+- For database setups not using a shared worker, use a `BroadcastChannel` to share updates across different tabs.
+
+## 0.10.0
+
+- Add the `exposeEndpoint()` method available on web databases. It returns a serializable
+  description of the database endpoint that can be sent across workers.
+  This allows sharing an opened database connection across workers.
+
+## 0.9.1
+
+- Support version ^0.2.0 of package:sqlite3_web
+- Fix update notifications to only fire outside transactions
+- Fix update notifications to be debounced on web
+
+## 0.9.0
+
+- Support the latest version of package:web and package:sqlite3_web
+
+- Export sqlite3 `open` for packages that depend on `sqlite_async`
+
+## 0.8.3
+
+- Updated web database implementation for get and getOptional. Fixed refreshSchema not working in web.
+
+## 0.8.2
+
+- **FEAT**: Added `refreshSchema()`, allowing queries and watch calls to work against updated schemas.
+
+## 0.8.1
+
+- Added Navigator locks for web `Mutex`s.
+
+## 0.8.0
+
+- Added web support (web functionality is in beta)
+
+## 0.7.0
+
+- BREAKING CHANGE: Update all Database types to use a `CommonDatabase` interface.
+- Update `openDB` and `open` methods to be synchronous.
+- Fix `ArgumentError (Invalid argument(s): argument value for 'return_value' is null)` in sqlite3 when closing the database connection by upgrading to version 2.4.4.
+
+## 0.7.0-alpha.5
+
+- The dependency for the `Drift` package is now removed in favour of using the new `sqlite3_web` package.
+- A new implementation for WebDatabase is used for SQL database connections on web.
+- New exports are added for downstream consumers of this package to extended custom workers with custom SQLite function capabilities.
+- Update minimum Dart SDK to 3.4.0
+
+## 0.7.0-alpha.4
+
+- Add latest changes from master
+
+## 0.7.0-alpha.3
+
+- Add latest changes from master
+
+## 0.7.0-alpha.2
+
+- Fix re-using a shared Mutex from <https://github.com/powersync-ja/sqlite_async.dart/pull/31>
+
+## 0.7.0-alpha.1
+
+- Added initial support for web platform.
+
+## 0.6.1
+
+- Fix errors when closing a `SqliteDatabase`.
+- Configure SQLite `busy_timeout` (30s default). This fixes "database is locked (code 5)" error when using multiple `SqliteDatabase` instances for the same database.
+- Fix errors when opening multiple connections at the same time, e.g. when running multiple read queries concurrently
+  right after opening the dtaabase.
+- Improved error handling when an Isolate crashes with an uncaught error.
+- Rewrite connection pool logic to fix performance issues when multiple read connections are open.
+- Fix using `SqliteDatabase.isolateConnectionFactory()` in multiple isolates.
+
+## 0.6.0
+
+- Allow catching errors and continuing the transaction. This is technically a breaking change, although it should not be an issue in most cases.
+- Add `tx.closed` and `db/tx.getAutoCommit()` to check whether transactions are active.
+- Requires sqlite3 ^2.3.0 and Dart ^3.2.0.
+
+## 0.5.2
+
+- Fix releasing of locks when closing `SharedMutex``.
+
+## 0.5.1
+
+- Fix `watch` when called with query parameters.
+- Clean up `-wal` and `-shm` files on close.
+
+## 0.5.0
+
+- No code changes.
+- Updated dependencies to support sqlite3 2.x.
+
+## 0.4.0
+
+- Ensure database connections are cleaned up on unhandled Isolate errors.
+- Minor performance improvements.
+
+## 0.3.0
+
+- Better error messages for recursive transactions.
+- Breaking change: Error by default when starting a read transaction within a write transaction.
+
+## 0.2.1
+
+- Fix update notifications missing the first update.
+
+## 0.2.0
+
+- Initial version.

@@ -1,0 +1,5 @@
+enum: RecallScope
+serialized: byName
+values:
+  - batch
+  - instance

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{pageTitle}} · FauxShield</title>
+    <link rel="stylesheet" href="{{{@/web/css/verify.css}}}" />
+  </head>
+  <body class="verify-body" style="--brand: {{themeColor}}">
+    <main class="verify-card">
+      <header class="brand">
+        {{#logoUrl}}<img src="{{logoUrl}}" alt="{{brandName}}" class="brand-logo" />{{/logoUrl}}
+        <p class="brand-kicker">Protected by FauxShield</p>
+        <h1>{{brandName}}</h1>
+        {{#tagline}}<p class="tagline">{{tagline}}</p>{{/tagline}}
+      </header>
+
+      {{#needsToken}}
+      <section class="panel">
+        <h2>Check your product</h2>
+        <p class="muted">
+          Scan the QR code on the packaging, or type the code printed next to it.
+        </p>
+        <form method="get" action="/verify" class="stack">
+          <label class="field-label" for="t">Product code</label>
+          <input
+            id="t"
+            name="t"
+            class="input"
+            placeholder="e.g. 3f7c1a9e64b25d80"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            required
+          />
+          <input type="hidden" name="fp" class="fp-field" value="" />
+          <button type="submit" class="button">Verify product</button>
+        </form>
+        <p class="hint">
+          FauxShield never stores your exact location — checks run at city level
+          so brands can spot counterfeit patterns.
+        </p>
+      </section>
+      {{/needsToken}}
+
+      {{#needsPin}}
+      <section class="panel">
+        <h2>Enter the packaging PIN</h2>
+        <p class="muted">
+          The unit {{tokenMasked}}{{#productName}} of {{productName}}{{/productName}}
+          is registered. Type the {{pinLength}} digit PIN printed under the scratch
+          panel to confirm it is genuine.
+        </p>
+        <form method="post" action="/verify" class="stack">
+          <input type="hidden" name="action" value="pin" />
+          <input type="hidden" name="sessionId" value="{{sessionId}}" />
+          <input type="hidden" name="fp" class="fp-field" value="" />
+          <label class="field-label" for="pin">PIN</label>
+          <input
+            id="pin"
+            name="pin"
+            class="input input-pin"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="6"
+            minlength="6"
+            placeholder="000000"
+            autocomplete="one-time-code"
+            required
+          />
+          <button type="submit" class="button">Confirm PIN</button>
+        </form>
+      </section>
+      {{/needsPin}}
+
+      {{#hasResult}}
+      <section class="result {{resultClass}}">
+        <div class="result-badge">{{resultTitle}}</div>
+        <p class="result-message">{{resultMessage}}</p>
+
+        {{#recalled}}
+        <p class="callout">
+          <strong>Recall notice:</strong> {{#recallReason}}{{recallReason}}{{/recallReason}}
+          {{^recallReason}}contact the brand for return instructions.{{/recallReason}}
+        </p>
+        {{/recalled}}
+
+        {{#fraudSuspected}}
+        <p class="callout">
+          The brand's fraud team has been alerted. Keep the product and packaging
+          for investigation if possible.
+        </p>
+        {{/fraudSuspected}}
+
+        <dl class="facts">
+          {{#productName}}<div><dt>Product</dt><dd>{{productName}}</dd></div>{{/productName}}
+          {{#sku}}<div><dt>SKU</dt><dd>{{sku}}</dd></div>{{/sku}}
+          <div><dt>Code</dt><dd>{{tokenMasked}}</dd></div>
+          {{#batchReference}}<div><dt>Batch</dt><dd>{{batchReference}}</dd></div>{{/batchReference}}
+          {{#locationLabel}}<div><dt>Location</dt><dd>{{locationLabel}}</dd></div>{{/locationLabel}}
+          <div><dt>Verification count</dt><dd>{{verificationCount}}</dd></div>
+        </dl>
+
+        {{#alreadyVerified}}
+        <p class="callout">
+          First verified {{firstVerifiedAtLabel}}.
+        </p>
+        {{/alreadyVerified}}
+      </section>
+
+      {{#canReport}}
+      <details class="report">
+        <summary>Report a suspicious product</summary>
+        <form method="post" action="/verify" class="stack">
+          <input type="hidden" name="action" value="report" />
+          <input type="hidden" name="sessionId" value="{{sessionId}}" />
+          <input type="hidden" name="fp" class="fp-field" value="" />
+          <label class="field-label" for="reason">What looks wrong?</label>
+          <select id="reason" name="reason" class="input">
+            <option value="Packaging looks different">Packaging looks different</option>
+            <option value="Code did not verify">Code did not verify</option>
+            <option value="PIN did not match">PIN did not match</option>
+            <option value="Bought in a restricted market">Bought in a restricted market</option>
+            <option value="Other">Other</option>
+          </select>
+          <textarea
+            name="comment"
+            class="input"
+            rows="3"
+            placeholder="Anything else the brand should know (optional)"
+          ></textarea>
+          <button type="submit" class="button button-secondary">Send report</button>
+        </form>
+      </details>
+      {{/canReport}}
+      {{/hasResult}}
+
+      {{#reported}}
+      <section class="result already">
+        <div class="result-badge">Report received</div>
+        <p class="result-message">{{message}}</p>
+        <a class="button button-secondary" href="/verify">Verify another product</a>
+      </section>
+      {{/reported}}
+
+      {{#failure}}
+      <section class="result danger">
+        <div class="result-badge">We could not verify that code</div>
+        <p class="result-message">{{message}}</p>
+        <a class="button" href="/verify">Try again</a>
+      </section>
+      {{/failure}}
+
+      <footer class="verify-footer">
+        <span>Anti-counterfeit verification by FauxShield</span>
+      </footer>
+    </main>
+
+    <script>
+      (function () {
+        var KEY = 'fauxshield_device';
+        try {
+          var fp = window.localStorage.getItem(KEY);
+          if (!fp) {
+            var bytes = new Uint8Array(16);
+            (window.crypto || window.msCrypto).getRandomValues(bytes);
+            fp = 'web-';
+            for (var i = 0; i < bytes.length; i++) {
+              fp += ('0' + bytes[i].toString(16)).slice(-2);
+            }
+            window.localStorage.setItem(KEY, fp);
+          }
+          var fields = document.querySelectorAll('.fp-field');
+          for (var j = 0; j < fields.length; j++) {
+            fields[j].value = fp;
+          }
+        } catch (e) {
+          /* The server falls back to a request based fingerprint. */
+        }
+      })();
+    </script>
+  </body>
+</html>

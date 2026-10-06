@@ -1,0 +1,8 @@
+enum: ScanSource
+serialized: byName
+values:
+  - consumerWeb
+  - operatorApp
+  - inspectorOffline
+  - simulation
+  - machineApi

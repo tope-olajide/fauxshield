@@ -1,0 +1,9 @@
+### A generated export such as an identity CSV. Exports are bounded so a single
+### call cannot exhaust server resources.
+class: ExportFile
+fields:
+  filename: String
+  mimeType: String
+  content: String
+  rowCount: int
+  truncated: bool

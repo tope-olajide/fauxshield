@@ -1,0 +1,7 @@
+### Payload for the scheduled future call that advances an attack simulation.
+### Each step executes one scenario action, then schedules the next one.
+class: SimulationStepRequest
+fields:
+  simulationId: UuidValue
+  ### Seconds until the next step should run. Zero means run immediately.
+  delaySeconds: int, default=0

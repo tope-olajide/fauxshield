@@ -1,0 +1,7 @@
+enum: InvitationStatus
+serialized: byName
+values:
+  - pending
+  - accepted
+  - expired
+  - revoked

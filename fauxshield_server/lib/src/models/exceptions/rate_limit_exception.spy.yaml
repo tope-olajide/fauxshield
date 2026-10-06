@@ -1,0 +1,4 @@
+exception: RateLimitException
+extends: ApiException
+fields:
+  retryAfterSeconds: int

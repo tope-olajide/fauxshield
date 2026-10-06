@@ -1,0 +1,6 @@
+enum: FakeReportStatus
+serialized: byName
+values:
+  - open
+  - triaged
+  - rejected

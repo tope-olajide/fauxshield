@@ -1,0 +1,23 @@
+### Catalog row delivered to inspector devices so field checks keep working
+### without connectivity. The device stores these locally and matches scans
+### against them. Holds no secret material: offline checks are identity lookups
+### and status checks, never cryptographic authentication.
+class: InspectorCatalogEntry
+fields:
+  identityId: UuidValue
+  qrToken: String
+  productName: String
+  sku: String?
+  productDescription: String?
+  imageUrls: List<String>?
+  packaging: String?
+  shelfLife: String?
+  countryRestrictions: List<String>?
+  safetyInstructions: String?
+  batchReference: String
+  batchStatus: BatchStatus
+  manufactureDate: DateTime?
+  distributionRegion: String
+  identityStatus: IdentityStatus
+  recallReason: String?
+  recalledAt: DateTime?

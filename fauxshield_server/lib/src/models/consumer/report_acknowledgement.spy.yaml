@@ -1,0 +1,6 @@
+### Confirmation shown to a consumer after reporting a suspicious product.
+class: ReportAcknowledgement
+fields:
+  reportId: UuidValue
+  message: String
+  createdAt: DateTime

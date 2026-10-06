@@ -1,0 +1,7 @@
+enum: NotificationType
+serialized: byName
+values:
+  - fraudAlert
+  - recall
+  - verificationDigest
+  - system

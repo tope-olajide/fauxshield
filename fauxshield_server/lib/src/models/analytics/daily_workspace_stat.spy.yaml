@@ -1,0 +1,25 @@
+### Daily analytics rollup materialized by a recurring scheduled task so the
+### dashboard stays fast even on large verification volumes.
+class: DailyWorkspaceStat
+table: daily_workspace_stat
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  ### UTC date (midnight) this rollup covers.
+  date: DateTime
+  verifications: int, default=0
+  authentic: int, default=0
+  alreadyVerified: int, default=0
+  invalidPin: int, default=0
+  fraudSuspected: int, default=0
+  highRisk: int, default=0
+  recalled: int, default=0
+  alertsCreated: int, default=0
+  alertsResolved: int, default=0
+  ### JSON list of country activity for the day.
+  topCountriesJson: String?
+  createdAt: DateTime, default=now
+indexes:
+  daily_workspace_stat_key_idx:
+    fields: workspaceId, date
+    unique: true

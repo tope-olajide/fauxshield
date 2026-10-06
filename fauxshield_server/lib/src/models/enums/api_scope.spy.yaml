@@ -1,0 +1,19 @@
+enum: ApiScope
+serialized: byName
+values:
+  - productsRead
+  - productsWrite
+  - batchesRead
+  - batchesWrite
+  - identitiesRead
+  - identitiesGenerate
+  - identitiesExport
+  - verificationsRead
+  - fraudRead
+  - fraudWrite
+  - auditRead
+  - analyticsRead
+  - webhooksRead
+  - webhooksWrite
+  - teamRead
+  - teamWrite

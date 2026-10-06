@@ -1,0 +1,11 @@
+### Everything the app needs right after sign-in: the resolved workspace, the
+### member record, the role, capability names for UI gating, and whether this
+### is the public demo workspace.
+class: WorkspaceBootstrap
+fields:
+  workspace: Workspace
+  member: WorkspaceMember
+  role: MembershipRole
+  ### Permission names the role holds, used to gate UI actions.
+  permissions: List<String>
+  isDemo: bool

@@ -1,0 +1,6 @@
+### A typed failure in the consumer verification flow. Carries a reason the app
+### can react to without parsing error strings.
+exception: VerificationException
+extends: ApiException
+fields:
+  reason: VerificationErrorReason

@@ -1,0 +1,28 @@
+### A manufacturing batch for one product. Identities are generated per batch,
+### and a batch can be recalled as a whole.
+class: Batch
+table: batch
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  productId: UuidValue, relation(parent=product)
+  ### Manufacturing reference or lot number printed on packaging.
+  reference: String
+  manufactureDate: DateTime
+  expiryDate: DateTime?
+  ### Expected distribution region, for example NG or West Africa.
+  distributionRegion: String
+  ### Planned unit quantity for this batch.
+  quantity: int
+  status: BatchStatus, default=created
+  notes: String?
+  recallReason: String?
+  recalledAt: DateTime?
+  recalledBy: String?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  batch_workspace_idx:
+    fields: workspaceId
+  batch_product_idx:
+    fields: productId

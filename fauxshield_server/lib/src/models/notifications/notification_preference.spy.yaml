@@ -1,0 +1,17 @@
+### Per-member preference for one notification channel.
+class: NotificationPreference
+table: notification_preference
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  userIdentifier: String
+  channel: NotificationChannel
+  enabled: bool, default=true
+  ### Only notify for alerts at or above this severity.
+  minSeverity: AlertSeverity, default=low
+  email: String?
+  updatedAt: DateTime, default=now
+indexes:
+  notification_preference_unique_idx:
+    fields: workspaceId, userIdentifier, channel
+    unique: true

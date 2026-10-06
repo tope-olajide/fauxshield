@@ -1,0 +1,25 @@
+### A scripted attack simulation run. Brands rehearse their fraud response
+### against realistic attack patterns; the platform produces real verification
+### sessions, real signals, and real alerts that flow through the normal pipeline.
+class: AttackSimulation
+table: attack_simulation
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  type: SimulationType
+  status: SimulationStatus, default=queued
+  label: String?
+  ### Simulation specific parameters serialized as JSON.
+  paramsJson: String?
+  progress: int, default=0
+  totalSteps: int, default=0
+  ### Result summary serialized as JSON.
+  summaryJson: String?
+  createdBy: String
+  createdAt: DateTime, default=now
+  startedAt: DateTime?
+  completedAt: DateTime?
+  cancelledAt: DateTime?
+indexes:
+  attack_simulation_workspace_idx:
+    fields: workspaceId

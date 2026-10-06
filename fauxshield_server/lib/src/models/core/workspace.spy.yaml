@@ -1,0 +1,26 @@
+### A workspace is the tenant boundary for brands. All product, identity,
+### verification, fraud, and audit data is scoped to exactly one workspace.
+class: Workspace
+table: workspace
+fields:
+  id: UuidValue?, defaultPersist=random
+  ### Human readable workspace name.
+  name: String
+  ### URL friendly unique slug used in links.
+  slug: String
+  ### Brand presentation for consumer facing pages.
+  branding: Branding?
+  ### Message shown to consumers when a product verifies as authentic.
+  authenticMessage: String?
+  ### ISO country codes where this brand's products may not be sold.
+  restrictedCountries: List<String>?
+  ### Fraud detection thresholds for this workspace.
+  fraudPolicy: FraudPolicy?
+  ### When true the workspace is a public demo and may be reset by anyone.
+  demoMode: bool, default=false
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  workspace_slug_unique_idx:
+    fields: slug
+    unique: true

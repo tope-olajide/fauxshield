@@ -1,0 +1,24 @@
+### Append-only audit event. Every significant operator, machine, and consumer
+### action is recorded with its actor so changes can be traced back.
+class: AuditEvent
+table: audit_event
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  actorType: ActorType, default=system
+  ### Auth user identifier, api key id, or system component name.
+  actorIdentifier: String?
+  apiKeyId: UuidValue?
+  ### Dotted action name such as identity.generated or alert.resolved.
+  action: String
+  targetType: String
+  targetId: UuidValue?
+  ### Structured context serialized as JSON.
+  metadataJson: String?
+  ipAddress: String?
+  createdAt: DateTime, default=now
+indexes:
+  audit_event_workspace_idx:
+    fields: workspaceId
+  audit_event_action_idx:
+    fields: action

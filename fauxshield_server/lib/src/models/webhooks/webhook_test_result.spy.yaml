@@ -1,0 +1,8 @@
+### Result of sending a test delivery to a webhook endpoint.
+class: WebhookTestResult
+fields:
+  success: bool
+  statusCode: int?
+  responseTimeMs: int?
+  error: String?
+  deliveryId: UuidValue?

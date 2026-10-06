@@ -1,0 +1,18 @@
+### Postgres backed idempotency record. Create operations accept a client
+### supplied key and replay the stored response instead of duplicating work.
+class: IdempotencyRecord
+table: idempotency_record
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue
+  ### Composed key of workspace, operation, and caller supplied value.
+  idempotencyKey: String, unique
+  operation: String
+  requestHash: String
+  responseJson: String?, scope=serverOnly
+  statusCode: int?, scope=serverOnly
+  createdAt: DateTime, default=now
+  expiresAt: DateTime
+indexes:
+  idempotency_record_workspace_idx:
+    fields: workspaceId

@@ -1,0 +1,6 @@
+enum: GeoProvider
+serialized: byName
+values:
+  - demo
+  - http
+  - disabled

@@ -1,0 +1,31 @@
+### The allow-listed view of a verification shown to consumers. Contains only
+### what a consumer may see: brand presentation, product facts, outcome, and
+### recall state. No internal identifiers or fraud internals are exposed.
+class: VerificationPresentation
+fields:
+  sessionId: UuidValue
+  state: VerificationState
+  outcome: VerificationOutcome?
+  riskScore: RiskScore?
+  verifiedAt: DateTime
+  firstVerified: bool
+  verificationCount: int
+  location: GeoSummary?
+  branding: Branding?
+  workspaceName: String
+  authenticMessage: String?
+  productName: String
+  description: String?
+  sku: String?
+  batchReference: String
+  imageUrls: List<String>?
+  packaging: String?
+  shelfLife: String?
+  countryRestrictions: List<String>?
+  safetyInstructions: String?
+  recallReason: String?
+  recalledAt: DateTime?
+  recallScope: RecallScope?
+  ### Fully masked token for display, for example ab12...ef90.
+  tokenMasked: String
+  verifyUrl: String?

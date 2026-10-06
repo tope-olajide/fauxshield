@@ -1,0 +1,18 @@
+### Links an authenticated user to a workspace with a role. Authorization for
+### every operator endpoint is derived from this record.
+class: WorkspaceMember
+table: workspace_member
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  ### The serverpod auth user identifier. Never trust a client supplied value.
+  userIdentifier: String, unique(per=workspaceId)
+  email: String
+  displayName: String?
+  role: MembershipRole, default=member
+  ### Optional notification email when it differs from the sign-in email.
+  notificationEmail: String?
+  createdAt: DateTime, default=now
+indexes:
+  workspace_member_workspace_idx:
+    fields: workspaceId

@@ -1,0 +1,7 @@
+### Base class for every typed failure the API returns to clients. Sealed so
+### apps get exhaustiveness checking when they handle failures.
+exception: ApiException
+sealed: true
+fields:
+  message: String
+  code: String, default='api_error'

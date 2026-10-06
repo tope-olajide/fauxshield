@@ -1,0 +1,15 @@
+### One queued offline scan submitted to the server for authoritative processing.
+class: OfflineScanInput
+fields:
+  ### Client generated local identifier used to correlate the verdict.
+  localId: String
+  deviceId: String
+  deviceFingerprint: String?
+  identityId: UuidValue?
+  qrToken: String
+  scannedAt: DateTime
+  latitude: double?
+  longitude: double?
+  country: String?
+  city: String?
+  provisionalOutcome: String?

@@ -1,0 +1,7 @@
+enum: RiskScore
+serialized: byName
+values:
+  - low
+  - medium
+  - high
+  - fraudSuspected

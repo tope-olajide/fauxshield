@@ -1,0 +1,7 @@
+enum: BatchStatus
+serialized: byName
+values:
+  - created
+  - inProduction
+  - shipped
+  - recalled

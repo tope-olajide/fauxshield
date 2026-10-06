@@ -1,0 +1,9 @@
+### Coarse IP-derived location for a verification. The platform never uses
+### browser GPS and never stores precise consumer coordinates.
+class: GeoSummary
+fields:
+  country: String?
+  countryCode: String?
+  city: String?
+  latitude: double?
+  longitude: double?

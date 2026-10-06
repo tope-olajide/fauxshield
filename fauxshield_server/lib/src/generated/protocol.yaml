@@ -1,0 +1,107 @@
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
+jwtRefresh:
+  - refreshAccessToken:
+alert:
+  - list:
+  - get:
+  - evidence:
+  - updateStatus:
+  - assign:
+  - signals:
+  - reports:
+  - triageReport:
+analytics:
+  - dashboard:
+  - rollupNow:
+apiKey:
+  - list:
+  - create:
+  - revoke:
+audit:
+  - query:
+batch:
+  - list:
+  - get:
+  - create:
+  - update:
+  - generateIdentities:
+  - stats:
+demo:
+  - seed:
+  - isSeeded:
+identity:
+  - list:
+  - get:
+  - export:
+  - revealPin:
+  - regenerateToken:
+  - lock:
+  - unlock:
+  - delete:
+  - restore:
+notification:
+  - list:
+  - markRead:
+  - markAllRead:
+  - preferences:
+  - updatePreference:
+offline:
+  - ingest:
+  - records:
+  - convertNow:
+product:
+  - list:
+  - get:
+  - create:
+  - update:
+  - archive:
+recall:
+  - list:
+  - recallBatch:
+  - recallIdentity:
+  - lift:
+simulation:
+  - start:
+  - list:
+  - get:
+  - step:
+  - run:
+  - cancel:
+verification:
+  - start:
+  - acknowledge:
+  - submitPin:
+  - result:
+  - reportFake:
+  - list:
+  - get:
+  - watchWorkspace:
+webhookAdmin:
+  - list:
+  - create:
+  - update:
+  - delete:
+  - rotateSecret:
+  - test:
+  - deliveries:
+  - redeliver:
+  - drainNow:
+workspace:
+  - bootstrap:
+  - create:
+  - joinDemo:
+  - update:
+  - members:
+  - invitations:
+  - invite:
+  - acceptInvitation:
+  - changeRole:
+  - removeMember:

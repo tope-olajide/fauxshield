@@ -1,0 +1,8 @@
+enum: SimulationStatus
+serialized: byName
+values:
+  - queued
+  - running
+  - completed
+  - cancelled
+  - failed

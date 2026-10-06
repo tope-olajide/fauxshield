@@ -1,0 +1,6 @@
+### A snapshot of the catalog an inspector device needs for offline field work.
+class: InspectorCatalog
+fields:
+  workspaceId: UuidValue
+  generatedAt: DateTime
+  entries: List<InspectorCatalogEntry>

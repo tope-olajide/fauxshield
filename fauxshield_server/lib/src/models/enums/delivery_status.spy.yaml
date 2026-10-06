@@ -1,0 +1,9 @@
+enum: DeliveryStatus
+serialized: byName
+values:
+  - pending
+  - processing
+  - retrying
+  - delivered
+  - failed
+  - disabled

@@ -1,0 +1,26 @@
+### A suspicious or fake product report submitted by a consumer from the
+### verification flow. Reports feed the fraud pipeline and the brand's triage queue.
+class: FakeReport
+table: fake_report
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  identityId: UuidValue, relation(parent=product_identity)
+  sessionId: UuidValue?
+  reason: String
+  comment: String?
+  photoStorageId: String?
+  photoPath: String?
+  deviceFingerprint: String?
+  country: String?
+  city: String?
+  status: FakeReportStatus, default=open
+  source: ScanSource, default=consumerWeb
+  createdAt: DateTime, default=now
+  triagedAt: DateTime?
+  triagedBy: String?
+indexes:
+  fake_report_workspace_idx:
+    fields: workspaceId
+  fake_report_identity_idx:
+    fields: identityId

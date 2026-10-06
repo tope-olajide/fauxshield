@@ -1,0 +1,34 @@
+### A fraud alert for the brand's operations team. Alerts carry their own
+### workflow state and point at the evidence needed to investigate.
+class: FraudAlert
+table: fraud_alert
+fields:
+  id: UuidValue?, defaultPersist=random
+  workspaceId: UuidValue, relation(parent=workspace)
+  ### Optional links to evidence. Plain ids so alerts survive identity deletion.
+  identityId: UuidValue?
+  batchId: UuidValue?
+  sessionId: UuidValue?
+  severity: AlertSeverity
+  status: AlertStatus, default=open
+  title: String
+  description: String
+  recommendedAction: String?
+  signalTypes: List<SignalType>?
+  ### Stable key that prevents duplicate alerts for the same underlying event.
+  dedupeKey: String, unique
+  ### True when the platform automatically locked the identity for this alert.
+  autoLocked: bool, default=false
+  assignee: String?
+  simulationId: UuidValue?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+  acknowledgedAt: DateTime?
+  resolvedAt: DateTime?
+  resolvedBy: String?
+  resolutionNote: String?
+indexes:
+  fraud_alert_workspace_idx:
+    fields: workspaceId
+  fraud_alert_status_idx:
+    fields: status
