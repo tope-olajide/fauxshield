@@ -20,13 +20,25 @@ class FraudEvaluation implements FraudEvaluationLike {
   final List<String> skippedSignals;
 }
 
+/// Signal types that say something about the *batch* rather than about one
+/// code: a unit seen in more than one place, a unit outside the declared
+/// distribution region, or a unit in a restricted market. Operational signals
+/// on a single code (a velocity spike, a PIN attack) are deliberately excluded,
+/// because a batch is not duplicated just because one of its codes misbehaved.
+const Set<SignalType> _batchLevelSignalTypes = <SignalType>{
+  SignalType.cloneDetection,
+  SignalType.distributorLeakage,
+  SignalType.greyMarket,
+};
+
 /// Evaluates verification sessions for the six fraud signals:
 ///
 /// * `clone_detection`: the same identity scanned in distant locations inside
 ///   one time window.
 /// * `velocity_anomaly`: an unusual number of scans for one token.
 /// * `pin_attack`: repeated failed PIN submissions against one identity.
-/// * `batch_duplication`: fraud flagged units accumulating inside one batch.
+/// * `batch_duplication`: several units of one batch each show copying or
+///   diversion evidence, which is what a duplicated batch looks like.
 /// * `distributor_leakage`: verification outside the batch's distribution
 ///   region.
 /// * `grey_market`: verification from a country the brand restricted.
@@ -128,31 +140,38 @@ class FraudEngine {
     );
   }
 
+  /// Detects a batch whose stock is being copied or diverted as a whole.
+  ///
+  /// This used to count *every* unit in the batch carrying any signal at all,
+  /// which meant a batch with a handful of unrelated per-code signals (a
+  /// velocity spike here, a PIN attack there) reported itself as duplicated.
+  /// Because the signal is high severity, that then pushed almost every later
+  /// scan of that batch to `fraudSuspected`, including scans of untouched
+  /// units. Only batch level evidence counts now.
   Future<SignalAssessment?> _checkBatchDuplication(
     Session session,
     Batch batch,
     FraudPolicy policy,
   ) async {
-    // Count distinct identities in this batch that already carry signals.
-    final flaggedSignals = await FraudSignalRecord.db.find(
+    final batchSignals = await FraudSignalRecord.db.find(
       session,
-      where: (t) =>
-          t.batchId.equals(batch.id!) &
-          t.type.notEquals(SignalType.offlineBackfill),
+      where: (t) => t.batchId.equals(batch.id!),
       limit: 500,
     );
-    final distinctIdentities = <String>{};
-    for (final signal in flaggedSignals) {
-      distinctIdentities.add(signal.identityId.uuid);
-    }
-    if (distinctIdentities.length < policy.batchDuplicationThreshold) {
+    final affectedIdentities = <String>{
+      for (final signal in batchSignals)
+        if (_batchLevelSignalTypes.contains(signal.type))
+          signal.identityId.uuid,
+    };
+    if (affectedIdentities.length < policy.batchDuplicationThreshold) {
       return null;
     }
     return SignalAssessment(
       type: SignalType.batchDuplication,
       severity: signalSeverity(SignalType.batchDuplication),
       reasons: <String>[
-        '${distinctIdentities.length} units in this batch carry fraud signals '
+        '${affectedIdentities.length} units in this batch have been seen '
+            'copied, beyond their region, or in a restricted market '
             '(threshold ${policy.batchDuplicationThreshold})',
       ],
     );

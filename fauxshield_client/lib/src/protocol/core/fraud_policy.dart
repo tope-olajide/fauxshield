@@ -82,7 +82,8 @@ abstract class FraudPolicy
   /// Failed PIN attempts on one identity before a pin attack signal.
   int pinAttackThreshold;
 
-  /// Fraud flagged identities in one batch before a batch duplication signal.
+  /// Units of one batch with copying or diversion evidence (clone detection,
+  /// out of region, or restricted market) before a batch duplication signal.
   int batchDuplicationThreshold;
 
   /// Time window for clone detection in minutes.

@@ -9,6 +9,7 @@ import 'src/core/constants.dart';
 import 'src/generated/serverpod.dart';
 import 'src/web/routes/app_config_route.dart';
 import 'src/web/routes/landing_route.dart';
+import 'src/web/routes/marketing_routes.dart';
 import 'src/web/routes/verify_route.dart';
 
 /// The starting point of the Serverpod server.
@@ -45,6 +46,13 @@ void run(List<String> args) async {
   // Consumer verification page. QR codes printed on packaging point here as
   // /verify?t=<token>, and the same page handles PIN entry and product reports.
   pod.webServer.addRoute(VerifyRoute(), '/verify');
+
+  // Public marketing pages. They share the nav, footer, and design system
+  // rendered by SiteChrome, and are served by the same Serverpod process.
+  pod.webServer.addRoute(FeaturesRoute(), '/features');
+  pod.webServer.addRoute(PricingRoute(), '/pricing');
+  pod.webServer.addRoute(AboutRoute(), '/about');
+  pod.webServer.addRoute(DocsRoute(), '/docs');
 
   // Serve all files in the web/static relative directory under /web.
   // These are used by the default web page.

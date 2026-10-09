@@ -38,26 +38,55 @@ class LandingRoute extends WidgetRoute {
       if (demoWorkspace != null) {
         demoBrandName =
             demoWorkspace.branding?.displayName ?? demoWorkspace.name;
-        // Prefer an untouched unit so first-time visitors see the authentic
-        // outcome; fall back to any live unit in the demo workspace.
+
+        // A visitor's first click should land on a clean verification, so
+        // units whose batch is already under an open alert are skipped. The
+        // seeded investigations stay in the operator's fraud queue, which is
+        // where they are actually put on show.
+        final flaggedBatches = <UuidValue>{};
+        final openAlerts = await FraudAlert.db.find(
+          session,
+          where: (t) =>
+              t.workspaceId.equals(demoWorkspace.id!) &
+              t.status.equals(AlertStatus.open) &
+              t.batchId.notEquals(null),
+          limit: 200,
+        );
+        for (final alert in openAlerts) {
+          final batchId = alert.batchId;
+          if (batchId != null) flaggedBatches.add(batchId);
+        }
+
+        Future<ProductIdentity?> pick({
+          required bool unverifiedOnly,
+          required bool avoidFlagged,
+        }) {
+          return ProductIdentity.db.findFirstRow(
+            session,
+            where: (t) {
+              var expression =
+                  t.workspaceId.equals(demoWorkspace.id!) &
+                  t.deletedAt.equals(null) &
+                  t.status.equals(IdentityStatus.active);
+              if (unverifiedOnly) {
+                expression = expression & t.firstVerified.equals(false);
+              }
+              if (avoidFlagged && flaggedBatches.isNotEmpty) {
+                expression = expression & t.batchId.notInSet(flaggedBatches);
+              }
+              return expression;
+            },
+            orderBy: (t) => t.createdAt,
+          );
+        }
+
+        // An untouched unit gives a first-time visitor the authentic outcome.
+        // A batch the engine has nothing bad to say about is even better, so it
+        // is tried first, but never at the cost of the untouched unit.
         final demoIdentity =
-            await ProductIdentity.db.findFirstRow(
-              session,
-              where: (t) =>
-                  t.workspaceId.equals(demoWorkspace.id!) &
-                  t.deletedAt.equals(null) &
-                  t.status.equals(IdentityStatus.active) &
-                  t.firstVerified.equals(false),
-              orderBy: (t) => t.createdAt,
-            ) ??
-            await ProductIdentity.db.findFirstRow(
-              session,
-              where: (t) =>
-                  t.workspaceId.equals(demoWorkspace.id!) &
-                  t.deletedAt.equals(null) &
-                  t.status.equals(IdentityStatus.active),
-              orderBy: (t) => t.createdAt,
-            );
+            await pick(unverifiedOnly: true, avoidFlagged: true) ??
+            await pick(unverifiedOnly: true, avoidFlagged: false) ??
+            await pick(unverifiedOnly: false, avoidFlagged: false);
         if (demoIdentity != null) {
           demoToken = demoIdentity.qrToken;
           final batch = await Batch.db.findById(session, demoIdentity.batchId);

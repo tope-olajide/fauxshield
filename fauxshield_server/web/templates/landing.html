@@ -3,88 +3,385 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FauxShield · Anti-counterfeit command center</title>
-    <link rel="stylesheet" href="{{{@/web/css/landing.css}}}" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{{pageTitle}}</title>
+    <meta name="description" content="{{pageDescription}}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="{{{@/web/css/public.css}}}" />
   </head>
-  <body class="landing">
-    <header class="hero">
-      <div class="shell">
-        <p class="eyebrow">Serverpod 4 · Flutter · Live fraud intelligence</p>
-        <h1>FauxShield</h1>
-        <p class="lede">
-          Serialize every physical unit with signed QR codes and PINs, catch
-          cloned and grey-market stock in real time, and run field inspections
-          that work offline. Built as a full-stack Flutter + Serverpod app.
-        </p>
-        <div class="cta-row">
-          <a class="button" href="/app">Open the operator app</a>
-          <a class="button button-ghost" href="/verify">Verify a product</a>
+  <body class="site">
+    {{{siteNav}}}
+
+    <main>
+      <!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="pattern dot-pattern" aria-hidden="true"></div>
+        <div class="wrap hero-inner animate-page-in">
+          <span class="badge badge-outline">
+            {{{iconShield}}}Anti-counterfeit infrastructure for modern brands
+          </span>
+
+          <h1 id="hero-title">
+            Counterfeits are a
+            <span class="text-destructive">$500 billion problem.</span><br />
+            FauxShield is the answer.
+          </h1>
+
+          <p class="lead">
+            Every physical unit gets a signed QR code and a packaging PIN, so
+            consumers can prove authenticity, brands can catch clones and grey
+            market stock as it happens, and field teams can keep inspecting when
+            the network is gone. Built end to end on Serverpod 4 and Flutter.
+          </p>
+
+          <div class="btn-row">
+            <a class="btn btn-primary btn-lg" href="/app">
+              Open the operator app {{{iconArrow}}}
+            </a>
+            <a class="btn btn-outline btn-lg" href="/verify">
+              Verify a product
+            </a>
+          </div>
+
           {{#hasDemo}}
-          <a class="button button-ghost" href="/verify?t={{demoToken}}">
-            Try demo code
-          </a>
+          <div class="demo-strip">
+            <span>
+              There is a live demo here: {{demoBrandName}}{{#demoProductName}}
+              &middot; {{demoProductName}}{{/demoProductName}}
+            </span>
+            {{#hasDemoPin}}
+            <span>Packaging PIN <strong class="demo-pin">{{demoPin}}</strong></span>
+            {{/hasDemoPin}}
+            <a class="btn btn-secondary btn-sm" href="/verify?t={{demoToken}}">
+              Try the demo code
+            </a>
+          </div>
           {{/hasDemo}}
         </div>
-        {{#hasDemo}}
-        <p class="demo-note">
-          Demo code from {{demoBrandName}}{{#demoProductName}} · {{demoProductName}}{{/demoProductName}}.
-          {{#hasDemoPin}}
-          Walk the whole flow: tap <strong>Try demo code</strong>, then enter
-          the packaging PIN <strong class="demo-pin">{{demoPin}}</strong>.
-          {{/hasDemoPin}}
-          The demo workspace can be reset at any time.
-        </p>
-        {{/hasDemo}}
-      </div>
-    </header>
+      </section>
 
-    <section class="stats">
-      <div class="shell grid">
-        <div class="stat"><span>{{products}}</span><label>Products</label></div>
-        <div class="stat"><span>{{identities}}</span><label>Serialized units</label></div>
-        <div class="stat"><span>{{verifications}}</span><label>Verifications</label></div>
-        <div class="stat"><span>{{alerts}}</span><label>Fraud alerts</label></div>
-        <div class="stat"><span>{{workspaces}}</span><label>Brands onboard</label></div>
-      </div>
-    </section>
+      <!-- ═════════════════════════════ LIVE PLATFORM STATS ═════════════════════════ -->
+      <section class="section section-tight section-alt" aria-label="Live platform totals">
+        <div class="wrap">
+          <div class="stat-grid">
+            <div class="stat"><span class="stat-value">{{products}}</span><span class="stat-label">Products</span></div>
+            <div class="stat"><span class="stat-value">{{identities}}</span><span class="stat-label">Serialized units</span></div>
+            <div class="stat"><span class="stat-value">{{verifications}}</span><span class="stat-label">Verifications</span></div>
+            <div class="stat"><span class="stat-value">{{alerts}}</span><span class="stat-label">Fraud alerts</span></div>
+            <div class="stat"><span class="stat-value">{{workspaces}}</span><span class="stat-label">Brands onboard</span></div>
+          </div>
+          <p class="text-center muted mt-4">
+            Read live from this deployment on every page load &mdash; not a
+            screenshot.
+          </p>
+        </div>
+      </section>
 
-    <section class="features">
-      <div class="shell grid">
-        <article>
-          <h2>Live command center</h2>
-          <p>
-            Serverpod streaming pushes every scan, signal, and alert to the
-            operator app the moment it happens.
-          </p>
-        </article>
-        <article>
-          <h2>Six fraud signals</h2>
-          <p>
-            Clone detection, velocity anomalies, PIN attacks, batch
-            duplication, distributor leakage, and grey market detection.
-          </p>
-        </article>
-        <article>
-          <h2>Offline-first inspectors</h2>
-          <p>
-            Field scans queue on the device and sync through Serverpod's
-            offline sync; verdicts come back to the device automatically.
-          </p>
-        </article>
-        <article>
-          <h2>Attack rehearsals</h2>
-          <p>
-            Run clone, brute-force, burst, and grey-market simulations through
-            the real pipeline and watch the response unfold live.
-          </p>
-        </article>
-      </div>
-    </section>
+      <!-- ══════════════════════════════════ THE CRISIS ══════════════════════════════ -->
+      <section class="section section-alt" aria-labelledby="problem-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-destructive badge-block">The crisis</span>
+            <h2 id="problem-title">
+              Counterfeits don't just cost money. They cost trust &mdash; and
+              sometimes lives.
+            </h2>
+            <p>
+              Fake medicines cause preventable deaths. Counterfeit seeds and
+              pesticides wipe out a farmer's entire season. Consumers buy
+              dangerous cosmetics and electronics with no way to tell. And
+              brands absorb the lost revenue, the recalls, and the reputation
+              damage.
+            </p>
+          </div>
 
-    <footer class="landing-footer">
-      <div class="shell">
-        <span>FauxShield — built on Serverpod 4 for the Build Something Real hackathon.</span>
-      </div>
-    </footer>
+          {{{crisisStats}}}
+
+          <div class="mt-12">{{{crisisImpact}}}</div>
+
+          <div class="card mt-12">
+            <h3 class="text-center">Why existing solutions fall short</h3>
+            <div class="mt-6">{{{shortfalls}}}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════════════════════════ THE SOLUTION ═════════════════════════════ -->
+      <section class="section" aria-labelledby="solution-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-success badge-block">The solution</span>
+            <h2 id="solution-title">
+              One platform, from product identity to verified authenticity.
+            </h2>
+            <p>
+              FauxShield fits an existing production line. Standard QR codes on
+              the packaging you already print, backed by cryptographic
+              identities, a fraud engine, and a response workflow &mdash; with
+              no special hardware for the consumer and no SMS bill.
+            </p>
+          </div>
+
+          {{{solutionFlow}}}
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════ HOW IT WORKS ════════════════════════════════ -->
+      <section class="section section-alt" aria-labelledby="how-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">How it works</span>
+            <h2 id="how-title">From a printed label to a defensible answer.</h2>
+            <p>Five steps, all of them running inside one Serverpod server.</p>
+          </div>
+
+          <div class="grid-3">
+            <div class="step">
+              <span class="step-index">1</span>
+              <div>
+                <h3>Serialize the batch</h3>
+                <p>
+                  Create a product, then a batch. Each unit is minted with its
+                  own QR token, HMAC signature, hashed PIN, and encrypted PIN
+                  copy for audited reveals.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-index">2</span>
+              <div>
+                <h3>Print and ship</h3>
+                <p>
+                  Export the batch as CSV or TSV and send the codes to your
+                  existing print process. No new hardware and no proprietary
+                  tags.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-index">3</span>
+              <div>
+                <h3>Consumer scans the label</h3>
+                <p>
+                  The code opens a web page that works without an app. The
+                  server resolves the token, records where it came from, and
+                  asks for the PIN under the scratch panel.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-index">4</span>
+              <div>
+                <h3>The engine scores the scan</h3>
+                <p>
+                  Eight signals are evaluated against the workspace policy
+                  inside a time budget. Suspicious scans escalate to an alert
+                  with the evidence attached.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-index">5</span>
+              <div>
+                <h3>Investigate and respond</h3>
+                <p>
+                  Triage alerts, assign owners, reveal or regenerate a
+                  compromised token, and recall a batch &mdash; with every
+                  action written to the audit log.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════ FEATURES ════════════════════════════════ -->
+      <section class="section" aria-labelledby="features-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Platform</span>
+            <h2 id="features-title">Everything the brand side needs.</h2>
+            <p>
+              These are the modules shipping in this build, not a roadmap.
+            </p>
+          </div>
+          {{{featureCards}}}
+        </div>
+      </section>
+
+      <!-- ════════════════════════════ FRAUD INTELLIGENCE ════════════════════════ -->
+      <section class="section section-alt" aria-labelledby="fraud-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-destructive badge-block">Fraud intelligence</span>
+            <h2 id="fraud-title">Eight signals, scored against your policy.</h2>
+            <p>
+              Every threshold is per workspace, so a luxury distributor and a
+              seed supplier can disagree about what looks suspicious.
+            </p>
+          </div>
+          {{{signalCards}}}
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ OFFLINE-FIRST INSPECTORS ═══════════════════════ -->
+      <section class="section" aria-labelledby="offline-title">
+        <div class="wrap wrap-md split">
+          <div>
+            <span class="badge badge-block">Field operations</span>
+            <h2 id="offline-title" class="mt-4">
+              Inspections that keep working without a network.
+            </h2>
+            <p class="lead mt-4">
+              Warehouses, ports, and rural distributors are exactly where the
+              signal is worst. The inspector app keeps scanning, queues the
+              work locally, and reconciles when connectivity returns.
+            </p>
+            <ul class="bullet-list check-list">
+              <li>Scans are stored on the device with a local id and device id</li>
+              <li>A provisional verdict is shown immediately, on device</li>
+              <li>Queued scans sync through Serverpod's database sync layer</li>
+              <li>The converter turns each synced scan into a real session</li>
+              <li>Authoritative outcomes are pushed back to the inspector</li>
+              <li>Consumer reports queued offline are delivered too</li>
+            </ul>
+          </div>
+          <div class="card card-solid">
+            <div class="card-head">
+              <span class="icon-tile icon-tile-primary">{{{iconWifiOff}}}</span>
+              <h3>Built for the gap between print and shelf</h3>
+            </div>
+            <p>
+              A scan that happens offline cannot be allowed to become a
+              second class event. It carries the same identity, the same
+              policy evaluation, and the same audit trail as anything that
+              arrives over the wire.
+            </p>
+            <div class="table-wrap mt-6">
+              <table class="data">
+                <thead>
+                  <tr><th>Stage</th><th>Where it happens</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Scan captured</td><td class="muted">On device</td></tr>
+                  <tr><td>Provisional verdict</td><td class="muted">On device</td></tr>
+                  <tr><td>Sync</td><td class="muted">Serverpod sync</td></tr>
+                  <tr><td>Policy evaluation</td><td class="muted">Server</td></tr>
+                  <tr><td>Final verdict</td><td class="muted">Back to device</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════════════════════ DEVELOPER PLATFORM ═══════════════════════ -->
+      <section class="section section-alt" id="developers" aria-labelledby="dev-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Developer platform</span>
+            <h2 id="dev-title">A typed client, a JSON-RPC surface, and real jobs.</h2>
+            <p>
+              Serverpod generates a typed Dart client from the same models the
+              server uses, exposes every endpoint over JSON-RPC, and runs the
+              background work &mdash; all from this one repository.
+            </p>
+          </div>
+
+          {{{developerShowcase}}}
+
+          <div class="grid-3 mt-12">
+            <div class="card">
+              <div class="card-head">
+                <span class="icon-tile icon-tile-sm icon-tile-primary">{{{iconCode}}}</span>
+                <h3>Generated client</h3>
+              </div>
+              <p>
+                Models live in <code>.spy.yaml</code>; the server, the Dart
+                client, and the database schema are generated from them.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <span class="icon-tile icon-tile-sm icon-tile-primary">{{{iconActivity}}}</span>
+                <h3>Streaming built in</h3>
+              </div>
+              <p>
+                The command center subscribes to a workspace event channel and
+                renders scans, alerts, and recalls as they land.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <span class="icon-tile icon-tile-sm icon-tile-primary">{{{iconTimer}}}</span>
+                <h3>Scheduled jobs</h3>
+              </div>
+              <p>
+                Webhook drain, offline conversion, daily rollups, and
+                maintenance sweeps run as Serverpod future calls.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════════════════════════ USE CASES ═══════════════════════════════ -->
+      <section class="section" aria-labelledby="usecases-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Use cases</span>
+            <h2 id="usecases-title">Anywhere a label has to mean something.</h2>
+            <p>
+              The unit of trust changes by industry. The workflow does not.
+            </p>
+          </div>
+          {{{useCaseCards}}}
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════ SECURITY ═══════════════════════════════ -->
+      <section class="section section-alt" aria-labelledby="security-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Security</span>
+            <h2 id="security-title">The boring parts, done properly.</h2>
+            <p>
+              Anti-counterfeit is a security product. These are implementation
+              details you can read in the source.
+            </p>
+          </div>
+          {{{securityCards}}}
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════ CTA ════════════════════════════════════ -->
+      <section class="section" aria-labelledby="cta-title">
+        <div class="wrap wrap-md">
+          <div class="cta-band">
+            <h2 id="cta-title">Give every unit an identity you can prove.</h2>
+            <p>
+              Sign in, open a demo workspace with real products, batches,
+              verifications, and alerts already in it, then run your first
+              attack simulation.
+            </p>
+            <div class="btn-row">
+              <a class="btn btn-primary btn-lg" href="/app">
+                Open the operator app {{{iconArrow}}}
+              </a>
+              <a class="btn btn-outline btn-lg" href="/docs">
+                Read the docs
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {{{siteFooter}}}
   </body>
 </html>

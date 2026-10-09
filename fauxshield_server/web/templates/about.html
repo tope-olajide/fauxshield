@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{{pageTitle}}</title>
+    <meta name="description" content="{{pageDescription}}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="{{{@/web/css/public.css}}}" />
+  </head>
+  <body class="site">
+    {{{siteNav}}}
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="pattern dot-pattern" aria-hidden="true"></div>
+        <div class="wrap wrap-md hero-inner animate-page-in">
+          <span class="badge badge-outline">{{{iconShield}}}About</span>
+          <h1 id="page-title">Anti-counterfeit infrastructure, rebuilt on Serverpod.</h1>
+          <p class="lead">
+            FauxShield started as a question with an uncomfortable answer: a
+            printed QR code proves nothing on its own. Anyone can photograph a
+            code and print it again. The code is not the defence &mdash; the
+            identity behind it is.
+          </p>
+          <div class="btn-row">
+            <a class="btn btn-primary btn-lg" href="/app">
+              Open the operator app {{{iconArrow}}}
+            </a>
+            <a class="btn btn-outline btn-lg" href="/features">See the features</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="why-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-destructive badge-block">Why it exists</span>
+            <h2 id="why-title">Counterfeiting is not a packaging problem.</h2>
+            <p>
+              Counterfeit medicine, seeds, pesticides, and electronics destroy
+              trust and sometimes lives. The brands that suffer most are often
+              the ones with the least infrastructure to fight back: no unit
+              level record, no way to prove a product came from them, and no
+              mechanism to warn buyers when something goes wrong. FauxShield is
+              an attempt to make that infrastructure ordinary rather than
+              enterprise only.
+            </p>
+          </div>
+          {{{principleCards}}}
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="stack-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">How it is built</span>
+            <h2 id="stack-title">One repository, one full stack.</h2>
+            <p>
+              The server, the API, the database schema, the background jobs, the
+              web pages, and the operator app all live together and are
+              generated from the same model definitions.
+            </p>
+          </div>
+          {{{stackCards}}}
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="serverpod-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">What Serverpod does here</span>
+            <h2 id="serverpod-title">The platform is not a wrapper around it.</h2>
+            <p>
+              Serverpod is not used as a thin transport. The identity system,
+              the fraud engine, and the operations surface are all expressed in
+              its primitives.
+            </p>
+          </div>
+          {{{serverpodCards}}}
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="build-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">This build</span>
+            <h2 id="build-title">What is actually in the repository.</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <tbody>
+                <tr>
+                  <th>Platform</th>
+                  <td class="muted">Serverpod 4.0.3 server with a Flutter operator app, both in one Dart workspace</td>
+                </tr>
+                <tr>
+                  <th>Modelled data</th>
+                  <td class="muted">Around 80 .spy.yaml models covering identities, verification, fraud, webhooks, offline sync, and analytics</td>
+                </tr>
+                <tr>
+                  <th>API surface</th>
+                  <td class="muted">18 endpoints, including the authentication providers and a streaming channel</td>
+                </tr>
+                <tr>
+                  <th>Background work</th>
+                  <td class="muted">Webhook drain, offline scan conversion, daily rollups, maintenance sweeps, and simulation runners</td>
+                </tr>
+                <tr>
+                  <th>Tests</th>
+                  <td class="muted">Unit tests for the crypto and fraud rules, plus integration tests through the real endpoints</td>
+                </tr>
+                <tr>
+                  <th>Continuous integration</th>
+                  <td class="muted">Analyze, format check, and the full test suite on every push</td>
+                </tr>
+                <tr>
+                  <th>Licence</th>
+                  <td class="muted">MIT</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="context-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Context</span>
+            <h2 id="context-title">Built for the Build Something Real hackathon.</h2>
+          </div>
+          <div class="card card-solid">
+            <p>
+              This implementation was produced for <strong>Build Something
+              Real: The Serverpod Hackathon</strong>. The domain model came from
+              an earlier prototype of the same product idea, which was used as
+              reference material and is not part of this repository. The server,
+              the Flutter app, the web pages, the migrations, and the tests in
+              this repository were written against the Serverpod SDK, with an AI
+              coding agent as the primary development tool under human
+              direction: every change was reviewed and verified locally by
+              running the analysis, the test suite, and the running application
+              in a browser.
+            </p>
+            <p class="mt-4">
+              If you are reading this to evaluate the project, the fastest path
+              is to start the server, sign in, and open the demo workspace.
+              Everything described on these pages is reachable from there.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="cta-title">
+        <div class="wrap wrap-md">
+          <div class="cta-band">
+            <h2 id="cta-title">Judge it by using it.</h2>
+            <p>
+              The demo workspace comes preloaded, and the consumer flow works
+              from a link with no account at all.
+            </p>
+            <div class="btn-row">
+              <a class="btn btn-primary btn-lg" href="/app">
+                Open the operator app {{{iconArrow}}}
+              </a>
+              <a class="btn btn-outline btn-lg" href="/docs">Read the docs</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {{{siteFooter}}}
+  </body>
+</html>

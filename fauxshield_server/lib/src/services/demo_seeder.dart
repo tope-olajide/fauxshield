@@ -118,12 +118,20 @@ class DemoSeeder {
     return workspace;
   }
 
+  /// Deletes the workspace's rows children first.
+  ///
+  /// The foreign keys run fraud_signal_record -> verification_session ->
+  /// product_identity (-> batch -> product) and fake_report ->
+  /// product_identity, and webhook_delivery -> webhook_endpoint. Deleting a
+  /// parent before its children raises a foreign key violation halfway through
+  /// and leaves the caller with a half wiped workspace, so this order is load
+  /// bearing.
   Future<void> _wipe(Session session, UuidValue workspaceId) async {
-    await VerificationSession.db.deleteWhere(
+    await FraudSignalRecord.db.deleteWhere(
       session,
       where: (t) => t.workspaceId.equals(workspaceId),
     );
-    await FraudSignalRecord.db.deleteWhere(
+    await VerificationSession.db.deleteWhere(
       session,
       where: (t) => t.workspaceId.equals(workspaceId),
     );
@@ -163,9 +171,21 @@ class DemoSeeder {
       session,
       where: (t) => t.workspaceId.equals(workspaceId),
     );
-    await OfflineScanRecord.db.deleteWhere(
-      session,
-      where: (t) => t.workspaceId.equals(workspaceId),
+    // `offline_scan_record` is declared `database: sync`, so the generated
+    // deleteWhere routes through the offline sync recorder, which needs a
+    // device node or a persistent user and throws `Bad state: No user ID found
+    // for transaction or persistent user ID.` from a plain server session.
+    // A reset discards the workspace's sync state anyway, so these rows are
+    // removed with SQL instead of through the recorder.
+    // The sync module creates its tables from the Dart model, so the column is
+    // `"workspaceId"` rather than the snake_case name a normal migration would
+    // use, and it has to stay quoted. The raw driver cannot encode a
+    // `UuidValue` either, so the parameter is bound as its string form.
+    await session.db.unsafeExecute(
+      'DELETE FROM offline_scan_record WHERE "workspaceId" = @workspaceId',
+      parameters: QueryParameters.named(<String, Object?>{
+        'workspaceId': workspaceId.uuid,
+      }),
     );
     await DailyWorkspaceStat.db.deleteWhere(
       session,

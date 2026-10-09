@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{{pageTitle}}</title>
+    <meta name="description" content="{{pageDescription}}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="{{{@/web/css/public.css}}}" />
+  </head>
+  <body class="site">
+    {{{siteNav}}}
+
+    <main>
+      <section class="section" aria-labelledby="page-title">
+        <div class="wrap">
+          <div class="section-head" style="text-align: left; margin-left: 0">
+            <span class="badge badge-block">Documentation</span>
+            <h1 id="page-title">Run it, understand it, call it.</h1>
+            <p style="margin-left: 0">
+              Everything on this page refers to the code in this repository. The
+              commands and requests have been run against a local development
+              server.
+            </p>
+          </div>
+
+          <div class="docs-layout">
+            <aside class="docs-side">
+              <h3>On this page</h3>
+              <a href="#getting-started">Getting started</a>
+              <a href="#concepts">Core concepts</a>
+              <a href="#api">API reference</a>
+              <a href="#verification">Verification flow</a>
+              <a href="#fraud">Fraud signals</a>
+              <a href="#webhooks">Webhooks</a>
+              <a href="#offline">Offline sync</a>
+              <a href="#cli">Command line</a>
+              <a href="#operations">Operations</a>
+            </aside>
+
+            <div class="docs-body">
+              <section id="getting-started">
+                <h2>Getting started</h2>
+                <p>
+                  Development uses Serverpod's embedded PostgreSQL, so there is
+                  no database to install and no container to run. The first
+                  startup creates the data directory under
+                  <code>.serverpod/development/pgdata</code> and applies the
+                  migrations in the repository.
+                </p>
+                {{{startCode}}}
+                <p>
+                  The server listens on <strong>8080</strong> for the API and
+                  <strong>8082</strong> for the web pages. In development, the
+                  web server also answers on the API port.
+                </p>
+              </section>
+
+              <section id="concepts">
+                <h2>Core concepts</h2>
+                <p>
+                  Six objects carry the whole system. Understanding them is
+                  enough to read the API.
+                </p>
+                <div class="table-wrap">
+                  <table class="data">
+                    <thead>
+                      <tr><th>Concept</th><th>What it is</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>Workspace</strong></td>
+                        <td class="muted">
+                          The tenant. Owns branding, restricted markets, the
+                          fraud policy, and demo mode. Every other record hangs
+                          off it.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Product</strong></td>
+                        <td class="muted">
+                          A sellable item with SKU, category, packaging notes,
+                          shelf life, and safety instructions.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Batch</strong></td>
+                        <td class="muted">
+                          A manufacturing run: reference, dates, quantity, and
+                          the distribution region used for leakage detection.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Identity</strong></td>
+                        <td class="muted">
+                          One physical unit: QR token, HMAC signature, PIN hash,
+                          locked/recalled status, and first verification record.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Verification session</strong></td>
+                        <td class="muted">
+                          One consumer scan being resolved, from token resolved
+                          through PIN prompted to a determined outcome.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Alert</strong></td>
+                        <td class="muted">
+                          An escalation with severity, status, assignee,
+                          evidence, and the signals that produced it.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <h3>Endpoints and authentication</h3>
+                <p>
+                  Calls are addressed as <code>/&lt;endpoint&gt;/&lt;method&gt;</code>
+                  with arguments in the JSON body. Authenticated calls carry a
+                  JWT as an <code>Authorization: Bearer</code> header. Public
+                  endpoints, such as the verification flow, need no token.
+                </p>
+                <p>
+                  Authorization is always resolved server side from the caller's
+                  workspace membership. A workspace id sent by a client is
+                  checked against that membership and never trusted on its own.
+                </p>
+              </section>
+
+              <section id="api">
+                <h2>API reference</h2>
+                <h3>Dart client</h3>
+                <p>
+                  The generated client is the intended way to use the API. It
+                  shares the server's model classes, so the compiler catches
+                  mismatched fields.
+                </p>
+                {{{dartCode}}}
+
+                <h3>Authentication</h3>
+                {{{curlAuthCode}}}
+
+                <h3>Authenticated calls</h3>
+                {{{curlBatchCode}}}
+
+                <h3>Endpoint groups</h3>
+                <div class="table-wrap">
+                  <table class="data">
+                    <thead>
+                      <tr><th>Endpoint</th><th>Responsibility</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td><code>product</code>, <code>batch</code></td><td class="muted">Catalogue and serialization, including identity generation, batch statistics, and exports</td></tr>
+                      <tr><td><code>identity</code></td><td class="muted">Per unit lookup, PIN reveal, token regeneration, lock, unlock, delete, restore</td></tr>
+                      <tr><td><code>verification</code></td><td class="muted">The public consumer flow, plus the workspace event stream</td></tr>
+                      <tr><td><code>alert</code></td><td class="muted">Fraud queue, evidence, triage of consumer reports, assignment and status</td></tr>
+                      <tr><td><code>recall</code></td><td class="muted">Batch and single unit recalls, with lift</td></tr>
+                      <tr><td><code>webhookAdmin</code></td><td class="muted">Endpoints, secrets, deliveries, rotation, and test sends</td></tr>
+                      <tr><td><code>offline</code></td><td class="muted">Inspector catalogue, queued scans, sync ingestion</td></tr>
+                      <tr><td><code>simulation</code></td><td class="muted">Attack rehearsals that run through the real pipeline</td></tr>
+                      <tr><td><code>workspace</code>, <code>apiKey</code>, <code>audit</code></td><td class="muted">Team, invitations, scoped keys, and the audit log</td></tr>
+                      <tr><td><code>analytics</code></td><td class="muted">Dashboard summary, trends, breakdowns, and manual rollups</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section id="verification">
+                <h2>Verification flow</h2>
+                <p>
+                  This is the path a shopper takes. It is public, rate limited,
+                  and never reveals more than the outcome requires.
+                </p>
+                {{{curlVerifyCode}}}
+                <h3>Outcomes</h3>
+                <ul class="bullet-list">
+                  <li><strong>authentic</strong> &mdash; the PIN matched and no risk rule escalated the scan</li>
+                  <li><strong>alreadyVerified</strong> &mdash; the token was already claimed, shown with the original time and place</li>
+                  <li><strong>invalidPin</strong> &mdash; the PIN did not match, with attempts counted and lockout tracked</li>
+                  <li><strong>highRisk</strong> &mdash; the scan matched signals that warrant an operator review</li>
+                  <li><strong>fraudSuspected</strong> &mdash; escalation was severe enough to short circuit the flow and open an alert</li>
+                  <li><strong>recalled</strong> &mdash; the unit or its batch is under an active recall</li>
+                </ul>
+                <p>
+                  Replay protection keys off the token and the device
+                  fingerprint, so reloading the page resumes an existing session
+                  instead of burning a new identity claim.
+                </p>
+              </section>
+
+              <section id="fraud">
+                <h2>Fraud signals</h2>
+                <p>
+                  Eight checks are evaluated per scan against the workspace
+                  policy. The overall score is the highest severity seen,
+                  escalated to fraud suspected when a high severity signal is
+                  combined with any other.
+                </p>
+                <div class="table-wrap">
+                  <table class="data">
+                    <thead>
+                      <tr><th>Signal</th><th>Base severity</th><th>Trigger</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>Clone detection</td><td class="muted">High</td><td class="muted">The same token resolved from locations too far apart to be one unit</td></tr>
+                      <tr><td>Batch duplication</td><td class="muted">High</td><td class="muted">The number of flagged units in a batch reaches the policy threshold</td></tr>
+                      <tr><td>Velocity anomaly</td><td class="muted">Medium</td><td class="muted">Scan count for one unit inside the window exceeds the threshold</td></tr>
+                      <tr><td>PIN attack</td><td class="muted">Medium</td><td class="muted">Failed PIN attempts on one unit reach the policy threshold</td></tr>
+                      <tr><td>Distributor leakage</td><td class="muted">Medium</td><td class="muted">The scan country is outside the batch's distribution region</td></tr>
+                      <tr><td>Grey market</td><td class="muted">Medium</td><td class="muted">The scan country is on the workspace restricted markets list</td></tr>
+                      <tr><td>PIN lockout</td><td class="muted">Medium</td><td class="muted">The unit is temporarily locked after repeated wrong PINs</td></tr>
+                      <tr><td>Offline backfill</td><td class="muted">Low</td><td class="muted">A field scan synced after the fact</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p>
+                  Alerts are created according to policy: high risk alerts when
+                  the workspace asks for it, and fraud suspected always. The
+                  policy also decides whether the identity is locked
+                  automatically.
+                </p>
+              </section>
+
+              <section id="webhooks">
+                <h2>Webhooks</h2>
+                <p>
+                  Subscribe an HTTPS endpoint to the events you care about.
+                  Deliveries are signed, retried with backoff, and recorded so
+                  you can see and redrive them.
+                </p>
+                {{{webhookCode}}}
+                <h3>Subscribable events</h3>
+                <ul class="bullet-list">
+                  <li>verificationCompleted and fraudAlertCreated / fraudAlertUpdated</li>
+                  <li>batchStatusChanged and identityStatusChanged</li>
+                  <li>recallIssued and fakeReportCreated</li>
+                  <li>testEvent, for validating a new endpoint</li>
+                </ul>
+              </section>
+
+              <section id="offline">
+                <h2>Offline sync</h2>
+                <p>
+                  Field devices keep working without connectivity. A queued scan
+                  carries a local id, a device id, the token, the capture time,
+                  coarse location, and a provisional outcome produced on device.
+                </p>
+                <div class="table-wrap">
+                  <table class="data">
+                    <thead>
+                      <tr><th>Stage</th><th>Where it runs</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>Scan captured, staged locally</td><td class="muted">Device</td></tr>
+                      <tr><td>Provisional verdict shown</td><td class="muted">Device</td></tr>
+                      <tr><td>Records synced through Serverpod sync</td><td class="muted">Transport</td></tr>
+                      <tr><td>Scan converted into a real verification session</td><td class="muted">Recurring job</td></tr>
+                      <tr><td>Authoritative verdict available to the device</td><td class="muted">Server</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p>
+                  Queued consumer reports follow the same path, so a report filed
+                  in a dead zone still reaches triage.
+                </p>
+              </section>
+
+              <section id="cli">
+                <h2>Command line</h2>
+                <p>
+                  <code>fauxshield_cli</code> is a plain Dart console package
+                  that talks to the same JSON-RPC API as the operator app. It
+                  needs no Flutter runtime, so it runs on a build server or a
+                  factory laptop, and every command takes <code>--json</code>
+                  when the output is going into a script.
+                </p>
+                {{{cliCode}}}
+                <div class="table-wrap">
+                  <table class="data">
+                    <thead>
+                      <tr><th>Group</th><th>Commands</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td><code>auth</code></td><td class="muted">login, logout, whoami, token</td></tr>
+                      <tr><td><code>products</code></td><td class="muted">list, create</td></tr>
+                      <tr><td><code>batches</code></td><td class="muted">list, create, stats</td></tr>
+                      <tr><td><code>identities</code></td><td class="muted">list, generate, reveal-pin</td></tr>
+                      <tr><td><code>alerts</code></td><td class="muted">list, show</td></tr>
+                      <tr><td><code>verify</code></td><td class="muted">Walk the consumer scan and PIN steps</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section id="operations">
+                <h2>Operations</h2>
+                <p>
+                  The recurring jobs below are scheduled when the server starts,
+                  and cancelling by identifier first keeps a restart from
+                  stacking duplicate schedules.
+                </p>
+                <h3>Build and deploy</h3>
+                {{{opsCode}}}
+                <div class="table-wrap">
+                  <table class="data">
+                    <thead>
+                      <tr><th>Job</th><th>Interval</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>Webhook drain</td><td class="muted">30s</td><td class="muted">Attempts due deliveries and applies retry backoff</td></tr>
+                      <tr><td>Offline scan converter</td><td class="muted">45s</td><td class="muted">Turns synced scans into verification sessions</td></tr>
+                      <tr><td>Daily rollup</td><td class="muted">15m</td><td class="muted">Materialises analytics per workspace</td></tr>
+                      <tr><td>Maintenance sweep</td><td class="muted">Recurring</td><td class="muted">Prunes expired idempotency records and stale runs</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <h3>Secrets</h3>
+                <p>
+                  The server needs an HMAC signing key for QR tokens, a key for
+                  PIN encryption, and a key for webhook secrets. They live in
+                  <code>config/passwords.yaml</code> locally and as managed
+                  secrets in the cloud. The signing and encryption keys must not
+                  be rotated once data exists: rotating the signing key
+                  invalidates printed codes, and rotating the encryption key
+                  makes existing PINs unreadable.
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {{{siteFooter}}}
+  </body>
+</html>
