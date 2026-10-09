@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import '../app/app_state.dart';
 import '../client.dart';
 import '../utils/formatting.dart';
+import '../widgets/batch_qr_dialog.dart';
 import '../widgets/common.dart';
+import '../widgets/identity_qr_dialog.dart';
 
 /// Product catalog.
 class CatalogScreen extends StatefulWidget {
@@ -561,6 +563,11 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
             label: const Text('Generate units'),
           ),
           OutlinedButton.icon(
+            onPressed: _showBatchQr,
+            icon: const Icon(Icons.qr_code_scanner_rounded),
+            label: const Text('QR sheet'),
+          ),
+          OutlinedButton.icon(
             onPressed: widget.controller.can('identitiesExport')
                 ? _export
                 : null,
@@ -622,32 +629,50 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
               '${identity.status.name} · ${identity.verificationCount} scans'
               '${identity.failedPinAttempts > 0 ? ' · ${identity.failedPinAttempts} failed PINs' : ''}',
             ),
-            trailing: PopupMenuButton<String>(
-              onSelected: (value) => _identityAction(identity, value),
-              itemBuilder: (context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'pin',
-                  child: Text('Reveal packaging PIN'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                IconButton(
+                  tooltip: 'QR code',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _showIdentityQr(identity),
+                  icon: const Icon(Icons.qr_code_2_rounded, size: 20),
                 ),
-                const PopupMenuItem<String>(
-                  value: 'regenerate',
-                  child: Text('Regenerate token'),
-                ),
-                PopupMenuItem<String>(
-                  value: identity.status == IdentityStatus.locked
-                      ? 'unlock'
-                      : 'lock',
-                  child: Text(
-                    identity.status == IdentityStatus.locked
-                        ? 'Unlock unit'
-                        : 'Lock unit',
-                  ),
-                ),
-                PopupMenuItem<String>(
-                  value: identity.deletedAt == null ? 'delete' : 'restore',
-                  child: Text(
-                    identity.deletedAt == null ? 'Delete unit' : 'Restore unit',
-                  ),
+                PopupMenuButton<String>(
+                  tooltip: 'Unit actions',
+                  onSelected: (value) => _identityAction(identity, value),
+                  itemBuilder: (context) => <PopupMenuEntry<String>>[
+                    const PopupMenuItem<String>(
+                      value: 'qr',
+                      child: Text('Show QR code'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'pin',
+                      child: Text('Reveal packaging PIN'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'regenerate',
+                      child: Text('Regenerate token'),
+                    ),
+                    PopupMenuItem<String>(
+                      value: identity.status == IdentityStatus.locked
+                          ? 'unlock'
+                          : 'lock',
+                      child: Text(
+                        identity.status == IdentityStatus.locked
+                            ? 'Unlock unit'
+                            : 'Lock unit',
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: identity.deletedAt == null ? 'delete' : 'restore',
+                      child: Text(
+                        identity.deletedAt == null
+                            ? 'Delete unit'
+                            : 'Restore unit',
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -668,9 +693,33 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
     );
   }
 
+  void _showIdentityQr(ProductIdentity identity) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => IdentityQrDialog(
+        identity: identity,
+        batchReference: widget.batch.reference,
+      ),
+    );
+  }
+
+  void _showBatchQr() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => BatchQrDialog(
+        controller: widget.controller,
+        batch: widget.batch,
+        total: _stats?.totalIdentities ?? _identities.length,
+      ),
+    );
+  }
+
   Future<void> _identityAction(ProductIdentity identity, String action) async {
     try {
       switch (action) {
+        case 'qr':
+          _showIdentityQr(identity);
+          return;
         case 'pin':
           final revealed = await client.identity.revealPin(
             workspaceId: widget.controller.workspaceId,

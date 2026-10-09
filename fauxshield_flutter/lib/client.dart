@@ -24,8 +24,14 @@ final serverUrl = getServerUrl();
 /// instead of using a global client object. This is just a simple example.
 late final Client client;
 
+/// Parsed server base URL, used to build public links (e.g. the verification
+/// URL encoded into a unit's QR code).
+late final Uri serverBase;
+
 Future<void> initializeClient() async {
-  client = Client(await serverUrl)
+  final host = await serverUrl;
+  serverBase = Uri.parse(host);
+  client = Client(host)
     ..connectivityMonitor = FlutterConnectivityMonitor()
     ..authSessionManager = FlutterAuthSessionManager();
   unawaited(client.auth.initialize());
