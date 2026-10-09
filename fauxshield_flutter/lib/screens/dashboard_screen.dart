@@ -7,7 +7,6 @@ import '../utils/formatting.dart';
 import '../widgets/common.dart';
 import 'alert_detail_screen.dart';
 import 'scan_screen.dart';
-import 'simulations_screen.dart';
 
 /// The operator dashboard: platform health at a glance.
 class DashboardScreen extends StatefulWidget {
@@ -57,38 +56,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final workspace = widget.controller.bootstrap?.workspace;
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: <Widget>[
-            Flexible(
-              child: Text(
-                workspace?.branding?.displayName ??
-                    workspace?.name ??
-                    'FauxShield',
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (widget.controller.isDemo)
-              const Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Pill(
-                  label: 'DEMO',
-                  color: Color(0xFF2563EB),
-                  dense: true,
-                ),
-              ),
-          ],
-        ),
-        actions: <Widget>[
-          IconButton(
-            tooltip: 'Refresh',
-            onPressed: _load,
-            icon: const Icon(Icons.refresh_rounded),
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.push(
           context,
@@ -113,175 +81,210 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
+    final wide = MediaQuery.sizeOf(context).width >= 900;
+
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+        padding: wide
+            ? const EdgeInsets.fromLTRB(28, 24, 28, 96)
+            : const EdgeInsets.fromLTRB(16, 8, 16, 96),
         children: <Widget>[
-          _quickActions(),
-          const SizedBox(height: 8),
-          _statGrid(summary),
-          SectionCard(
-            title: 'Verification volume',
-            subtitle: 'Last ${summary.windowDays} days',
-            trailing: SegmentedButton<int>(
-              showSelectedIcon: false,
-              style: const ButtonStyle(
-                visualDensity: VisualDensity.compact,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              segments: const <ButtonSegment<int>>[
-                ButtonSegment<int>(value: 7, label: Text('7d')),
-                ButtonSegment<int>(value: 14, label: Text('14d')),
-                ButtonSegment<int>(value: 30, label: Text('30d')),
-              ],
-              selected: <int>{_windowDays},
-              onSelectionChanged: (selection) {
-                setState(() => _windowDays = selection.first);
-                _load();
-              },
-            ),
-            child: _TrendChart(trend: summary.trend),
-          ),
-          SectionCard(
-            title: 'Outcome mix',
-            subtitle: '${summary.totalVerifications} verifications in window',
-            child: _outcomeBreakdown(summary),
-          ),
-          SectionCard(
-            title: 'Top countries',
-            subtitle: 'Where your products are being scanned',
-            child: _countries(summary),
-          ),
-          SectionCard(
-            title: 'Recent alerts',
-            subtitle:
-                '${summary.openAlerts} open · ${summary.criticalAlerts} critical',
-            child: _recentAlerts(summary),
-          ),
+          _pageHeader(),
+          const SizedBox(height: 20),
+          _metricGrid(summary),
+          const SizedBox(height: 10),
+          _dashboardCards(summary),
         ],
       ),
     );
   }
 
-  Widget _quickActions() {
+  /// Page header matching the reference `PageHeader` component: bold title,
+  /// muted description, refresh action, demo pill.
+  Widget _pageHeader() {
+    final theme = Theme.of(context);
+    final workspace = widget.controller.bootstrap?.workspace;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Expanded(
-          child: _actionCard(
-            icon: Icons.science_rounded,
-            title: 'Run simulation',
-            subtitle: 'Rehearse an attack',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    SimulationsScreen(controller: widget.controller),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _actionCard(
-            icon: Icons.qr_code_scanner_rounded,
-            title: 'Verify a code',
-            subtitle: 'Consumer style scan',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) => ScanScreen(controller: widget.controller),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _actionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: <Widget>[
-            Icon(icon, color: theme.colorScheme.primary),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
                 children: <Widget>[
-                  Text(title, style: theme.textTheme.titleSmall),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  Flexible(
+                    child: Text(
+                      'Dashboard',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
+                      ),
                     ),
                   ),
+                  if (widget.controller.isDemo)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8),
+                      child: Pill(
+                        label: 'DEMO',
+                        color: Color(0xFF2563EB),
+                        dense: true,
+                      ),
+                    ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                'Overview of ${workspace?.branding?.displayName ?? workspace?.name ?? 'your workspace'}'
+                ' verification activity and metrics.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+        IconButton(
+          tooltip: 'Refresh',
+          onPressed: _load,
+          icon: const Icon(Icons.refresh_rounded),
+        ),
+      ],
     );
   }
 
-  Widget _statGrid(DashboardSummary summary) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 1.9,
-      children: <Widget>[
-        StatTile(
-          label: 'Verifications',
-          value: '${summary.totalVerifications}',
-          icon: Icons.verified_user_rounded,
+  /// The four metric cards, mirroring the reference `MetricCard` grid
+  /// (`sm:grid-cols-2 lg:grid-cols-4`).
+  Widget _metricGrid(DashboardSummary summary) {
+    final metrics = <(String, String, String)>[
+      (
+        'Total verifications',
+        '${summary.totalVerifications}',
+        'Last ${summary.windowDays} days',
+      ),
+      (
+        'Authentic',
+        '${summary.authentic}',
+        'Successful verifications',
+      ),
+      (
+        'Fraud alerts',
+        '${summary.openAlerts}',
+        summary.criticalAlerts > 0
+            ? '${summary.criticalAlerts} critical right now'
+            : 'Open alerts across the workspace',
+      ),
+      (
+        'Serialized units',
+        '${summary.identitiesTotal}',
+        '${summary.batchesTotal} batches',
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final columns = width >= 1024
+            ? 4
+            : width >= 640
+            ? 2
+            : 1;
+        const gap = 12.0;
+        final cardWidth = (width - gap * (columns - 1)) / columns;
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: <Widget>[
+            for (final (title, value, description) in metrics)
+              _MetricCard(
+                width: cardWidth,
+                title: title,
+                value: value,
+                description: description,
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Dashboard cards: two columns on wide layouts, stacked on narrow ones,
+  /// matching the reference `grid gap-4 md:grid-cols-2` arrangement.
+  Widget _dashboardCards(DashboardSummary summary) {
+    final trendCard = SectionCard(
+      title: 'Verifications over time',
+      subtitle: 'Last ${summary.windowDays} days',
+      trailing: SegmentedButton<int>(
+        showSelectedIcon: false,
+        style: const ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
-        StatTile(
-          label: 'Fraud suspected',
-          value: '${summary.fraudSuspected}',
-          icon: Icons.gpp_bad_rounded,
-          color: Theme.of(context).colorScheme.error,
-        ),
-        StatTile(
-          label: 'Open alerts',
-          value: '${summary.openAlerts}',
-          icon: Icons.notification_important_rounded,
-          color: const Color(0xFFB45309),
-        ),
-        StatTile(
-          label: 'Serialized units',
-          value: '${summary.identitiesTotal}',
-          icon: Icons.qr_code_2_rounded,
-        ),
-        StatTile(
-          label: 'Locked units',
-          value: '${summary.identitiesLocked}',
-          icon: Icons.lock_rounded,
-          color: const Color(0xFFC2410C),
-        ),
-        StatTile(
-          label: 'Batches',
-          value: '${summary.batchesTotal}',
-          icon: Icons.inventory_2_rounded,
-        ),
-      ],
+        segments: const <ButtonSegment<int>>[
+          ButtonSegment<int>(value: 7, label: Text('7d')),
+          ButtonSegment<int>(value: 14, label: Text('14d')),
+          ButtonSegment<int>(value: 30, label: Text('30d')),
+        ],
+        selected: <int>{_windowDays},
+        onSelectionChanged: (selection) {
+          setState(() => _windowDays = selection.first);
+          _load();
+        },
+      ),
+      child: _TrendChart(trend: summary.trend),
+    );
+    final outcomeCard = SectionCard(
+      title: 'Outcome distribution',
+      subtitle: '${summary.totalVerifications} verifications in window',
+      child: _outcomeBreakdown(summary),
+    );
+    final countriesCard = SectionCard(
+      title: 'Top countries',
+      subtitle: 'Where your products are being scanned',
+      child: _countries(summary),
+    );
+    final alertsCard = SectionCard(
+      title: 'Recent alerts',
+      subtitle:
+          '${summary.openAlerts} open · ${summary.criticalAlerts} critical',
+      child: _recentAlerts(summary),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 900) {
+          return Column(
+            children: <Widget>[
+              trendCard,
+              outcomeCard,
+              countriesCard,
+              alertsCard,
+            ],
+          );
+        }
+        return Column(
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(child: trendCard),
+                const SizedBox(width: 12),
+                Expanded(child: outcomeCard),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(child: countriesCard),
+                const SizedBox(width: 12),
+                Expanded(child: alertsCard),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -417,6 +420,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
+/// A metric card matching the reference `MetricCard`: bordered card,
+/// medium title, bold value, muted description.
+class _MetricCard extends StatelessWidget {
+  const _MetricCard({
+    required this.width,
+    required this.title,
+    required this.value,
+    required this.description,
+  });
+
+  final double width;
+  final String title;
+  final String value;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox(
+      width: width,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                title,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                description,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A compact bar chart of verifications per day.
 class _TrendChart extends StatelessWidget {
   const _TrendChart({required this.trend});
@@ -436,7 +495,7 @@ class _TrendChart extends StatelessWidget {
         .fold<int>(0, (a, b) => a > b ? a : b);
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
-      height: 130,
+      height: 160,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
