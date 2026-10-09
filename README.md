@@ -12,9 +12,19 @@ that consumers and operators open.
 | Entry point | What it is | URL (local dev) |
 | --- | --- | --- |
 | Landing page | Live platform stats + demo product code | http://localhost:8082/ |
+| Features | What each module does, in detail | http://localhost:8082/features |
+| Pricing | The three supported deployment options | http://localhost:8082/pricing |
+| About | Why it exists and how it was built | http://localhost:8082/about |
+| Documentation | Setup, concepts, API, webhooks, offline sync | http://localhost:8082/docs |
 | Consumer verification | Scan → PIN → verdict, with product reports | http://localhost:8082/verify |
 | Operator app | Flutter web command center (also runs on mobile/desktop) | http://localhost:8082/app |
+| Command line | Products, batches, units, and alerts from a terminal | `fauxshield` (step 5) |
 | API + Insights | Serverpod JSON-RPC API and Insights | http://localhost:8080 · :8081 |
+
+The marketing pages are server-rendered by Serverpod from Mustache templates in
+`fauxshield_server/web/templates/` with shared chrome built in
+`lib/src/web/widgets/site_chrome.dart`, and the design tokens in
+`web/static/css/public.css` match the reference design system.
 
 ---
 
@@ -156,6 +166,15 @@ Create an account with any email + password, then choose **Open demo workspace**
 on the onboarding screen. The demo seeds a complete brand (products, batches,
 units, verifications, a recall, alerts, simulations) so every screen has data.
 
+> **Where's my email verification code?** No email is sent in development.
+> The code is written to the server console right after you sign up, as a line
+> like `Registration code for you@brand.test: <a1b2c3d4>` — copy it into the
+> app's verification step. Starting the server with the `serverpod` CLI shows
+> the same line as a popup alert and copies the code to your clipboard.
+> Password-reset codes work the same way. Real emails are only sent in
+> `staging`/`production` run modes, through the Serverpod Cloud email service
+> configured in `fauxshield_server/lib/server.dart`.
+
 ### 3. Try the consumer flow
 
 Open http://localhost:8082/, take the demo product code, then enter its
@@ -175,6 +194,33 @@ cp -r build/web/. ../fauxshield_server/web/app/
 > `third_party/` so `dart2js` can compile the client-side database dependency.
 > See `third_party/sqlite_async/README_GUARD.md`.
 
+### 5. Use the command line client
+
+`fauxshield_cli` is a plain Dart console package over the same JSON-RPC API, so
+it needs no Flutter runtime and no browser. It is the third client of the same
+server, alongside the operator app and the consumer web flow.
+
+```bash
+# from the repository root
+dart pub global activate --source path fauxshield_cli
+
+fauxshield auth login --email you@brand.test --password '<your password>'
+fauxshield auth whoami
+fauxshield products list
+fauxshield batches list
+fauxshield identities list --page-size 10
+fauxshield alerts list --severity critical
+fauxshield alerts show --alert <uuid>
+
+# Run the consumer flow without a browser
+fauxshield verify --token <token> --pin <pin>
+```
+
+Command groups: `auth`, `products`, `batches`, `identities`, `alerts`, `verify`.
+Every command takes `--json` for scripting, and `FAUXSHIELD_URL`,
+`FAUXSHIELD_TOKEN`, and `FAUXSHIELD_PASSWORD` override the stored config, so it
+runs unattended in CI. `fauxshield --help` lists everything.
+
 ---
 
 ## Tests
@@ -187,7 +233,9 @@ dart test
 Covers the core crypto (HMAC, PBKDF2, AES-GCM), the verification pipeline
 (outcomes, replay protection, PIN lockout), the fraud pipeline (clone/PIN/offline
 signals and alert evidence), recalls, and the demo seeder — 24 tests, all green.
-The Flutter app is analyzed clean with `flutter analyze`.
+The Flutter app is analyzed clean with `flutter analyze`, and the CLI has its
+own suite (`cd fauxshield_cli && dart test`) covering version parity, usage
+exit codes, and the failure path when a server is unreachable.
 
 ---
 
@@ -251,6 +299,9 @@ fauxshield/                      # repository root
 │       ├── app/                # theme + workspace state
 │       ├── widgets/ utils/     # shared UI
 │       └── main.dart
+├── fauxshield_cli/             # Dart console client for operators and scripts
+│   ├── bin/fauxshield.dart     # entry point
+│   └── lib/                    # commands, auth/config, table output
 ├── fauxshield_client/          # generated Dart client (do not edit)
 ├── third_party/sqlite_async/   # one-line patch for web builds (see README)
 ├── docs/                       # deployment guide + demo script
@@ -259,14 +310,6 @@ fauxshield/                      # repository root
 ```
 
 ---
-
-## AI disclosure
-
-This project was built with **Codebuff / Freebuff**, an AI coding agent, as the
-primary development tool, following the hackathon's disclosure requirement. The
-agent wrote the server, the Flutter app, the web pages, migrations, and tests
-under human direction, with every change reviewed and verified locally
-(`dart analyze`, `flutter analyze`, `dart test`, end-to-end runs in Chrome).
 
 ## License
 

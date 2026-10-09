@@ -5,6 +5,7 @@ environment:
   sdk: '^3.12.2'
 
 workspace:
+  - fauxshield_cli
   - fauxshield_client
   - fauxshield_server
   - fauxshield_flutter

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{{pageTitle}}</title>
+    <meta name="description" content="{{pageDescription}}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="{{{@/web/css/public.css}}}" />
+  </head>
+  <body class="site">
+    {{{siteNav}}}
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="pattern dot-pattern" aria-hidden="true"></div>
+        <div class="wrap wrap-md hero-inner animate-page-in">
+          <span class="badge badge-outline">{{{iconShield}}}Deployment</span>
+          <h1 id="page-title">Run it yourself, or let Serverpod run it.</h1>
+          <p class="lead">
+            FauxShield is one MIT licensed codebase. There is no feature gate
+            between the options below &mdash; the choice is about who operates
+            the PostgreSQL instance, the secrets, and the upgrades.
+          </p>
+          <div class="btn-row">
+            <a class="btn btn-primary btn-lg" href="/app">
+              Open the operator app {{{iconArrow}}}
+            </a>
+            <a class="btn btn-outline btn-lg" href="/docs#getting-started">
+              Read the setup guide
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="tiers-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Options</span>
+            <h2 id="tiers-title">Three ways to run the same platform.</h2>
+            <p>
+              This page describes deployment, not a hosted price list. This
+              build contains no billing or payment integration.
+            </p>
+          </div>
+
+          <div class="grid-3">
+            <div class="card card-solid">
+              <div class="card-head">
+                <span class="icon-tile icon-tile-primary">{{{iconCode}}}</span>
+                <h3>Self-hosted</h3>
+              </div>
+              <p class="stat-value text-primary mt-4">Free</p>
+              <p class="mt-2">
+                Clone the repository and run it. Everything in this build is
+                included, under the MIT licence.
+              </p>
+              <ul class="bullet-list check-list">
+                <li>Serverpod server, Flutter app, and migrations</li>
+                <li>All eight fraud signals and the simulation suite</li>
+                <li>Roles, API keys, audit log, and analytics</li>
+                <li>Embedded PostgreSQL for development, no Docker</li>
+                <li>You operate the database and the secrets</li>
+              </ul>
+            </div>
+
+            <div class="card card-solid">
+              <div class="card-head">
+                <span class="icon-tile icon-tile-primary">{{{iconActivity}}}</span>
+                <h3>Serverpod Cloud</h3>
+              </div>
+              <p class="stat-value text-primary mt-4">Usage-based</p>
+              <p class="mt-2">
+                One command builds, deploys, and wires up the infrastructure for
+                you.
+              </p>
+              <ul class="bullet-list check-list">
+                <li><code>serverpod cloud launch</code> from the server folder</li>
+                <li>Managed PostgreSQL with migrations applied on boot</li>
+                <li>Managed secrets through the CLI, kept out of the repo</li>
+                <li>API, Insights, and web URLs provisioned for you</li>
+                <li>Built-in cloud storage for branding assets</li>
+              </ul>
+            </div>
+
+            <div class="card card-solid">
+              <div class="card-head">
+                <span class="icon-tile icon-tile-primary">{{{iconShield}}}</span>
+                <h3>Enterprise</h3>
+              </div>
+              <p class="stat-value text-primary mt-4">Talk to us</p>
+              <p class="mt-2">
+                For deployments with specific integration, data residency, or
+                review requirements.
+              </p>
+              <ul class="bullet-list check-list">
+                <li>Deployment review against your environment</li>
+                <li>Integration support for existing print and ERP pipelines</li>
+                <li>Key management and rotation planning</li>
+                <li>Migration and upgrade assistance</li>
+                <li>A named contact instead of a support queue</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="included-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-success badge-block">Included everywhere</span>
+            <h2 id="included-title">No tier withholds a module.</h2>
+            <p>
+              Because FauxShield ships as one server, every deployment gets the
+              same surface. What differs is who carries the operational load.
+            </p>
+          </div>
+          {{{includedCards}}}
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="compare-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Comparison</span>
+            <h2 id="compare-title">Who does what.</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Concern</th>
+                  <th>Self-hosted</th>
+                  <th>Serverpod Cloud</th>
+                  <th>Enterprise</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Application code</td>
+                  <td class="muted">Included</td>
+                  <td class="muted">Included</td>
+                  <td class="muted">Included</td>
+                </tr>
+                <tr>
+                  <td>PostgreSQL</td>
+                  <td class="muted">You</td>
+                  <td class="muted">Managed</td>
+                  <td class="muted">Agreed</td>
+                </tr>
+                <tr>
+                  <td>Migrations</td>
+                  <td class="muted">You</td>
+                  <td class="muted">Applied on boot</td>
+                  <td class="muted">Assisted</td>
+                </tr>
+                <tr>
+                  <td>Secret management</td>
+                  <td class="muted">Your config</td>
+                  <td class="muted">Managed secrets</td>
+                  <td class="muted">Planned with you</td>
+                </tr>
+                <tr>
+                  <td>Upgrades</td>
+                  <td class="muted">You</td>
+                  <td class="muted">You trigger a deploy</td>
+                  <td class="muted">Supported</td>
+                </tr>
+                <tr>
+                  <td>Support</td>
+                  <td class="muted">Community</td>
+                  <td class="muted">Serverpod</td>
+                  <td class="muted">Named contact</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="faq-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Questions</span>
+            <h2 id="faq-title">The things people ask first.</h2>
+          </div>
+          {{{faqCards}}}
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="cta-title">
+        <div class="wrap wrap-md">
+          <div class="cta-band">
+            <h2 id="cta-title">The fastest way to evaluate it is to run it.</h2>
+            <p>
+              Development mode starts its own PostgreSQL instance. There is no
+              container to install and no database to configure first.
+            </p>
+            <div class="btn-row">
+              <a class="btn btn-primary btn-lg" href="/docs#getting-started">
+                Getting started {{{iconArrow}}}
+              </a>
+              <a class="btn btn-outline btn-lg" href="/features">See the features</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {{{siteFooter}}}
+  </body>
+</html>

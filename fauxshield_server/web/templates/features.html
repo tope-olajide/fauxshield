@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{{pageTitle}}</title>
+    <meta name="description" content="{{pageDescription}}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="{{{@/web/css/public.css}}}" />
+  </head>
+  <body class="site">
+    {{{siteNav}}}
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="pattern dot-pattern" aria-hidden="true"></div>
+        <div class="wrap wrap-md hero-inner animate-page-in">
+          <span class="badge badge-outline">{{{iconShield}}}Product</span>
+          <h1 id="page-title">
+            Everything from the print run<br />
+            to the recall notice.
+          </h1>
+          <p class="lead">
+            FauxShield covers the whole lifecycle of a physical product: it is
+            serialized, printed, scanned by a consumer, scored for fraud,
+            investigated by an operator, and recalled if it has to be. Every
+            card on this page is a module that ships in this build.
+          </p>
+          <div class="btn-row">
+            <a class="btn btn-primary btn-lg" href="/app">
+              Open the operator app {{{iconArrow}}}
+            </a>
+            <a class="btn btn-outline btn-lg" href="/verify">Verify a product</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="journey-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">The pipeline</span>
+            <h2 id="journey-title">One unit, six stages, no gaps.</h2>
+            <p>
+              Nothing here is a batch job someone has to remember to run. Each
+              stage is an endpoint, a job, or a stream inside one server.
+            </p>
+          </div>
+          {{{apiFlow}}}
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="identity-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Identity and verification</span>
+            <h2 id="identity-title">Serialization that survives contact with reality.</h2>
+            <p>
+              The code on the box is the easy part. What matters is what the
+              server knows about it, and what it refuses to reveal.
+            </p>
+          </div>
+          {{{identityCards}}}
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="fraud-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-destructive badge-block">Fraud intelligence</span>
+            <h2 id="fraud-title">Suspicion has to be explainable.</h2>
+            <p>
+              An alert that only says something looked odd is not actionable.
+              Every escalation here carries the signals and reasons behind it.
+            </p>
+          </div>
+          {{{fraudCards}}}
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="response-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Response and operations</span>
+            <h2 id="response-title">Detection is only useful if you can act.</h2>
+            <p>
+              Investigating a clone is a workflow, not a dashboard. These are
+              the levers an operator actually gets.
+            </p>
+          </div>
+          {{{responseCards}}}
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="field-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Field and offline</span>
+            <h2 id="field-title">Inspections that survive a dead zone.</h2>
+            <p>
+              The places counterfeits move through are the places with the worst
+              connectivity. The inspector app is built around that.
+            </p>
+          </div>
+          {{{fieldCards}}}
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="admin-title">
+        <div class="wrap wrap-md">
+          <div class="section-head">
+            <span class="badge badge-block">Platform and administration</span>
+            <h2 id="admin-title">Built for more than one person.</h2>
+            <p>
+              Roles, scoped keys, an audit trail, and analytics, so the platform
+              can be handed to a team without handing over everything.
+            </p>
+          </div>
+          {{{adminCards}}}
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="cta-title">
+        <div class="wrap wrap-md">
+          <div class="cta-band">
+            <h2 id="cta-title">See it running with real data.</h2>
+            <p>
+              The demo workspace is seeded with products, batches, verifications,
+              alerts, a recall, and completed simulations, so no screen is
+              empty.
+            </p>
+            <div class="btn-row">
+              <a class="btn btn-primary btn-lg" href="/app">
+                Open the operator app {{{iconArrow}}}
+              </a>
+              <a class="btn btn-outline btn-lg" href="/docs">Read the docs</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {{{siteFooter}}}
+  </body>
+</html>

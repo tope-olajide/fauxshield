@@ -39,23 +39,45 @@ class _SignInScreenState extends State<SignInScreen> {
 
     return _isSignedIn
         ? widget.child
-        : Center(
-            child: SignInWidget(
-              client: client,
-              onAuthenticated: () {
-                context.showSnackBar(
-                  message: 'User authenticated.',
-                  backgroundColor: colors.primaryContainer,
-                  foregroundColor: colors.onPrimaryContainer,
-                );
-              },
-              onError: (error) {
-                context.showSnackBar(
-                  message: 'Authentication failed: $error',
-                  backgroundColor: colors.errorContainer,
-                  foregroundColor: colors.onErrorContainer,
-                );
-              },
+        : Scaffold(
+            backgroundColor: colors.surface,
+            body: SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: Card(
+                      color: colors.surfaceContainerLow,
+                      child: Padding(
+                        padding: const EdgeInsets.all(28),
+                        child: SignInWidget(
+                          client: client,
+                          buttonStyle: SignInButtonStyle(
+                            backgroundColor: colors.surfaceContainer,
+                            foregroundColor: colors.onSurface,
+                            borderColor: colors.outlineVariant,
+                          ),
+                          onAuthenticated: () {
+                            context.showSnackBar(
+                              message: 'User authenticated.',
+                              backgroundColor: colors.primaryContainer,
+                              foregroundColor: colors.onPrimaryContainer,
+                            );
+                          },
+                          onError: (error) {
+                            context.showSnackBar(
+                              message: 'Authentication failed: $error',
+                              backgroundColor: colors.errorContainer,
+                              foregroundColor: colors.onErrorContainer,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           );
   }

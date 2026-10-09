@@ -7,7 +7,8 @@ fields:
   velocityThreshold: int, default=10
   ### Failed PIN attempts on one identity before a pin attack signal.
   pinAttackThreshold: int, default=5
-  ### Fraud flagged identities in one batch before a batch duplication signal.
+  ### Units of one batch with copying or diversion evidence (clone detection,
+  ### out of region, or restricted market) before a batch duplication signal.
   batchDuplicationThreshold: int, default=3
   ### Time window for clone detection in minutes.
   cloneWindowMinutes: int, default=60
