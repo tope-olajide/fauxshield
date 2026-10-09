@@ -34,6 +34,8 @@ dependencies:
     path: ../fauxshield_client
   serverpod_flutter: 4.0.3
   serverpod_auth_idp_flutter: 4.0.3
+  qr_flutter: ^4.1.0
+  web: ^1.1.1
 
 dev_dependencies:
   # Used for agents to drive the app through the Dart MCP
