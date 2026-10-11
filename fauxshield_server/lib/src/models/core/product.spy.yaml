@@ -22,6 +22,11 @@ fields:
   safetyInstructions: String?
   createdBy: String?
   archivedAt: DateTime?
+  ### Soft delete marker: the product sits in the recycle bin until it is
+  ### restored or permanently purged. Null means the product is live.
+  deletedAt: DateTime?
+  deletedBy: String?
+  deleteReason: String?
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 indexes:

@@ -31,6 +31,9 @@ abstract class Product
     this.safetyInstructions,
     this.createdBy,
     this.archivedAt,
+    this.deletedAt,
+    this.deletedBy,
+    this.deleteReason,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -50,6 +53,9 @@ abstract class Product
     String? safetyInstructions,
     String? createdBy,
     DateTime? archivedAt,
+    DateTime? deletedAt,
+    String? deletedBy,
+    String? deleteReason,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _ProductImpl;
@@ -85,6 +91,11 @@ abstract class Product
           : _isc.DateTimeJsonExtension.fromJson(
               jsonSerialization['archivedAt'],
             ),
+      deletedAt: jsonSerialization['deletedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['deletedAt']),
+      deletedBy: jsonSerialization['deletedBy'] as String?,
+      deleteReason: jsonSerialization['deleteReason'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -129,6 +140,14 @@ abstract class Product
 
   DateTime? archivedAt;
 
+  /// Soft delete marker: the product sits in the recycle bin until it is
+  /// restored or permanently purged. Null means the product is live.
+  DateTime? deletedAt;
+
+  String? deletedBy;
+
+  String? deleteReason;
+
   DateTime createdAt;
 
   DateTime updatedAt;
@@ -150,6 +169,9 @@ abstract class Product
     String? safetyInstructions,
     String? createdBy,
     DateTime? archivedAt,
+    DateTime? deletedAt,
+    String? deletedBy,
+    String? deleteReason,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -171,6 +193,9 @@ abstract class Product
       if (safetyInstructions != null) 'safetyInstructions': safetyInstructions,
       if (createdBy != null) 'createdBy': createdBy,
       if (archivedAt != null) 'archivedAt': archivedAt?.toJson(),
+      if (deletedAt != null) 'deletedAt': deletedAt?.toJson(),
+      if (deletedBy != null) 'deletedBy': deletedBy,
+      if (deleteReason != null) 'deleteReason': deleteReason,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -194,6 +219,9 @@ abstract class Product
       if (safetyInstructions != null) 'safetyInstructions': safetyInstructions,
       if (createdBy != null) 'createdBy': createdBy,
       if (archivedAt != null) 'archivedAt': archivedAt?.toJson(),
+      if (deletedAt != null) 'deletedAt': deletedAt?.toJson(),
+      if (deletedBy != null) 'deletedBy': deletedBy,
+      if (deleteReason != null) 'deleteReason': deleteReason,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -222,6 +250,9 @@ class _ProductImpl extends Product {
     String? safetyInstructions,
     String? createdBy,
     DateTime? archivedAt,
+    DateTime? deletedAt,
+    String? deletedBy,
+    String? deleteReason,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -238,6 +269,9 @@ class _ProductImpl extends Product {
          safetyInstructions: safetyInstructions,
          createdBy: createdBy,
          archivedAt: archivedAt,
+         deletedAt: deletedAt,
+         deletedBy: deletedBy,
+         deleteReason: deleteReason,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -260,6 +294,9 @@ class _ProductImpl extends Product {
     Object? safetyInstructions = _Undefined,
     Object? createdBy = _Undefined,
     Object? archivedAt = _Undefined,
+    Object? deletedAt = _Undefined,
+    Object? deletedBy = _Undefined,
+    Object? deleteReason = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -283,6 +320,9 @@ class _ProductImpl extends Product {
           : this.safetyInstructions,
       createdBy: createdBy is String? ? createdBy : this.createdBy,
       archivedAt: archivedAt is DateTime? ? archivedAt : this.archivedAt,
+      deletedAt: deletedAt is DateTime? ? deletedAt : this.deletedAt,
+      deletedBy: deletedBy is String? ? deletedBy : this.deletedBy,
+      deleteReason: deleteReason is String? ? deleteReason : this.deleteReason,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -43,6 +43,8 @@ import 'package:fauxshield_server/src/generated/core/invitation.dart'
 import 'package:fauxshield_server/src/generated/core/invitation_created.dart'
     as _ies6uk5i;
 import 'package:fauxshield_server/src/generated/core/product.dart' as _ian4oqo2;
+import 'package:fauxshield_server/src/generated/core/product_delete_impact.dart'
+    as _iyiu7bdr;
 import 'package:fauxshield_server/src/generated/core/product_identity.dart'
     as _i2mg5i1l;
 import 'package:fauxshield_server/src/generated/core/revealed_pin.dart'
@@ -2474,6 +2476,179 @@ class _ProductEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_ian4oqo2.Product>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ian4oqo2.Product> delete(
+    _ist.TestSessionBuilder sessionBuilder, {
+    _is.UuidValue? workspaceId,
+    required _is.UuidValue productId,
+    String? reason,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'product',
+            method: 'delete',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'product',
+          methodName: 'delete',
+          parameters: _ist.testObjectToJson({
+            'workspaceId': workspaceId,
+            'productId': productId,
+            'reason': reason,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ian4oqo2.Product>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_ian4oqo2.Product>> listDeleted(
+    _ist.TestSessionBuilder sessionBuilder, {
+    _is.UuidValue? workspaceId,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'product',
+            method: 'listDeleted',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'product',
+          methodName: 'listDeleted',
+          parameters: _ist.testObjectToJson({'workspaceId': workspaceId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_ian4oqo2.Product>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ian4oqo2.Product> restore(
+    _ist.TestSessionBuilder sessionBuilder, {
+    _is.UuidValue? workspaceId,
+    required _is.UuidValue productId,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'product',
+            method: 'restore',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'product',
+          methodName: 'restore',
+          parameters: _ist.testObjectToJson({
+            'workspaceId': workspaceId,
+            'productId': productId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ian4oqo2.Product>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iyiu7bdr.ProductDeleteImpact> deleteImpact(
+    _ist.TestSessionBuilder sessionBuilder, {
+    _is.UuidValue? workspaceId,
+    required _is.UuidValue productId,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'product',
+            method: 'deleteImpact',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'product',
+          methodName: 'deleteImpact',
+          parameters: _ist.testObjectToJson({
+            'workspaceId': workspaceId,
+            'productId': productId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iyiu7bdr.ProductDeleteImpact>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<void> purge(
+    _ist.TestSessionBuilder sessionBuilder, {
+    _is.UuidValue? workspaceId,
+    required _is.UuidValue productId,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'product',
+            method: 'purge',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'product',
+          methodName: 'purge',
+          parameters: _ist.testObjectToJson({
+            'workspaceId': workspaceId,
+            'productId': productId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<void>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

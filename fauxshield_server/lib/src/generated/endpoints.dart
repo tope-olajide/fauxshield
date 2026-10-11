@@ -1917,6 +1917,131 @@ class Endpoints extends _is.EndpointDispatch {
                     params['productId'],
                   ),
         ),
+        'delete': _is.MethodConnector(
+          name: 'delete',
+          params: {
+            'workspaceId': _is.ParameterDescription(
+              name: 'workspaceId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'productId': _is.ParameterDescription(
+              name: 'productId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['product'] as _im5j1753.ProductEndpoint).delete(
+                    session,
+                    workspaceId: params['workspaceId'],
+                    productId: params['productId'],
+                    reason: params['reason'],
+                  ),
+        ),
+        'listDeleted': _is.MethodConnector(
+          name: 'listDeleted',
+          params: {
+            'workspaceId': _is.ParameterDescription(
+              name: 'workspaceId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['product'] as _im5j1753.ProductEndpoint)
+                  .listDeleted(
+                    session,
+                    workspaceId: params['workspaceId'],
+                  ),
+        ),
+        'restore': _is.MethodConnector(
+          name: 'restore',
+          params: {
+            'workspaceId': _is.ParameterDescription(
+              name: 'workspaceId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'productId': _is.ParameterDescription(
+              name: 'productId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['product'] as _im5j1753.ProductEndpoint).restore(
+                    session,
+                    workspaceId: params['workspaceId'],
+                    productId: params['productId'],
+                  ),
+        ),
+        'deleteImpact': _is.MethodConnector(
+          name: 'deleteImpact',
+          params: {
+            'workspaceId': _is.ParameterDescription(
+              name: 'workspaceId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'productId': _is.ParameterDescription(
+              name: 'productId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['product'] as _im5j1753.ProductEndpoint)
+                  .deleteImpact(
+                    session,
+                    workspaceId: params['workspaceId'],
+                    productId: params['productId'],
+                  ),
+        ),
+        'purge': _is.MethodConnector(
+          name: 'purge',
+          params: {
+            'workspaceId': _is.ParameterDescription(
+              name: 'workspaceId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'productId': _is.ParameterDescription(
+              name: 'productId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['product'] as _im5j1753.ProductEndpoint).purge(
+                    session,
+                    workspaceId: params['workspaceId'],
+                    productId: params['productId'],
+                  ),
+        ),
       },
     );
     connectors['recall'] = _is.EndpointConnector(

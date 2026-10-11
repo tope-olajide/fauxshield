@@ -40,6 +40,8 @@ import 'package:fauxshield_client/src/protocol/core/invitation.dart'
 import 'package:fauxshield_client/src/protocol/core/invitation_created.dart'
     as _iw0whh34;
 import 'package:fauxshield_client/src/protocol/core/product.dart' as _i1hi8dz8;
+import 'package:fauxshield_client/src/protocol/core/product_delete_impact.dart'
+    as _i8ud3di1;
 import 'package:fauxshield_client/src/protocol/core/product_identity.dart'
     as _ixvcz44n;
 import 'package:fauxshield_client/src/protocol/core/revealed_pin.dart'
@@ -1135,6 +1137,74 @@ class EndpointProduct extends _isc.EndpointRef {
         'archive',
         {'productId': productId},
       );
+
+  /// Moves a product to the recycle bin. Batches and identities stay attached
+  /// and the product can be restored with [restore] until it is purged.
+  _ida.Future<_i1hi8dz8.Product> delete({
+    _isc.UuidValue? workspaceId,
+    required _isc.UuidValue productId,
+    String? reason,
+  }) => caller.callServerEndpoint<_i1hi8dz8.Product>(
+    'product',
+    'delete',
+    {
+      'workspaceId': workspaceId,
+      'productId': productId,
+      'reason': reason,
+    },
+  );
+
+  /// Lists the products sitting in the recycle bin.
+  _ida.Future<List<_i1hi8dz8.Product>> listDeleted({
+    _isc.UuidValue? workspaceId,
+  }) => caller.callServerEndpoint<List<_i1hi8dz8.Product>>(
+    'product',
+    'listDeleted',
+    {'workspaceId': workspaceId},
+  );
+
+  /// Restores a recycled product to the live catalog.
+  _ida.Future<_i1hi8dz8.Product> restore({
+    _isc.UuidValue? workspaceId,
+    required _isc.UuidValue productId,
+  }) => caller.callServerEndpoint<_i1hi8dz8.Product>(
+    'product',
+    'restore',
+    {
+      'workspaceId': workspaceId,
+      'productId': productId,
+    },
+  );
+
+  /// Counts everything a delete or purge would affect, so the confirmation
+  /// dialogs can spell out exactly what is at stake.
+  _ida.Future<_i8ud3di1.ProductDeleteImpact> deleteImpact({
+    _isc.UuidValue? workspaceId,
+    required _isc.UuidValue productId,
+  }) => caller.callServerEndpoint<_i8ud3di1.ProductDeleteImpact>(
+    'product',
+    'deleteImpact',
+    {
+      'workspaceId': workspaceId,
+      'productId': productId,
+    },
+  );
+
+  /// Permanently deletes a recycled product and everything attached to it:
+  /// batches, serialized units, verification sessions, reports, and fraud
+  /// evidence. Audit events and fraud alerts are kept as history. This cannot
+  /// be undone.
+  _ida.Future<void> purge({
+    _isc.UuidValue? workspaceId,
+    required _isc.UuidValue productId,
+  }) => caller.callServerEndpoint<void>(
+    'product',
+    'purge',
+    {
+      'workspaceId': workspaceId,
+      'productId': productId,
+    },
+  );
 }
 
 /// Batch and identity recalls.

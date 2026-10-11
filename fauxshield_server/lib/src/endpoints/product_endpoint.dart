@@ -8,6 +8,7 @@ import 'package:serverpod/serverpod.dart';
 import '../core/public_url.dart';
 import '../generated/protocol.dart';
 import '../services/audit_service.dart';
+import '../services/product_lifecycle_service.dart';
 import '../services/rbac.dart';
 import '../services/workspace_service.dart';
 
@@ -19,6 +20,8 @@ const int _maxProductImages = 5;
 
 /// Product catalog management.
 class ProductEndpoint extends Endpoint {
+  final ProductLifecycleService _lifecycle = ProductLifecycleService();
+
   /// Lists products, optionally filtered by a search term.
   Future<List<Product>> list(
     Session session, {
@@ -36,6 +39,9 @@ class ProductEndpoint extends Endpoint {
       session,
       where: (t) {
         var expression = t.workspaceId.equals(context.workspaceId);
+        // Recycled products are hidden from the live catalog; the recycle bin
+        // lists them through [listDeleted].
+        expression = expression & t.deletedAt.equals(null);
         if (!includeArchived) {
           expression = expression & t.archivedAt.equals(null);
         }
@@ -357,6 +363,117 @@ class ProductEndpoint extends Endpoint {
     );
     return updated.copyWith(
       imageUrls: absoluteWebUrls(session, updated.imageUrls),
+    );
+  }
+
+  /// Moves a product to the recycle bin. Batches and identities stay attached
+  /// and the product can be restored with [restore] until it is purged.
+  Future<Product> delete(
+    Session session, {
+    UuidValue? workspaceId,
+    required UuidValue productId,
+    String? reason,
+  }) async {
+    final context = await WorkspaceService.contextFor(
+      session,
+      workspaceId: workspaceId,
+    );
+    WorkspaceService.require(context, Permission.productsWrite);
+    final deleted = await _lifecycle.softDelete(
+      session,
+      workspaceId: context.workspaceId,
+      productId: productId,
+      actorIdentifier: context.userIdentifier,
+      reason: reason,
+    );
+    return deleted.copyWith(
+      imageUrls: absoluteWebUrls(session, deleted.imageUrls),
+    );
+  }
+
+  /// Lists the products sitting in the recycle bin.
+  Future<List<Product>> listDeleted(
+    Session session, {
+    UuidValue? workspaceId,
+  }) async {
+    final context = await WorkspaceService.contextFor(
+      session,
+      workspaceId: workspaceId,
+    );
+    WorkspaceService.require(context, Permission.productsRead);
+    final rows = await Product.db.find(
+      session,
+      where: (t) =>
+          t.workspaceId.equals(context.workspaceId) &
+          t.deletedAt.notEquals(null),
+      orderBy: (t) => t.deletedAt.desc(),
+    );
+    return [
+      for (final product in rows)
+        product.copyWith(
+          imageUrls: absoluteWebUrls(session, product.imageUrls),
+        ),
+    ];
+  }
+
+  /// Restores a recycled product to the live catalog.
+  Future<Product> restore(
+    Session session, {
+    UuidValue? workspaceId,
+    required UuidValue productId,
+  }) async {
+    final context = await WorkspaceService.contextFor(
+      session,
+      workspaceId: workspaceId,
+    );
+    WorkspaceService.require(context, Permission.productsWrite);
+    final restored = await _lifecycle.restore(
+      session,
+      workspaceId: context.workspaceId,
+      productId: productId,
+    );
+    return restored.copyWith(
+      imageUrls: absoluteWebUrls(session, restored.imageUrls),
+    );
+  }
+
+  /// Counts everything a delete or purge would affect, so the confirmation
+  /// dialogs can spell out exactly what is at stake.
+  Future<ProductDeleteImpact> deleteImpact(
+    Session session, {
+    UuidValue? workspaceId,
+    required UuidValue productId,
+  }) async {
+    final context = await WorkspaceService.contextFor(
+      session,
+      workspaceId: workspaceId,
+    );
+    WorkspaceService.require(context, Permission.productsRead);
+    return _lifecycle.impact(
+      session,
+      workspaceId: context.workspaceId,
+      productId: productId,
+    );
+  }
+
+  /// Permanently deletes a recycled product and everything attached to it:
+  /// batches, serialized units, verification sessions, reports, and fraud
+  /// evidence. Audit events and fraud alerts are kept as history. This cannot
+  /// be undone.
+  Future<void> purge(
+    Session session, {
+    UuidValue? workspaceId,
+    required UuidValue productId,
+  }) async {
+    final context = await WorkspaceService.contextFor(
+      session,
+      workspaceId: workspaceId,
+    );
+    WorkspaceService.require(context, Permission.productsWrite);
+    await _lifecycle.purge(
+      session,
+      workspaceId: context.workspaceId,
+      productId: productId,
     );
   }
 }

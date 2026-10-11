@@ -1,0 +1,14 @@
+### What a product deletion would touch, shown in the operator UI before the
+### delete or permanent purge is confirmed. Counts are for the product's whole
+### tree: batches, serialized units, verification sessions, and fraud alerts.
+class: ProductDeleteImpact
+fields:
+  productId: UuidValue
+  productName: String
+  batchCount: int
+  identityCount: int
+  verificationCount: int
+  alertCount: int
+  ### True when the product already sits in the recycle bin, so the UI can
+  ### label the destructive action as permanent.
+  inRecycleBin: bool
