@@ -134,7 +134,9 @@ abstract final class AnalyticsService {
     final productsTotal = await Product.db.count(
       session,
       where: (t) =>
-          t.workspaceId.equals(workspaceId) & t.archivedAt.equals(null),
+          t.workspaceId.equals(workspaceId) &
+          t.archivedAt.equals(null) &
+          t.deletedAt.equals(null),
     );
 
     final recentAlerts = await FraudAlert.db.find(

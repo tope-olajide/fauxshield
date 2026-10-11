@@ -73,6 +73,13 @@ class BatchEndpoint extends Endpoint {
         resource: 'product',
       );
     }
+    if (product.deletedAt != null) {
+      throw ValidationException(
+        message:
+            'This product is in the recycle bin. Restore it before adding batches.',
+        field: 'productId',
+      );
+    }
     final trimmedReference = reference.trim();
     if (trimmedReference.length < 2) {
       throw ValidationException(

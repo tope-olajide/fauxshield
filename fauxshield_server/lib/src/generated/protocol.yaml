@@ -64,6 +64,11 @@ product:
   - create:
   - update:
   - archive:
+  - delete:
+  - listDeleted:
+  - restore:
+  - deleteImpact:
+  - purge:
 recall:
   - list:
   - recallBatch:

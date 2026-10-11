@@ -80,6 +80,7 @@ import 'core/identity_generation_result.dart' as _im6cjy38;
 import 'core/invitation.dart' as _ih8fc9d7;
 import 'core/invitation_created.dart' as _iq5lw9lm;
 import 'core/product.dart' as _iete5svs;
+import 'core/product_delete_impact.dart' as _ioyinfq8;
 import 'core/product_identity.dart' as _ikjtxbyt;
 import 'core/revealed_pin.dart' as _iayv1jn2;
 import 'core/workspace.dart' as _isqjmtap;
@@ -156,6 +157,7 @@ export 'core/identity_generation_result.dart';
 export 'core/invitation.dart';
 export 'core/invitation_created.dart';
 export 'core/product.dart';
+export 'core/product_delete_impact.dart';
 export 'core/product_identity.dart';
 export 'core/revealed_pin.dart';
 export 'core/workspace.dart';
@@ -677,6 +679,9 @@ class Protocol extends _isd.DatabaseSerializationManager {
     if (t == _iete5svs.Product) {
       return _iete5svs.Product.fromJson(data) as T;
     }
+    if (t == _ioyinfq8.ProductDeleteImpact) {
+      return _ioyinfq8.ProductDeleteImpact.fromJson(data) as T;
+    }
     if (t == _ikjtxbyt.ProductIdentity) {
       return _ikjtxbyt.ProductIdentity.fromJson(data) as T;
     }
@@ -936,6 +941,12 @@ class Protocol extends _isd.DatabaseSerializationManager {
     }
     if (t == _isc.getType<_iete5svs.Product?>()) {
       return (data != null ? _iete5svs.Product.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ioyinfq8.ProductDeleteImpact?>()) {
+      return (data != null
+              ? _ioyinfq8.ProductDeleteImpact.fromJson(data)
+              : null)
+          as T;
     }
     if (t == _isc.getType<_ikjtxbyt.ProductIdentity?>()) {
       return (data != null ? _ikjtxbyt.ProductIdentity.fromJson(data) : null)
@@ -1458,6 +1469,7 @@ class Protocol extends _isd.DatabaseSerializationManager {
       _ih8fc9d7.Invitation => 'Invitation',
       _iq5lw9lm.InvitationCreated => 'InvitationCreated',
       _iete5svs.Product => 'Product',
+      _ioyinfq8.ProductDeleteImpact => 'ProductDeleteImpact',
       _ikjtxbyt.ProductIdentity => 'ProductIdentity',
       _iayv1jn2.RevealedPin => 'RevealedPin',
       _isqjmtap.Workspace => 'Workspace',
@@ -1573,6 +1585,8 @@ class Protocol extends _isd.DatabaseSerializationManager {
         return 'InvitationCreated';
       case _iete5svs.Product():
         return 'Product';
+      case _ioyinfq8.ProductDeleteImpact():
+        return 'ProductDeleteImpact';
       case _ikjtxbyt.ProductIdentity():
         return 'ProductIdentity';
       case _iayv1jn2.RevealedPin():
@@ -1783,6 +1797,9 @@ class Protocol extends _isd.DatabaseSerializationManager {
     }
     if (dataClassName == 'Product') {
       return deserialize<_iete5svs.Product>(data['data']);
+    }
+    if (dataClassName == 'ProductDeleteImpact') {
+      return deserialize<_ioyinfq8.ProductDeleteImpact>(data['data']);
     }
     if (dataClassName == 'ProductIdentity') {
       return deserialize<_ikjtxbyt.ProductIdentity>(data['data']);

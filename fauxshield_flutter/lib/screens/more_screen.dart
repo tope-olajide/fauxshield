@@ -11,6 +11,7 @@ import 'geographic_screen.dart';
 import 'notifications_screen.dart';
 import 'offline_screen.dart';
 import 'recalls_screen.dart';
+import 'recycle_bin_screen.dart';
 import 'settings_screen.dart';
 import 'simulations_screen.dart';
 import 'team_screen.dart';
@@ -195,6 +196,12 @@ class _MoreScreenState extends State<MoreScreen> {
                 title: 'Workspace settings',
                 subtitle: 'Branding, restricted countries, fraud policy',
                 builder: (_) => SettingsScreen(controller: widget.controller),
+              ),
+              _tile(
+                icon: Icons.delete_outline_rounded,
+                title: 'Recycle bin',
+                subtitle: 'Deleted products: restore or permanently erase',
+                builder: (_) => RecycleBinScreen(controller: widget.controller),
               ),
             ],
           ),

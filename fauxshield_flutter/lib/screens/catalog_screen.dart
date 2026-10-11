@@ -124,7 +124,25 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              trailing: const Icon(Icons.chevron_right_rounded),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (widget.controller.can('productsWrite'))
+                    PopupMenuButton<String>(
+                      tooltip: 'Product actions',
+                      onSelected: (value) {
+                        if (value == 'delete') _deleteProduct(product);
+                      },
+                      itemBuilder: (context) => const <PopupMenuEntry<String>>[
+                        PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Text('Delete product'),
+                        ),
+                      ],
+                    ),
+                  const Icon(Icons.chevron_right_rounded),
+                ],
+              ),
               onTap: () async {
                 await Navigator.push(
                   context,
@@ -151,6 +169,72 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
     if (created == true && mounted) showMessage(context, 'Product created.');
     _load();
+  }
+
+  /// Confirms and performs a soft delete into the recycle bin.
+  ///
+  /// The dialog spells out exactly what sits under the product (batches,
+  /// serialized units, scans, alerts) so the operator knows the blast radius
+  /// before continuing, and states that the product can be restored from the
+  /// recycle bin in Settings.
+  Future<void> _deleteProduct(Product product) async {
+    ProductDeleteImpact impact;
+    try {
+      impact = await client.product.deleteImpact(
+        workspaceId: widget.controller.workspaceId,
+        productId: product.id!,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      showMessage(context, 'Could not load deletion details.', error: true);
+      return;
+    }
+    if (!mounted) return;
+    final lines = <String>[
+      if (impact.batchCount > 0)
+        '• ${impact.batchCount} ${impact.batchCount == 1 ? 'batch' : 'batches'}',
+      if (impact.identityCount > 0)
+        '• ${impact.identityCount} serialized '
+            '${impact.identityCount == 1 ? 'unit' : 'units'} (their QR codes '
+            'stop resolving)',
+      if (impact.verificationCount > 0)
+        '• ${impact.verificationCount} verification '
+            '${impact.verificationCount == 1 ? 'record' : 'records'}',
+      if (impact.alertCount > 0)
+        '• ${impact.alertCount} fraud ${impact.alertCount == 1 ? 'alert' : 'alerts'}',
+    ];
+    final confirmed = await confirmAction(
+      context,
+      title: 'Delete ${product.name}?',
+      message:
+          'This is a dangerous action. Deleting this product affects everything '
+          'created under it:\n\n'
+          '${lines.isEmpty ? '• Nothing is attached to this product yet' : lines.join('\n')}\n\n'
+          'The product moves to the recycle bin (Settings → Recycle bin) and '
+          'stops appearing in the catalog. You can restore it there, or '
+          'permanently delete it and everything above.',
+      confirmLabel: 'Delete product',
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await client.product.delete(
+        workspaceId: widget.controller.workspaceId,
+        productId: product.id!,
+      );
+      if (!mounted) return;
+      showMessage(
+        context,
+        '${product.name} moved to the recycle bin. Restore it from Settings.',
+      );
+      _load();
+    } catch (error) {
+      if (!mounted) return;
+      showMessage(
+        context,
+        error is ApiException ? error.message : error.toString(),
+        error: true,
+      );
+    }
   }
 
   /// Product thumbnail for the list: first uploaded image, or the default
