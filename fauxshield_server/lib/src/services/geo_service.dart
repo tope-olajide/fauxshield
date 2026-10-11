@@ -32,8 +32,23 @@ class GeoService {
   static final Map<String, GeoResult?> _cache = <String, GeoResult?>{};
   static const int _cacheLimit = 512;
 
-  Future<GeoResult?> resolveLocation(Session session, String? ipAddress) async {
-    if (ipAddress == null || ipAddress.isEmpty) return null;
+  /// Resolves a coarse location for [ipAddress].
+  ///
+  /// [timezoneHint] is the consumer device's IANA timezone (for example
+  /// `Africa/Lagos`), sent by the verify page. It is only consulted when the
+  /// IP itself carries no location: loopback and private addresses describe a
+  /// machine, not a place, so guessing a city from them (which the demo table
+  /// used to do for every address, including 127.0.0.1) misleads operators.
+  Future<GeoResult?> resolveLocation(
+    Session session,
+    String? ipAddress, {
+    String? timezoneHint,
+  }) async {
+    GeoResult? hint;
+    if (timezoneHint != null && timezoneHint.trim().isNotEmpty) {
+      hint = locationForTimezone(timezoneHint);
+    }
+    if (ipAddress == null || ipAddress.isEmpty) return hint;
 
     final provider =
         (providerOverride ??
@@ -44,6 +59,10 @@ class GeoService {
                 'demo')
             .toLowerCase();
     if (provider == 'disabled') return null;
+
+    // A non-routable address cannot be looked up by any provider; the
+    // timezone hint is the only honest signal available.
+    if (isPrivateOrLocalIp(ipAddress)) return hint;
 
     if (_cache.containsKey(ipAddress)) {
       return _cache[ipAddress];

@@ -53,6 +53,7 @@ class VerificationService {
     required String deviceFingerprint,
     ScanSource source = ScanSource.consumerWeb,
     String? ipOverride,
+    String? timezoneHint,
     GeoResult? locationOverride,
     UuidValue? offlineScanId,
     UuidValue? simulationId,
@@ -71,6 +72,23 @@ class VerificationService {
       where: (t) => t.qrToken.equals(normalized) & t.deletedAt.equals(null),
     );
     if (identity == null) {
+      final attemptedIp = ipOverride ?? _remoteIp(session);
+      final attemptedLocation =
+          locationOverride ??
+          (await _geoService.resolveLocation(
+            session,
+            attemptedIp,
+            timezoneHint: timezoneHint,
+          )) ??
+          const GeoResult(country: 'Unknown', countryCode: '', city: 'Unknown');
+      session.log(
+        'verification.scan_unregistered '
+        'token=${IdentityCrypto.maskToken(normalized)} '
+        'source=${source.name} ip=$attemptedIp '
+        'city=${attemptedLocation.city} country=${attemptedLocation.country} '
+        'fingerprint=$deviceFingerprint',
+        level: LogLevel.warning,
+      );
       throw VerificationException(
         message: 'This code is not registered by any brand on FauxShield.',
         reason: VerificationErrorReason.tokenNotFound,
@@ -122,7 +140,11 @@ class VerificationService {
     final ip = ipOverride ?? _remoteIp(session);
     final location =
         locationOverride ??
-        (await _geoService.resolveLocation(session, ip)) ??
+        (await _geoService.resolveLocation(
+          session,
+          ip,
+          timezoneHint: timezoneHint,
+        )) ??
         const GeoResult(country: 'Unknown', countryCode: '', city: 'Unknown');
 
     // Replay protection: a refresh from the same device recovers the live
@@ -843,6 +865,25 @@ class VerificationService {
         batch.recalledAt != null ||
         identity.status == IdentityStatus.recalled;
 
+    // An earlier completed verification by the SAME device (the fingerprint
+    // the verify page persists in localStorage, or the app's stored one) lets
+    // the UI say "you already verified this" instead of a generic count.
+    DateTime? verifiedByThisDevice;
+    if (verificationSession.outcome == VerificationOutcome.alreadyVerified ||
+        verificationSession.outcome == VerificationOutcome.authentic) {
+      final earlier = await VerificationSession.db.findFirstRow(
+        session,
+        where: (t) =>
+            t.identityId.equals(verificationSession.identityId) &
+            t.qrToken.equals(verificationSession.qrToken) &
+            t.deviceFingerprint.equals(deviceFingerprint) &
+            t.id.notEquals(verificationSession.id!) &
+            t.outcome.equals(VerificationOutcome.authentic),
+        orderBy: (t) => t.createdAt.desc(),
+      );
+      verifiedByThisDevice = earlier?.completedAt ?? earlier?.createdAt;
+    }
+
     return VerificationPresentation(
       sessionId: verificationSession.id!,
       state: verificationSession.state,
@@ -879,6 +920,7 @@ class VerificationService {
           : null,
       tokenMasked: IdentityCrypto.maskToken(identity.qrToken),
       verifyUrl: verifyUrl,
+      verifiedByThisDevice: verifiedByThisDevice,
     );
   }
 

@@ -96,7 +96,9 @@ class SimulationService {
       params['market'] = restricted.first;
     }
     if (request.type == SimulationType.cloneAttack) {
-      params['origin'] = demoLocationForIp('102.89.0.1').toJson();
+      // 102.89.0.1 is a public address that deterministically maps to Lagos
+      // in the demo table, so the override is always present.
+      params['origin'] = demoLocationForIp('102.89.0.1')!.toJson();
     }
 
     var simulation = AttackSimulation(

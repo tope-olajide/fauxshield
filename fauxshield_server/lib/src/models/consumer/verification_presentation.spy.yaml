@@ -29,3 +29,7 @@ fields:
   ### Fully masked token for display, for example ab12...ef90.
   tokenMasked: String
   verifyUrl: String?
+  ### Set when THIS device (same stored fingerprint) completed an earlier
+  ### verification of the same unit; carries the previous completion time so
+  ### the UI can say "you already verified this on ...".
+  verifiedByThisDevice: DateTime?

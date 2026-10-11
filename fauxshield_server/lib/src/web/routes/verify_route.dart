@@ -61,6 +61,9 @@ class VerifyRoute extends WidgetRoute {
       // WebCallSession carries no request, so the service cannot see the
       // caller's address; without it geo lookup yields "Unknown" country.
       ipOverride: request.remoteInfo,
+      // The browser's timezone names the consumer's region when the IP is
+      // local (localhost scans carry no routable address).
+      timezoneHint: params['tz']?.trim(),
     );
     var presentation = await _service.presentation(
       session,
@@ -83,7 +86,7 @@ class VerifyRoute extends WidgetRoute {
         deviceFingerprint: fingerprint,
       );
     }
-    return _pageFor(presentation, fingerprint);
+    return _pageFor(presentation, fingerprint, token);
   }
 
   Future<WebWidget> _handlePost(Session session, Request request) async {
@@ -95,7 +98,7 @@ class VerifyRoute extends WidgetRoute {
 
     switch (action) {
       case 'pin':
-        return _handlePin(session, form, sessionIdRaw, fingerprint);
+        return _handlePin(session, request, form, sessionIdRaw, fingerprint);
       case 'report':
         return _handleReport(session, form, sessionIdRaw, fingerprint);
       default:
@@ -105,18 +108,56 @@ class VerifyRoute extends WidgetRoute {
 
   Future<WebWidget> _handlePin(
     Session session,
+    Request request,
     Map<String, String> form,
     String? sessionIdRaw,
     String fingerprint,
   ) async {
     final pin = form['pin']?.trim() ?? '';
-    if (sessionIdRaw == null) {
-      return VerifyPageWidget.failure(
-        message: 'Your session expired. Scan again.',
+    final token = form['t']?.trim();
+
+    // The session may have expired between the PIN prompt and the submit, or
+    // the page was re-opened later. Instead of dead-ending with "scan again",
+    // re-resolve the token (carried in the form) into a fresh session so the
+    // consumer can simply re-enter the PIN.
+    VerificationSession? verification;
+    if (sessionIdRaw != null) {
+      try {
+        verification = await VerificationSession.db.findById(
+          session,
+          UuidValue.fromString(sessionIdRaw),
+        );
+      } catch (_) {
+        verification = null;
+      }
+      if (verification != null &&
+          verification.deviceFingerprint != fingerprint) {
+        verification = null;
+      }
+      if (verification != null &&
+          verification.expiresAt.isBefore(DateTime.now().toUtc()) &&
+          verification.state != VerificationState.resultDetermined) {
+        verification = null;
+      }
+    }
+
+    if (verification == null) {
+      if (token == null || token.isEmpty) {
+        return VerifyPageWidget.failure(
+          message: 'Your session expired. Scan again.',
+        );
+      }
+      verification = await _service.resolveToken(
+        session,
+        token: token,
+        deviceFingerprint: fingerprint,
+        source: ScanSource.consumerWeb,
+        ipOverride: request.remoteInfo,
+        timezoneHint: form['tz']?.trim(),
       );
     }
-    final sessionId = UuidValue.fromString(sessionIdRaw);
 
+    final sessionId = verification.id!;
     var presentation = await _service.presentation(
       session,
       sessionId: sessionId,
@@ -154,7 +195,7 @@ class VerifyRoute extends WidgetRoute {
         deviceFingerprint: fingerprint,
       );
     }
-    return _pageFor(presentation, fingerprint);
+    return _pageFor(presentation, fingerprint, token);
   }
 
   Future<WebWidget> _handleReport(
@@ -190,6 +231,7 @@ class VerifyRoute extends WidgetRoute {
   WebWidget _pageFor(
     VerificationPresentation presentation,
     String fingerprint,
+    String? token,
   ) {
     final branding = presentation.branding;
     final brandName = branding?.displayName ?? presentation.workspaceName;
@@ -207,6 +249,7 @@ class VerifyRoute extends WidgetRoute {
         sessionId: presentation.sessionId.uuid,
         tokenMasked: presentation.tokenMasked,
         fingerprint: fingerprint,
+        token: token,
         productName: presentation.productName,
         sku: presentation.sku,
         batchReference: presentation.batchReference,
@@ -258,12 +301,16 @@ class VerifyRoute extends WidgetRoute {
       countryRestrictions:
           presentation.countryRestrictions == null ||
               presentation.countryRestrictions!.isEmpty
-          ? null
+          ? 'None'
           : presentation.countryRestrictions!.join(', '),
       safetyInstructions: presentation.safetyInstructions,
       verificationCount: presentation.verificationCount,
       firstVerifiedAtLabel: presentation.verifiedAt
           .toIso8601String()
+          .split('T')
+          .first,
+      verifiedByThisDeviceAtLabel: presentation.verifiedByThisDevice
+          ?.toIso8601String()
           .split('T')
           .first,
       brandName: brandName,
@@ -278,7 +325,7 @@ class VerifyRoute extends WidgetRoute {
       case VerificationOutcome.authentic:
         return 'This product is authentic';
       case VerificationOutcome.alreadyVerified:
-        return 'This product was verified before';
+        return 'This product was already verified';
       case VerificationOutcome.invalidPin:
         return 'The PIN did not match';
       case VerificationOutcome.highRisk:
@@ -299,8 +346,13 @@ class VerifyRoute extends WidgetRoute {
             'The code resolves to a registered unit of ${presentation.productName} '
                 'and the PIN matched. Keep the packaging for your records.';
       case VerificationOutcome.alreadyVerified:
-        return 'This code was already verified ${presentation.verificationCount} time(s). '
-            'If you just bought this product sealed, treat it as suspicious and report it.';
+        if (presentation.verifiedByThisDevice != null) {
+          return 'You already verified this product from this device — the unit '
+              'checks out and its verification history is below.';
+        }
+        return 'This code was already verified ${presentation.verificationCount} time(s) '
+            'by another device. If you just bought this product sealed, treat it as '
+            'suspicious and report it.';
       case VerificationOutcome.invalidPin:
         return 'The PIN you entered does not match this code. Check the digits and try again, '
             'and report the product if it keeps failing.';

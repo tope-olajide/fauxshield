@@ -1,11 +1,10 @@
-import 'dart:math';
-
 import 'package:fauxshield_client/fauxshield_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../app/app_state.dart';
 import '../client.dart';
+import '../utils/device_fingerprint.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
 
@@ -28,7 +27,6 @@ enum _ScanStage { entry, ready, pin, result }
 class _ScanScreenState extends State<ScanScreen> {
   final TextEditingController _token = TextEditingController();
   final TextEditingController _pin = TextEditingController();
-  final String _fingerprint = _generateFingerprint();
 
   _ScanStage _stage = _ScanStage.entry;
   VerificationPresentation? _presentation;
@@ -40,12 +38,6 @@ class _ScanScreenState extends State<ScanScreen> {
     _token.dispose();
     _pin.dispose();
     super.dispose();
-  }
-
-  static String _generateFingerprint() {
-    final random = Random.secure();
-    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
-    return bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
   }
 
   Future<void> _run(Future<VerificationPresentation> Function() action) async {
@@ -89,15 +81,17 @@ class _ScanScreenState extends State<ScanScreen> {
       showMessage(context, 'Enter or scan a QR token first.', error: true);
       return;
     }
-    await _run(() => client.verification.start(token, _fingerprint));
+    final fingerprint = await DeviceFingerprint.load();
+    await _run(() => client.verification.start(token, fingerprint));
   }
 
   Future<void> _acknowledge() async {
     final presentation = _presentation;
     if (presentation == null) return;
+    final fingerprint = await DeviceFingerprint.load();
     await _run(
       () =>
-          client.verification.acknowledge(presentation.sessionId, _fingerprint),
+          client.verification.acknowledge(presentation.sessionId, fingerprint),
     );
   }
 
@@ -109,10 +103,11 @@ class _ScanScreenState extends State<ScanScreen> {
       showMessage(context, 'The packaging PIN is 6 digits.', error: true);
       return;
     }
+    final fingerprint = await DeviceFingerprint.load();
     await _run(
       () => client.verification.submitPin(
         presentation.sessionId,
-        _fingerprint,
+        fingerprint,
         pin,
       ),
     );
@@ -426,6 +421,20 @@ class _ScanScreenState extends State<ScanScreen> {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
+                if (presentation.verifiedByThisDevice != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'You already verified this product on '
+                      '${presentation.verifiedByThisDevice!.toIso8601String().split('T').first} '
+                      'from this device.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    ),
+                  ),
                 if (presentation.recallReason != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
@@ -598,9 +607,10 @@ class _ScanScreenState extends State<ScanScreen> {
     );
     if (confirmed == true && reason.text.trim().length >= 3) {
       try {
+        final fingerprint = await DeviceFingerprint.load();
         final acknowledgement = await client.verification.reportFake(
           presentation.sessionId,
-          _fingerprint,
+          fingerprint,
           reason.text.trim(),
           comment: comment.text.trim().isEmpty ? null : comment.text.trim(),
         );
