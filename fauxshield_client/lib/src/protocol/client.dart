@@ -1045,6 +1045,31 @@ class EndpointProduct extends _isc.EndpointRef {
         {'productId': productId},
       );
 
+  /// Uploads a product image and returns its public URL.
+  ///
+  /// Flutter web cannot post multipart forms to Serverpod endpoints, so the
+  /// bytes arrive base64-encoded. The payload is validated by magic-byte
+  /// sniffing and a 2 MB cap, written under `web/static/media/products/`,
+  /// and served by the static route at `/web/media/products/<file>`.
+  ///
+  /// When [productId] is given the URL is appended to the product's
+  /// `imageUrls` (capped at [_maxProductImages] images).
+  _ida.Future<String> uploadImage({
+    _isc.UuidValue? workspaceId,
+    required String fileName,
+    required String data,
+    _isc.UuidValue? productId,
+  }) => caller.callServerEndpoint<String>(
+    'product',
+    'uploadImage',
+    {
+      'workspaceId': workspaceId,
+      'fileName': fileName,
+      'data': data,
+      'productId': productId,
+    },
+  );
+
   /// Creates a product.
   _ida.Future<_i1hi8dz8.Product> create({
     _isc.UuidValue? workspaceId,
@@ -1358,6 +1383,7 @@ class EndpointVerification extends _isc.EndpointRef {
     _isc.UuidValue? workspaceId,
     _isc.UuidValue? identityId,
     _isc.UuidValue? batchId,
+    _isc.UuidValue? productId,
     _igw875bh.VerificationState? state,
     _ikdjmowm.VerificationOutcome? outcome,
     _ijihw5xo.RiskScore? riskScore,
@@ -1373,6 +1399,7 @@ class EndpointVerification extends _isc.EndpointRef {
       'workspaceId': workspaceId,
       'identityId': identityId,
       'batchId': batchId,
+      'productId': productId,
       'state': state,
       'outcome': outcome,
       'riskScore': riskScore,

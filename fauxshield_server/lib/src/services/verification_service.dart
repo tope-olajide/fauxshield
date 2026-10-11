@@ -6,6 +6,7 @@ import 'package:serverpod/serverpod.dart';
 import '../core/constants.dart';
 import '../core/geo_dataset.dart';
 import '../core/identity_crypto.dart';
+import '../core/public_url.dart';
 import '../generated/protocol.dart';
 import 'alert_service.dart';
 import 'audit_service.dart';
@@ -864,7 +865,7 @@ class VerificationService {
       description: product?.description,
       sku: product?.sku,
       batchReference: batch.reference,
-      imageUrls: product?.imageUrls,
+      imageUrls: absoluteWebUrls(session, product?.imageUrls),
       packaging: product?.packaging,
       shelfLife: product?.shelfLife,
       countryRestrictions: product?.countryRestrictions,

@@ -2309,6 +2309,45 @@ class _ProductEndpoint {
     });
   }
 
+  _ida.Future<String> uploadImage(
+    _ist.TestSessionBuilder sessionBuilder, {
+    _is.UuidValue? workspaceId,
+    required String fileName,
+    required String data,
+    _is.UuidValue? productId,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'product',
+            method: 'uploadImage',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'product',
+          methodName: 'uploadImage',
+          parameters: _ist.testObjectToJson({
+            'workspaceId': workspaceId,
+            'fileName': fileName,
+            'data': data,
+            'productId': productId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<_ian4oqo2.Product> create(
     _ist.TestSessionBuilder sessionBuilder, {
     _is.UuidValue? workspaceId,
@@ -3007,6 +3046,7 @@ class _VerificationEndpoint {
     _is.UuidValue? workspaceId,
     _is.UuidValue? identityId,
     _is.UuidValue? batchId,
+    _is.UuidValue? productId,
     _iewd06xu.VerificationState? state,
     _i0trd2wt.VerificationOutcome? outcome,
     _ijv8khy1.RiskScore? riskScore,
@@ -3031,6 +3071,7 @@ class _VerificationEndpoint {
             'workspaceId': workspaceId,
             'identityId': identityId,
             'batchId': batchId,
+            'productId': productId,
             'state': state,
             'outcome': outcome,
             'riskScore': riskScore,

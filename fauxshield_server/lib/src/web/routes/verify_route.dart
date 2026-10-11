@@ -48,7 +48,7 @@ class VerifyRoute extends WidgetRoute {
   Future<WebWidget> _handleGet(Session session, Request request) async {
     final params = request.url.queryParameters;
     final token = params['t']?.trim();
-    final fingerprint = _fingerprint(session, request, params['fp']);
+    final fingerprint = _fingerprint(request, params['fp']);
     if (token == null || token.isEmpty) {
       return VerifyPageWidget.tokenEntry();
     }
@@ -58,12 +58,31 @@ class VerifyRoute extends WidgetRoute {
       token: token,
       deviceFingerprint: fingerprint,
       source: ScanSource.consumerWeb,
+      // WebCallSession carries no request, so the service cannot see the
+      // caller's address; without it geo lookup yields "Unknown" country.
+      ipOverride: request.remoteInfo,
     );
-    final presentation = await _service.presentation(
+    var presentation = await _service.presentation(
       session,
       sessionId: verification.id!,
       deviceFingerprint: fingerprint,
     );
+    // A healthy unit stops at the PIN prompt: the token resolved, and the
+    // consumer now proves possession of the packaging PIN. Recalled, locked
+    // and fraud-flagged sessions already carry a result and skip this step.
+    if (presentation.state == VerificationState.tokenResolved) {
+      await _service.advanceState(
+        session,
+        sessionId: verification.id!,
+        deviceFingerprint: fingerprint,
+        targetState: VerificationState.pinPrompted,
+      );
+      presentation = await _service.presentation(
+        session,
+        sessionId: verification.id!,
+        deviceFingerprint: fingerprint,
+      );
+    }
     return _pageFor(presentation, fingerprint);
   }
 
@@ -71,7 +90,7 @@ class VerifyRoute extends WidgetRoute {
     final body = await request.readAsString();
     final form = Uri.splitQueryString(body);
     final action = form['action'] ?? '';
-    final fingerprint = _fingerprint(session, request, form['fp']);
+    final fingerprint = _fingerprint(request, form['fp']);
     final sessionIdRaw = form['sessionId'];
 
     switch (action) {
@@ -187,7 +206,10 @@ class VerifyRoute extends WidgetRoute {
       return VerifyPageWidget.pinEntry(
         sessionId: presentation.sessionId.uuid,
         tokenMasked: presentation.tokenMasked,
+        fingerprint: fingerprint,
         productName: presentation.productName,
+        sku: presentation.sku,
+        batchReference: presentation.batchReference,
         brandName: brandName,
         logoUrl: branding?.logoUrl,
         tagline: branding?.tagline,
@@ -214,6 +236,7 @@ class VerifyRoute extends WidgetRoute {
       resultMessage: message,
       resultClass: resultClass,
       tokenMasked: presentation.tokenMasked,
+      fingerprint: fingerprint,
       alreadyVerified: outcome == VerificationOutcome.alreadyVerified,
       recalled: outcome == VerificationOutcome.recalled,
       fraudSuspected: outcome == VerificationOutcome.fraudSuspected,
@@ -225,6 +248,19 @@ class VerifyRoute extends WidgetRoute {
       locationLabel: locationLabel == null || locationLabel.isEmpty
           ? null
           : locationLabel,
+      imageUrl:
+          presentation.imageUrls == null || presentation.imageUrls!.isEmpty
+          ? null
+          : presentation.imageUrls!.first,
+      description: presentation.description,
+      packaging: presentation.packaging,
+      shelfLife: presentation.shelfLife,
+      countryRestrictions:
+          presentation.countryRestrictions == null ||
+              presentation.countryRestrictions!.isEmpty
+          ? null
+          : presentation.countryRestrictions!.join(', '),
+      safetyInstructions: presentation.safetyInstructions,
       verificationCount: presentation.verificationCount,
       firstVerifiedAtLabel: presentation.verifiedAt
           .toIso8601String()
@@ -295,10 +331,10 @@ class VerifyRoute extends WidgetRoute {
   /// The page stores a random id in localStorage and posts it with every form;
   /// when it is missing (for example on the first QR hit or with JavaScript
   /// disabled) a deterministic hash of the request is used instead.
-  String _fingerprint(Session session, Request request, String? submitted) {
+  String _fingerprint(Request request, String? submitted) {
     final provided = submitted?.trim();
     if (provided != null && provided.length >= 8) return provided;
-    final ip = session.request?.remoteInfo ?? 'unknown';
+    final ip = request.remoteInfo;
     final agent = request.headers['user-agent'] ?? 'unknown';
     return 'web:${IdentityCrypto.sha256Hex('$ip|$agent').substring(0, 32)}';
   }

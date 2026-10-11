@@ -136,16 +136,30 @@ The marketing pages are server-rendered by Serverpod from Mustache templates in
 
 ### 1. Run the server
 
+The recommended way to run the project is the Serverpod CLI, which boots the
+embedded PostgreSQL, applies pending migrations, and watches for changes with
+hot reload:
+
 ```bash
 # from the repository root
 cd fauxshield_server
-dart pub get
-dart run bin/main.dart --mode development --apply-migrations
+serverpod start
 ```
+
+Press `Q` to shut down. First startup creates the data directory under
+`.serverpod/development/pgdata` and applies the migrations in the repository.
 
 - API: http://localhost:8080
 - Landing page, `/verify`, and the prebuilt operator app at `/app`:
   http://localhost:8082
+
+Prefer a plain foreground run (CI, headless environments) instead?
+
+```bash
+cd fauxshield_server
+dart pub get
+dart run bin/main.dart --mode development --apply-migrations
+```
 
 `--apply-migrations` is only needed on the first run (or after a model change).
 Secrets live in `config/passwords.yaml` (dev-only values checked in on purpose
