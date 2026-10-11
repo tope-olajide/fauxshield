@@ -37,6 +37,9 @@ dependencies:
   qr_flutter: ^4.1.0
   web: ^1.1.1
   file_picker: ^13.1.0
+  # Persists the device fingerprint used to bind verification sessions, so
+  # re-scans from the same device are recognized across app restarts.
+  shared_preferences: ^2.3.0
 
 dev_dependencies:
   # Used for agents to drive the app through the Dart MCP

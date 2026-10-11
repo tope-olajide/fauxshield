@@ -383,10 +383,48 @@ const Map<String, int> _knownIpIndex = <String, int>{
   '86.': 11, // Shanghai
 };
 
-/// Deterministic city for an IP address. Stable for the same IP so demos are
-/// reproducible. Used by the demo geo provider and the attack simulation.
-GeoResult demoLocationForIp(String ip) {
+/// True when [ip] is a loopback, private, link-local, or otherwise
+/// non-routable address. These can never be geolocated: the address identifies
+/// a machine or network segment, not a place, so fabricating a city for them
+/// would be dishonest. Local scans report "Unknown" or a device timezone
+/// hint instead.
+bool isPrivateOrLocalIp(String ip) {
+  final value = ip.trim().toLowerCase();
+  if (value.isEmpty) return true;
+  if (value == '::1' || value == '::') return true;
+  if (value.startsWith('fe80:') ||
+      value.startsWith('fc') ||
+      value.startsWith('fd')) {
+    // IPv6 link-local (fe80::/10) and unique local (fc00::/7).
+    return true;
+  }
+  if (value.startsWith('::ffff:')) {
+    // IPv4-mapped IPv6, for example ::ffff:127.0.0.1.
+    return isPrivateOrLocalIp(value.substring(7));
+  }
+  final parts = value.split('.');
+  if (parts.length != 4) return false;
+  final a = int.tryParse(parts[0]);
+  final b = int.tryParse(parts[1]);
+  if (a == null || b == null) return false;
+  if (a == 127) return true; // Loopback, 127.0.0.0/8.
+  if (a == 10) return true; // Private, 10.0.0.0/8.
+  if (a == 0) return true; // "This network".
+  if (a == 169 && b == 254) return true; // Link-local.
+  if (a == 172 && b >= 16 && b <= 31) return true; // Private, 172.16.0.0/12.
+  if (a == 192 && b == 168) return true; // Private, 192.168.0.0/16.
+  if (a == 100 && b >= 64 && b <= 127) return true; // CGNAT, 100.64.0.0/10.
+  return false;
+}
+
+/// Deterministic city for a *public* IP address. Stable for the same IP so
+/// demos are reproducible. Used by the demo geo provider and the attack
+/// simulation. Private and loopback addresses are refused: they carry no
+/// location, and guessing one (as an earlier version did, inventing
+/// "Guangzhou" for 127.0.0.1) misleads operators investigating real scans.
+GeoResult? demoLocationForIp(String ip) {
   final trimmed = ip.trim();
+  if (isPrivateOrLocalIp(trimmed)) return null;
   for (final entry in _knownIpIndex.entries) {
     if (trimmed.startsWith(entry.key)) {
       return demoCities[entry.value];
@@ -397,6 +435,23 @@ GeoResult demoLocationForIp(String ip) {
     hash = (hash * 31 + code) & 0x7fffffff;
   }
   return demoCities[hash % demoCities.length];
+}
+
+/// Resolves an IANA timezone label, for example `Africa/Lagos`, to the
+/// nearest bundled city. Scans from localhost carry a loopback address, so the
+/// consumer page sends the browser's timezone as a coarse, opt-in hint: it
+/// names a real region the device is configured for instead of a fabricated
+/// IP guess. Returns null when the timezone names no city we know.
+GeoResult? locationForTimezone(String timezone) {
+  final label = timezone.trim();
+  if (label.isEmpty || !label.contains('/')) return null;
+  // "Africa/Lagos" -> "Lagos"; "America/Argentina/Buenos_Aires" -> last part.
+  final city = label.split('/').last.replaceAll('_', ' ').trim();
+  if (city.isEmpty) return null;
+  for (final candidate in demoCities) {
+    if (candidate.city.toLowerCase() == city.toLowerCase()) return candidate;
+  }
+  return null;
 }
 
 /// Deterministic full city list entry for simulation scenarios.

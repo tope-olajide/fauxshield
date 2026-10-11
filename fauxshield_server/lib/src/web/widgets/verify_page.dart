@@ -30,6 +30,7 @@ class VerifyPageWidget extends TemplateWidget {
     required String sessionId,
     required String tokenMasked,
     required String fingerprint,
+    String? token,
     String? productName,
     String? sku,
     String? batchReference,
@@ -54,6 +55,9 @@ class VerifyPageWidget extends TemplateWidget {
         // Rendered server-side so the POST carries the exact fingerprint
         // the session was bound to; client-side rewrites would break it.
         'fp': fingerprint,
+        // Raw token so an expired session can be re-resolved into a fresh
+        // one without forcing the consumer to scan the QR code again.
+        'token': token,
         'pinLength': FauxShieldLimits.pinLength,
       });
   }
@@ -82,6 +86,7 @@ class VerifyPageWidget extends TemplateWidget {
     String? safetyInstructions,
     int verificationCount = 0,
     String? firstVerifiedAtLabel,
+    String? verifiedByThisDeviceAtLabel,
     String brandName = 'FauxShield',
     String? logoUrl,
     String? tagline,
@@ -118,6 +123,7 @@ class VerifyPageWidget extends TemplateWidget {
         'fraudSuspected': fraudSuspected,
         'verificationCount': verificationCount,
         'firstVerifiedAtLabel': firstVerifiedAtLabel,
+        'verifiedByThisDeviceAtLabel': verifiedByThisDeviceAtLabel,
         'canReport': !fraudSuspected,
       });
   }

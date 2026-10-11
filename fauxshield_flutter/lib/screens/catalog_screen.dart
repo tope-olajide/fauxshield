@@ -477,38 +477,127 @@ class _BatchListScreenState extends State<BatchListScreen> {
     final reference = TextEditingController();
     final region = TextEditingController(text: 'NG');
     final quantity = TextEditingController(text: '50');
+    var manufactureDate = DateTime.now();
+    DateTime? expiryDate;
+    String formatDate(DateTime date) {
+      const months = <String>[
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      return '${date.day} ${months[date.month - 1]} ${date.year}';
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('New batch'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              LabeledField(label: 'Reference', controller: reference),
-              LabeledField(
-                label: 'Distribution region',
-                controller: region,
-                hint: 'Country name or ISO code',
-              ),
-              LabeledField(
-                label: 'Planned quantity',
-                controller: quantity,
-                keyboardType: TextInputType.number,
-              ),
-            ],
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('New batch'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                LabeledField(label: 'Reference', controller: reference),
+                LabeledField(
+                  label: 'Distribution region',
+                  controller: region,
+                  hint: 'Country name or ISO code',
+                ),
+                LabeledField(
+                  label: 'Planned quantity',
+                  controller: quantity,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Manufacture date',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: manufactureDate,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) {
+                      setDialogState(() => manufactureDate = picked);
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.calendar_today_rounded),
+                    ),
+                    child: Text(formatDate(manufactureDate)),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Expiry date (optional)',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: expiryDate ?? manufactureDate,
+                      firstDate: manufactureDate,
+                      lastDate: DateTime.now().add(const Duration(days: 3650)),
+                    );
+                    if (picked != null) {
+                      setDialogState(() => expiryDate = picked);
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.event_rounded),
+                      suffixIcon: expiryDate == null
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.clear_rounded),
+                              onPressed: () =>
+                                  setDialogState(() => expiryDate = null),
+                            ),
+                    ),
+                    child: Text(
+                      expiryDate == null ? 'Not set' : formatDate(expiryDate!),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Create'),
+            ),
+          ],
         ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Create'),
-          ),
-        ],
       ),
     );
     if (confirmed == true && reference.text.trim().isNotEmpty && mounted) {
@@ -537,7 +626,8 @@ class _BatchListScreenState extends State<BatchListScreen> {
           workspaceId: widget.controller.workspaceId,
           productId: widget.product.id!,
           reference: reference.text.trim(),
-          manufactureDate: DateTime.now().toUtc(),
+          manufactureDate: manufactureDate.toUtc(),
+          expiryDate: expiryDate?.toUtc(),
           distributionRegion: region.text.trim().isEmpty
               ? 'NG'
               : region.text.trim(),
@@ -676,7 +766,13 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                           ' · ${_stats?.generated ?? 0} generated'
                           ' · ${_stats?.active ?? 0} active',
                       trailing: _statusPill(),
-                      child: _statsGrid(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          _productHeaderImage(widget.product),
+                          _statsGrid(),
+                        ],
+                      ),
                     ),
                     _actions(),
                     SectionCard(
@@ -690,6 +786,41 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Product imagery for the batch header: the first uploaded picture, or a
+  /// quiet fallback tile when the product has none.
+  Widget _productHeaderImage(Product product) {
+    final images = product.imageUrls;
+    final theme = Theme.of(context);
+    final fallback = Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Icon(Icons.inventory_2_rounded),
+    );
+    if (images == null || images.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: fallback,
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          images.first,
+          width: 56,
+          height: 56,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => fallback,
+        ),
       ),
     );
   }
@@ -1052,6 +1183,28 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
       ),
     );
     if (confirmed == true) {
+      if (mounted) {
+        // Serializing units can take a while; block the UI with feedback.
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Generating serialized units…'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
       try {
         final result = await client.batch.generateIdentities(
           workspaceId: widget.controller.workspaceId,
@@ -1071,6 +1224,9 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
             error: true,
           );
         }
+      }
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
       }
     }
     quantity.dispose();

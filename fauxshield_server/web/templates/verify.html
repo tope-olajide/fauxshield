@@ -35,6 +35,7 @@
             required
           />
           <input type="hidden" name="fp" class="fp-field" value="" />
+          <input type="hidden" name="tz" class="tz-field" value="" />
           <button type="submit" class="button">Verify product</button>
         </form>
         <p class="hint">
@@ -61,6 +62,10 @@
           <input type="hidden" name="action" value="pin" />
           <input type="hidden" name="sessionId" value="{{sessionId}}" />
           <input type="hidden" name="fp" value="{{fp}}" />
+          <!-- Carries the raw code so an expired session can be re-resolved
+               into a fresh one without scanning the QR code again. -->
+          {{#token}}<input type="hidden" name="t" value="{{token}}" />{{/token}}
+          <input type="hidden" name="tz" class="tz-field" value="" />
           <label class="field-label" for="pin">PIN</label>
           <input
             id="pin"
@@ -118,9 +123,17 @@
         {{#description}}<p class="product-detail">{{description}}</p>{{/description}}
         {{#safetyInstructions}}<p class="product-detail"><strong>Safety instructions:</strong> {{safetyInstructions}}</p>{{/safetyInstructions}}
 
+        {{#verifiedByThisDeviceAtLabel}}
+        <p class="callout callout-good">
+          You verified this product on {{verifiedByThisDeviceAtLabel}} from this device.
+        </p>
+        {{/verifiedByThisDeviceAtLabel}}
+
         {{#alreadyVerified}}
         <p class="callout">
-          First verified {{firstVerifiedAtLabel}}.
+          First verified {{firstVerifiedAtLabel}}{{^verifiedByThisDeviceAtLabel}},
+          possibly by another buyer — if this unit was sold to you sealed, treat it
+          as suspicious and report it.{{/verifiedByThisDeviceAtLabel}}.
         </p>
         {{/alreadyVerified}}
       </section>
@@ -193,6 +206,18 @@
           }
         } catch (e) {
           /* The server falls back to a request based fingerprint. */
+        }
+        try {
+          var tz =
+            (window.Intl &&
+              Intl.DateTimeFormat().resolvedOptions().timeZone) ||
+            '';
+          var tzFields = document.querySelectorAll('.tz-field');
+          for (var k = 0; k < tzFields.length; k++) {
+            tzFields[k].value = tz;
+          }
+        } catch (e2) {
+          /* Timezone hint is optional; geo falls back to the network address. */
         }
       })();
     </script>

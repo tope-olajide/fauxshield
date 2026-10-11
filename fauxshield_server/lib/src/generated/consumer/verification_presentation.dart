@@ -50,6 +50,7 @@ abstract class VerificationPresentation
     this.recallScope,
     required this.tokenMasked,
     this.verifyUrl,
+    this.verifiedByThisDevice,
   });
 
   factory VerificationPresentation({
@@ -78,6 +79,7 @@ abstract class VerificationPresentation
     _ikvp6e9n.RecallScope? recallScope,
     required String tokenMasked,
     String? verifyUrl,
+    DateTime? verifiedByThisDevice,
   }) = _VerificationPresentationImpl;
 
   factory VerificationPresentation.fromJson(
@@ -147,6 +149,11 @@ abstract class VerificationPresentation
             ),
       tokenMasked: jsonSerialization['tokenMasked'] as String,
       verifyUrl: jsonSerialization['verifyUrl'] as String?,
+      verifiedByThisDevice: jsonSerialization['verifiedByThisDevice'] == null
+          ? null
+          : _is.DateTimeJsonExtension.fromJson(
+              jsonSerialization['verifiedByThisDevice'],
+            ),
     );
   }
 
@@ -201,6 +208,11 @@ abstract class VerificationPresentation
 
   String? verifyUrl;
 
+  /// Set when THIS device (same stored fingerprint) completed an earlier
+  /// verification of the same unit; carries the previous completion time so
+  /// the UI can say "you already verified this on ...".
+  DateTime? verifiedByThisDevice;
+
   /// Returns a shallow copy of this [VerificationPresentation]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -230,6 +242,7 @@ abstract class VerificationPresentation
     _ikvp6e9n.RecallScope? recallScope,
     String? tokenMasked,
     String? verifyUrl,
+    DateTime? verifiedByThisDevice,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -261,6 +274,8 @@ abstract class VerificationPresentation
       if (recallScope != null) 'recallScope': recallScope?.toJson(),
       'tokenMasked': tokenMasked,
       if (verifyUrl != null) 'verifyUrl': verifyUrl,
+      if (verifiedByThisDevice != null)
+        'verifiedByThisDevice': verifiedByThisDevice?.toJson(),
     };
   }
 
@@ -294,6 +309,8 @@ abstract class VerificationPresentation
       if (recallScope != null) 'recallScope': recallScope?.toJson(),
       'tokenMasked': tokenMasked,
       if (verifyUrl != null) 'verifyUrl': verifyUrl,
+      if (verifiedByThisDevice != null)
+        'verifiedByThisDevice': verifiedByThisDevice?.toJson(),
     };
   }
 
@@ -332,6 +349,7 @@ class _VerificationPresentationImpl extends VerificationPresentation {
     _ikvp6e9n.RecallScope? recallScope,
     required String tokenMasked,
     String? verifyUrl,
+    DateTime? verifiedByThisDevice,
   }) : super._(
          sessionId: sessionId,
          state: state,
@@ -358,6 +376,7 @@ class _VerificationPresentationImpl extends VerificationPresentation {
          recallScope: recallScope,
          tokenMasked: tokenMasked,
          verifyUrl: verifyUrl,
+         verifiedByThisDevice: verifiedByThisDevice,
        );
 
   /// Returns a shallow copy of this [VerificationPresentation]
@@ -390,6 +409,7 @@ class _VerificationPresentationImpl extends VerificationPresentation {
     Object? recallScope = _Undefined,
     String? tokenMasked,
     Object? verifyUrl = _Undefined,
+    Object? verifiedByThisDevice = _Undefined,
   }) {
     return VerificationPresentation(
       sessionId: sessionId ?? this.sessionId,
@@ -433,6 +453,9 @@ class _VerificationPresentationImpl extends VerificationPresentation {
           : this.recallScope,
       tokenMasked: tokenMasked ?? this.tokenMasked,
       verifyUrl: verifyUrl is String? ? verifyUrl : this.verifyUrl,
+      verifiedByThisDevice: verifiedByThisDevice is DateTime?
+          ? verifiedByThisDevice
+          : this.verifiedByThisDevice,
     );
   }
 }
