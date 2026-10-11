@@ -52,10 +52,15 @@
           is registered. Type the {{pinLength}} digit PIN printed under the scratch
           panel to confirm it is genuine.
         </p>
+        <div class="pin-product">
+          {{#productName}}<p class="pin-product-name">{{productName}}</p>{{/productName}}
+          {{#sku}}<p class="pin-product-meta">SKU: {{sku}}</p>{{/sku}}
+          {{#batchReference}}<p class="pin-product-meta">Batch: {{batchReference}}</p>{{/batchReference}}
+        </div>
         <form method="post" action="/verify" class="stack">
           <input type="hidden" name="action" value="pin" />
           <input type="hidden" name="sessionId" value="{{sessionId}}" />
-          <input type="hidden" name="fp" class="fp-field" value="" />
+          <input type="hidden" name="fp" value="{{fp}}" />
           <label class="field-label" for="pin">PIN</label>
           <input
             id="pin"
@@ -71,11 +76,16 @@
           />
           <button type="submit" class="button">Confirm PIN</button>
         </form>
+        <p class="hint">
+          Approximate city and country are derived from your network address.
+          FauxShield does not request device GPS.
+        </p>
       </section>
       {{/needsPin}}
 
       {{#hasResult}}
       <section class="result {{resultClass}}">
+        {{#imageUrl}}<img class="product-image" src="{{imageUrl}}" alt="{{productName}} product image" />{{/imageUrl}}
         <div class="result-badge">{{resultTitle}}</div>
         <p class="result-message">{{resultMessage}}</p>
 
@@ -100,7 +110,13 @@
           {{#batchReference}}<div><dt>Batch</dt><dd>{{batchReference}}</dd></div>{{/batchReference}}
           {{#locationLabel}}<div><dt>Location</dt><dd>{{locationLabel}}</dd></div>{{/locationLabel}}
           <div><dt>Verification count</dt><dd>{{verificationCount}}</dd></div>
+          {{#packaging}}<div><dt>Packaging</dt><dd>{{packaging}}</dd></div>{{/packaging}}
+          {{#shelfLife}}<div><dt>Shelf life</dt><dd>{{shelfLife}}</dd></div>{{/shelfLife}}
+          {{#countryRestrictions}}<div><dt>Restricted countries</dt><dd>{{countryRestrictions}}</dd></div>{{/countryRestrictions}}
         </dl>
+
+        {{#description}}<p class="product-detail">{{description}}</p>{{/description}}
+        {{#safetyInstructions}}<p class="product-detail"><strong>Safety instructions:</strong> {{safetyInstructions}}</p>{{/safetyInstructions}}
 
         {{#alreadyVerified}}
         <p class="callout">
@@ -115,7 +131,7 @@
         <form method="post" action="/verify" class="stack">
           <input type="hidden" name="action" value="report" />
           <input type="hidden" name="sessionId" value="{{sessionId}}" />
-          <input type="hidden" name="fp" class="fp-field" value="" />
+          <input type="hidden" name="fp" value="{{fp}}" />
           <label class="field-label" for="reason">What looks wrong?</label>
           <select id="reason" name="reason" class="input">
             <option value="Packaging looks different">Packaging looks different</option>

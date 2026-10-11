@@ -3,6 +3,8 @@ class: BatchStats
 fields:
   batchId: UuidValue
   totalIdentities: int
+  ### Identity rows that exist for this batch, including trashed ones.
+  generated: int
   active: int
   verified: int
   locked: int

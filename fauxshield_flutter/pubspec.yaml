@@ -32,10 +32,11 @@ dependencies:
   google_fonts: ^8.1.0
   fauxshield_client:
     path: ../fauxshield_client
-  serverpod_flutter: 4.0.3
-  serverpod_auth_idp_flutter: 4.0.3
+  serverpod_flutter: 4.0.4
+  serverpod_auth_idp_flutter: 4.0.4
   qr_flutter: ^4.1.0
   web: ^1.1.1
+  file_picker: ^13.1.0
 
 dev_dependencies:
   # Used for agents to drive the app through the Dart MCP

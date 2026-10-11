@@ -249,6 +249,10 @@ class BatchEndpoint extends Endpoint {
       session,
       where: (t) => t.batchId.equals(batchId) & t.deletedAt.notEquals(null),
     );
+    final generated = await ProductIdentity.db.count(
+      session,
+      where: (t) => t.batchId.equals(batchId),
+    );
 
     final signals = await FraudSignalRecord.db.find(
       session,
@@ -265,6 +269,7 @@ class BatchEndpoint extends Endpoint {
     return BatchStats(
       batchId: batchId,
       totalIdentities: batch.quantity,
+      generated: generated,
       active: active,
       verified: verified,
       locked: locked,

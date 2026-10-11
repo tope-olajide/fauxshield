@@ -130,7 +130,7 @@ class _LiveFeedScreenState extends State<LiveFeedScreen> {
               action: FilledButton.tonalIcon(
                 onPressed: _subscribe,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Reconnect'),
+                label: const Text('Refresh'),
               ),
             )
           : ListView.separated(

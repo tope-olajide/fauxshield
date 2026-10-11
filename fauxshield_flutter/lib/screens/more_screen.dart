@@ -7,11 +7,14 @@ import '../utils/formatting.dart';
 import '../widgets/common.dart';
 import 'api_keys_screen.dart';
 import 'audit_screen.dart';
+import 'geographic_screen.dart';
 import 'notifications_screen.dart';
 import 'offline_screen.dart';
+import 'recalls_screen.dart';
 import 'settings_screen.dart';
 import 'simulations_screen.dart';
 import 'team_screen.dart';
+import 'verifications_screen.dart';
 import 'webhooks_screen.dart';
 
 /// The "More" hub: team, integrations, operations, and workspace settings.
@@ -148,6 +151,25 @@ class _MoreScreenState extends State<MoreScreen> {
           _section(
             'Operations',
             <Widget>[
+              _tile(
+                icon: Icons.fact_check_rounded,
+                title: 'Verifications',
+                subtitle: 'Verification activity by risk, outcome, and date',
+                builder: (_) =>
+                    VerificationsScreen(controller: widget.controller),
+              ),
+              _tile(
+                icon: Icons.campaign_rounded,
+                title: 'Recalls',
+                subtitle: 'Recall history across batches and units',
+                builder: (_) => RecallsScreen(controller: widget.controller),
+              ),
+              _tile(
+                icon: Icons.public_rounded,
+                title: 'Geographic',
+                subtitle: 'Scan volume and fraud by country',
+                builder: (_) => GeographicScreen(controller: widget.controller),
+              ),
               _tile(
                 icon: Icons.science_rounded,
                 title: 'Simulations',

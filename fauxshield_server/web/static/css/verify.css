@@ -50,7 +50,7 @@ body.verify-body {
 
 .verify-card {
   width: 100%;
-  max-width: 560px;
+  max-width: 720px;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 20px;
@@ -265,4 +265,44 @@ body.verify-body {
     padding-left: 18px;
     padding-right: 18px;
   }
+}
+
+/* Product imagery and extra facts on the PIN and result views. */
+.product-image {
+  display: block;
+  width: 220px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  margin: 0 auto 16px;
+}
+
+.pin-product {
+  border: 1px solid var(--line);
+  background: var(--field);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 0 0 16px;
+  text-align: left;
+}
+
+.pin-product-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.pin-product-meta {
+  margin: 4px 0 0;
+  font-family: ui-monospace, "Cascadia Mono", monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.product-detail {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
 }

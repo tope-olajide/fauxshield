@@ -1715,6 +1715,43 @@ class Endpoints extends _is.EndpointDispatch {
                     params['productId'],
                   ),
         ),
+        'uploadImage': _is.MethodConnector(
+          name: 'uploadImage',
+          params: {
+            'workspaceId': _is.ParameterDescription(
+              name: 'workspaceId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'fileName': _is.ParameterDescription(
+              name: 'fileName',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'data': _is.ParameterDescription(
+              name: 'data',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'productId': _is.ParameterDescription(
+              name: 'productId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['product'] as _im5j1753.ProductEndpoint)
+                  .uploadImage(
+                    session,
+                    workspaceId: params['workspaceId'],
+                    fileName: params['fileName'],
+                    data: params['data'],
+                    productId: params['productId'],
+                  ),
+        ),
         'create': _is.MethodConnector(
           name: 'create',
           params: {
@@ -2328,6 +2365,11 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
+            'productId': _is.ParameterDescription(
+              name: 'productId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
             'state': _is.ParameterDescription(
               name: 'state',
               type: _is.getType<_iewd06xu.VerificationState?>(),
@@ -2380,6 +2422,7 @@ class Endpoints extends _is.EndpointDispatch {
                         workspaceId: params['workspaceId'],
                         identityId: params['identityId'],
                         batchId: params['batchId'],
+                        productId: params['productId'],
                         state: params['state'],
                         outcome: params['outcome'],
                         riskScore: params['riskScore'],

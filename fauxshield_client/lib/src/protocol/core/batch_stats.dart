@@ -18,6 +18,7 @@ abstract class BatchStats
   BatchStats._({
     required this.batchId,
     required this.totalIdentities,
+    required this.generated,
     required this.active,
     required this.verified,
     required this.locked,
@@ -30,6 +31,7 @@ abstract class BatchStats
   factory BatchStats({
     required _isc.UuidValue batchId,
     required int totalIdentities,
+    required int generated,
     required int active,
     required int verified,
     required int locked,
@@ -45,6 +47,7 @@ abstract class BatchStats
         jsonSerialization['batchId'],
       ),
       totalIdentities: jsonSerialization['totalIdentities'] as int,
+      generated: jsonSerialization['generated'] as int,
       active: jsonSerialization['active'] as int,
       verified: jsonSerialization['verified'] as int,
       locked: jsonSerialization['locked'] as int,
@@ -60,6 +63,9 @@ abstract class BatchStats
   _isc.UuidValue batchId;
 
   int totalIdentities;
+
+  /// Identity rows that exist for this batch, including trashed ones.
+  int generated;
 
   int active;
 
@@ -82,6 +88,7 @@ abstract class BatchStats
   BatchStats copyWith({
     _isc.UuidValue? batchId,
     int? totalIdentities,
+    int? generated,
     int? active,
     int? verified,
     int? locked,
@@ -96,6 +103,7 @@ abstract class BatchStats
       '__className__': 'BatchStats',
       'batchId': batchId.toJson(),
       'totalIdentities': totalIdentities,
+      'generated': generated,
       'active': active,
       'verified': verified,
       'locked': locked,
@@ -112,6 +120,7 @@ abstract class BatchStats
       '__className__': 'BatchStats',
       'batchId': batchId.toJson(),
       'totalIdentities': totalIdentities,
+      'generated': generated,
       'active': active,
       'verified': verified,
       'locked': locked,
@@ -132,6 +141,7 @@ class _BatchStatsImpl extends BatchStats {
   _BatchStatsImpl({
     required _isc.UuidValue batchId,
     required int totalIdentities,
+    required int generated,
     required int active,
     required int verified,
     required int locked,
@@ -142,6 +152,7 @@ class _BatchStatsImpl extends BatchStats {
   }) : super._(
          batchId: batchId,
          totalIdentities: totalIdentities,
+         generated: generated,
          active: active,
          verified: verified,
          locked: locked,
@@ -158,6 +169,7 @@ class _BatchStatsImpl extends BatchStats {
   BatchStats copyWith({
     _isc.UuidValue? batchId,
     int? totalIdentities,
+    int? generated,
     int? active,
     int? verified,
     int? locked,
@@ -169,6 +181,7 @@ class _BatchStatsImpl extends BatchStats {
     return BatchStats(
       batchId: batchId ?? this.batchId,
       totalIdentities: totalIdentities ?? this.totalIdentities,
+      generated: generated ?? this.generated,
       active: active ?? this.active,
       verified: verified ?? this.verified,
       locked: locked ?? this.locked,

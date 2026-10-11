@@ -60,6 +60,7 @@ offline:
 product:
   - list:
   - get:
+  - uploadImage:
   - create:
   - update:
   - archive:

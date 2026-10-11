@@ -6,8 +6,10 @@ import '../app/app_state.dart';
 import '../client.dart';
 import '../utils/formatting.dart';
 import '../widgets/batch_qr_dialog.dart';
+import '../widgets/batch_stats_grid.dart';
 import '../widgets/common.dart';
 import '../widgets/identity_qr_dialog.dart';
+import 'product_editor_screen.dart';
 
 /// Product catalog.
 class CatalogScreen extends StatefulWidget {
@@ -58,15 +60,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Catalog'),
+        title: const Text('Products'),
         actions: <Widget>[
-          IconButton(
-            tooltip: 'New product',
-            onPressed: widget.controller.can('productsWrite')
-                ? _createProduct
-                : null,
-            icon: const Icon(Icons.add_rounded),
-          ),
           IconButton(
             tooltip: 'Refresh',
             onPressed: _load,
@@ -74,6 +69,13 @@ class _CatalogScreenState extends State<CatalogScreen> {
           ),
         ],
       ),
+      floatingActionButton: widget.controller.can('productsWrite')
+          ? FloatingActionButton.extended(
+              onPressed: _createProduct,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('New product'),
+            )
+          : null,
       body: _buildBody(),
     );
   }
@@ -96,7 +98,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 88),
         itemCount: _products.length,
         separatorBuilder: (_, _) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
@@ -108,10 +110,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 horizontal: 16,
                 vertical: 6,
               ),
-              leading: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                child: const Icon(Icons.inventory_2_rounded),
-              ),
+              leading: _productThumb(product),
               title: Text(product.name),
               subtitle: Text(
                 <String?>[
@@ -146,68 +145,34 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   Future<void> _createProduct() async {
-    final name = TextEditingController();
-    final sku = TextEditingController();
-    final category = TextEditingController();
-    final description = TextEditingController();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('New product'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              LabeledField(label: 'Name', controller: name),
-              LabeledField(label: 'SKU', controller: sku),
-              LabeledField(label: 'Category', controller: category),
-              LabeledField(
-                label: 'Description',
-                controller: description,
-                maxLines: 2,
-              ),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Create'),
-          ),
-        ],
+    final created = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const ProductEditorScreen()),
+    );
+    if (created == true && mounted) showMessage(context, 'Product created.');
+    _load();
+  }
+
+  /// Product thumbnail for the list: first uploaded image, or the default
+  /// inventory icon when the product has no imagery yet.
+  Widget _productThumb(Product product) {
+    final theme = Theme.of(context);
+    final fallback = CircleAvatar(
+      backgroundColor: theme.colorScheme.primaryContainer,
+      child: const Icon(Icons.inventory_2_rounded),
+    );
+    final images = product.imageUrls;
+    if (images == null || images.isEmpty) return fallback;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Image.network(
+        images.first,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => fallback,
       ),
     );
-    if (confirmed == true && name.text.trim().isNotEmpty) {
-      try {
-        await client.product.create(
-          workspaceId: widget.controller.workspaceId,
-          name: name.text.trim(),
-          sku: sku.text.trim().isEmpty ? null : sku.text.trim(),
-          category: category.text.trim().isEmpty ? null : category.text.trim(),
-          description: description.text.trim().isEmpty
-              ? null
-              : description.text.trim(),
-        );
-        if (mounted) showMessage(context, 'Product created.');
-      } catch (error) {
-        if (mounted) {
-          showMessage(
-            context,
-            error is ApiException ? error.message : error.toString(),
-            error: true,
-          );
-        }
-      }
-    }
-    name.dispose();
-    sku.dispose();
-    category.dispose();
-    description.dispose();
-    _load();
   }
 }
 
@@ -288,48 +253,137 @@ class _BatchListScreenState extends State<BatchListScreen> {
     }
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView.separated(
+      child: ListView(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
-        itemCount: _batches.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 8),
-        itemBuilder: (context, index) {
-          final batch = _batches[index];
-          return Card(
-            margin: EdgeInsets.zero,
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 6,
+        children: <Widget>[
+          _productOverview(),
+          const SizedBox(height: 8),
+          for (var index = 0; index < _batches.length; index++) ...<Widget>[
+            if (index > 0) const SizedBox(height: 8),
+            _batchCard(_batches[index]),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Product overview card shown above the batch list, mirroring the
+  /// reference product detail header: imagery plus the distribution and
+  /// safety fields.
+  Widget _productOverview() {
+    final product = widget.product;
+    final theme = Theme.of(context);
+    final images = product.imageUrls ?? <String>[];
+    final restrictions = (product.countryRestrictions ?? <String>[]).join(', ');
+    final meta = <String?>[
+      product.category,
+      if (product.sku != null && product.sku!.isNotEmpty) 'SKU ${product.sku}',
+    ].whereType<String>().join(' · ');
+    return SectionCard(
+      title: 'Product details',
+      subtitle: meta.isEmpty ? 'Overview' : meta,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          if (images.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  images.first,
+                  height: 140,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
               ),
-              leading: Icon(
-                batch.status == BatchStatus.recalled
-                    ? Icons.campaign_rounded
-                    : Icons.inventory_rounded,
-                color: batch.status == BatchStatus.recalled
-                    ? Theme.of(context).colorScheme.error
-                    : null,
+            ),
+          InfoRow(
+            label: 'Category',
+            value: _orNotSpecified(product.category),
+          ),
+          InfoRow(
+            label: 'SKU',
+            value: _orNotSpecified(product.sku),
+          ),
+          InfoRow(
+            label: 'Packaging',
+            value: _orNotSpecified(product.packaging),
+          ),
+          InfoRow(
+            label: 'Shelf life',
+            value: _orNotSpecified(product.shelfLife),
+          ),
+          InfoRow(
+            label: 'Restricted countries',
+            value: restrictions.isEmpty ? 'None' : restrictions,
+          ),
+          if (product.description != null &&
+              product.description!.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 10),
+            Text(
+              'Description',
+              style: theme.textTheme.labelMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(product.description!, style: theme.textTheme.bodyMedium),
+          ],
+          if (product.safetyInstructions != null &&
+              product.safetyInstructions!.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 10),
+            Text(
+              'Safety instructions',
+              style: theme.textTheme.labelMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              product.safetyInstructions!,
+              style: theme.textTheme.bodyMedium,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  static String _orNotSpecified(String? value) =>
+      value == null || value.isEmpty ? 'Not specified' : value;
+
+  Widget _batchCard(Batch batch) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 6,
+        ),
+        leading: Icon(
+          batch.status == BatchStatus.recalled
+              ? Icons.campaign_rounded
+              : Icons.inventory_rounded,
+          color: batch.status == BatchStatus.recalled
+              ? Theme.of(context).colorScheme.error
+              : null,
+        ),
+        title: Text(batch.reference),
+        subtitle: Text(
+          '${batch.quantity} planned · region ${batch.distributionRegion} · '
+          '${batch.status.name}',
+        ),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (_) => BatchDetailScreen(
+                controller: widget.controller,
+                batch: batch,
+                product: widget.product,
               ),
-              title: Text(batch.reference),
-              subtitle: Text(
-                '${batch.quantity} planned · region ${batch.distributionRegion} · '
-                '${batch.status.name}',
-              ),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) => BatchDetailScreen(
-                      controller: widget.controller,
-                      batch: batch,
-                      product: widget.product,
-                    ),
-                  ),
-                );
-                _load();
-              },
             ),
           );
+          _load();
         },
       ),
     );
@@ -373,7 +427,27 @@ class _BatchListScreenState extends State<BatchListScreen> {
         ],
       ),
     );
-    if (confirmed == true && reference.text.trim().isNotEmpty) {
+    if (confirmed == true && reference.text.trim().isNotEmpty && mounted) {
+      // Serializing a batch can take a while; block the UI with feedback.
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Creating batch…'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
       try {
         await client.batch.create(
           workspaceId: widget.controller.workspaceId,
@@ -394,6 +468,9 @@ class _BatchListScreenState extends State<BatchListScreen> {
             error: true,
           );
         }
+      }
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
       }
     }
     reference.dispose();
@@ -496,93 +573,134 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
         return _load();
       },
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: EdgeInsets.zero,
         children: <Widget>[
-          SectionCard(
-            title: widget.product.name,
-            subtitle:
-                'Region ${widget.batch.distributionRegion} · ${widget.batch.status.name}',
-            child: _statsGrid(),
-          ),
-          _actions(),
-          SectionCard(
-            title: 'Serialized units',
-            subtitle: '${_identities.length} loaded',
-            child: _identityList(),
+          Center(
+            child: ConstrainedBox(
+              // Keep a comfortable measure on wide desktop windows.
+              constraints: const BoxConstraints(maxWidth: 1080),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    SectionCard(
+                      title: widget.product.name,
+                      subtitle:
+                          'Region ${widget.batch.distributionRegion}'
+                          ' · ${widget.batch.quantity} planned'
+                          ' · ${_stats?.generated ?? 0} generated'
+                          ' · ${_stats?.active ?? 0} active',
+                      trailing: _statusPill(),
+                      child: _statsGrid(),
+                    ),
+                    _actions(),
+                    SectionCard(
+                      title: 'Serialized units',
+                      subtitle: '${_identities.length} loaded',
+                      child: _identityList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
+  /// Status badge for the batch header, mirroring the reference chip.
+  Widget _statusPill() {
+    final status = widget.batch.status;
+    final color = switch (status) {
+      BatchStatus.recalled => Theme.of(context).colorScheme.error,
+      BatchStatus.shipped => const Color(0xFF0F7B4D),
+      BatchStatus.inProduction => const Color(0xFFB45309),
+      BatchStatus.created => Theme.of(context).colorScheme.outline,
+    };
+    return Pill(label: status.name, color: color, dense: true);
+  }
+
   Widget _statsGrid() {
     final stats = _stats;
     if (stats == null) return const SizedBox.shrink();
-    return GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      childAspectRatio: 1.35,
-      children: <Widget>[
-        StatTile(label: 'Planned', value: '${stats.totalIdentities}'),
-        StatTile(label: 'Active', value: '${stats.active}'),
-        StatTile(label: 'Verified', value: '${stats.verified}'),
-        StatTile(
-          label: 'Flagged',
-          value: '${stats.flagged}',
-          color: const Color(0xFFB45309),
-        ),
-        StatTile(
-          label: 'Locked',
-          value: '${stats.locked}',
-          color: const Color(0xFFC2410C),
-        ),
-        StatTile(
-          label: 'Recalled',
-          value: '${stats.recalled}',
-          color: Theme.of(context).colorScheme.error,
-        ),
-      ],
-    );
+    return BatchStatsGrid(stats: stats);
   }
 
   Widget _actions() {
+    final stats = _stats;
+    final generated = stats?.generated ?? 0;
+    final active = stats?.active ?? 0;
+    final recalled = widget.batch.status == BatchStatus.recalled;
+    final canGenerate = widget.controller.can('identitiesGenerate');
+    final canExport = widget.controller.can('identitiesExport');
+    final canRecall = widget.controller.can('batchesWrite');
+    final hasExportable = active > 0;
+
+    // Same gating as the reference: export, QR and recall need live units,
+    // generation is blocked on a recalled batch, and a disabled action
+    // explains itself.
+    String? hint;
+    if (generated == 0) {
+      hint = 'Generate identities to enable export, QR, and recall actions.';
+    } else if (!hasExportable) {
+      hint =
+          'All generated identities are unavailable. '
+          'Restore a unit to enable export, QR, and recall actions.';
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          FilledButton.tonalIcon(
-            onPressed: widget.controller.can('identitiesGenerate')
-                ? _generateDialog
-                : null,
-            icon: const Icon(Icons.qr_code_2_rounded),
-            label: const Text('Generate units'),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              FilledButton.tonalIcon(
+                onPressed: canGenerate && !recalled ? _generateDialog : null,
+                icon: const Icon(Icons.qr_code_2_rounded),
+                label: const Text('Generate units'),
+              ),
+              OutlinedButton.icon(
+                onPressed: hasExportable ? _showBatchQr : null,
+                icon: const Icon(Icons.qr_code_scanner_rounded),
+                label: const Text('QR sheet'),
+              ),
+              OutlinedButton.icon(
+                onPressed: canExport && hasExportable ? _export : null,
+                icon: const Icon(Icons.download_rounded),
+                label: const Text('Export CSV'),
+              ),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                  side: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.error.withValues(alpha: 0.45),
+                  ),
+                ),
+                onPressed: canRecall && !recalled && hasExportable
+                    ? _recallDialog
+                    : null,
+                icon: const Icon(Icons.campaign_rounded),
+                label: const Text('Recall batch'),
+              ),
+            ],
           ),
-          OutlinedButton.icon(
-            onPressed: _showBatchQr,
-            icon: const Icon(Icons.qr_code_scanner_rounded),
-            label: const Text('QR sheet'),
-          ),
-          OutlinedButton.icon(
-            onPressed: widget.controller.can('identitiesExport')
-                ? _export
-                : null,
-            icon: const Icon(Icons.download_rounded),
-            label: const Text('Export CSV'),
-          ),
-          OutlinedButton.icon(
-            onPressed:
-                widget.controller.can('batchesWrite') &&
-                    widget.batch.status != BatchStatus.recalled
-                ? _recallDialog
-                : null,
-            icon: const Icon(Icons.campaign_rounded),
-            label: const Text('Recall batch'),
-          ),
+          if (hint != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                hint,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
         ],
       ),
     );

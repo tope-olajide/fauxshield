@@ -56,7 +56,7 @@ const List<_Destination> _destinations = <_Destination>[
     selectedIcon: Icons.gpp_maybe_rounded,
   ),
   _Destination(
-    label: 'Catalog',
+    label: 'Products',
     icon: Icons.inventory_2_outlined,
     selectedIcon: Icons.inventory_2_rounded,
   ),
@@ -129,7 +129,7 @@ class _HomeShellState extends State<HomeShell> {
                 NavigationDestination(
                   icon: Icon(Icons.inventory_2_outlined),
                   selectedIcon: Icon(Icons.inventory_2_rounded),
-                  label: 'Catalog',
+                  label: 'Products',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.more_horiz_outlined),

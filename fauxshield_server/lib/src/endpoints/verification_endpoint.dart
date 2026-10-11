@@ -162,6 +162,7 @@ class VerificationEndpoint extends Endpoint {
     UuidValue? workspaceId,
     UuidValue? identityId,
     UuidValue? batchId,
+    UuidValue? productId,
     VerificationState? state,
     VerificationOutcome? outcome,
     RiskScore? riskScore,
@@ -179,7 +180,7 @@ class VerificationEndpoint extends Endpoint {
     final size = pageSize.clamp(1, FauxShieldLimits.maxVerificationPageSize);
     final offset = (page < 0 ? 0 : page) * size;
 
-    Set<UuidValue>? batchIdentityIds;
+    Set<UuidValue>? scopedIdentityIds;
     if (batchId != null) {
       final identities = await ProductIdentity.db.find(
         session,
@@ -187,7 +188,24 @@ class VerificationEndpoint extends Endpoint {
         limit: 5000,
       );
       if (identities.isEmpty) return <VerificationSession>[];
-      batchIdentityIds = identities.map((identity) => identity.id!).toSet();
+      scopedIdentityIds = identities.map((identity) => identity.id!).toSet();
+    } else if (productId != null) {
+      // Product scoping resolves through the product's batches, then their
+      // identities, so the session query stays a single table scan.
+      final batches = await Batch.db.find(
+        session,
+        where: (t) => t.productId.equals(productId),
+        limit: 500,
+      );
+      if (batches.isEmpty) return <VerificationSession>[];
+      final batchIds = batches.map((batch) => batch.id!).toSet();
+      final identities = await ProductIdentity.db.find(
+        session,
+        where: (t) => t.batchId.inSet(batchIds),
+        limit: 20000,
+      );
+      if (identities.isEmpty) return <VerificationSession>[];
+      scopedIdentityIds = identities.map((identity) => identity.id!).toSet();
     }
 
     return VerificationSession.db.find(
@@ -197,7 +215,7 @@ class VerificationEndpoint extends Endpoint {
         if (identityId != null) {
           expression = expression & t.identityId.equals(identityId);
         }
-        final scopedIds = batchIdentityIds;
+        final scopedIds = scopedIdentityIds;
         if (scopedIds != null) {
           expression = expression & t.identityId.inSet(scopedIds);
         }
