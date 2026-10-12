@@ -150,6 +150,48 @@ Verified against the live deployment:
 6. In the app: **Dashboard** shows stats, **Live** shows events, and
    **Simulations → Clone attack** produces alerts in **Alerts**.
 
+## Point the clients at the deployment
+
+Everything a signed-in operator can do in the app is also available from the
+CLI and from the MCP server, both of which take a base URL and a credential.
+
+```bash
+# 1. Sign in against the live API (needs an account created in /app first).
+export FAUXSHIELD_URL=https://fauxshield.api.serverpod.space
+fauxshield auth login --email you@brand.test --password '<password>'
+fauxshield auth whoami          # prints workspace, role, and demo mode
+
+# 2. Headless smoke test of the consumer flow, with a token from the catalogue.
+fauxshield identities list --page-size 1
+fauxshield verify --token <qr token> --pin <pin>
+
+# 3. Issue a scoped key for automation and CI.
+fauxshield keys create --label github-actions \
+  --scopes analyticsRead,fraudRead,auditRead
+```
+
+For an AI agent, give the MCP server the URL and that key, keeping it read-only
+unless the agent is meant to change data:
+
+```json
+{
+  "mcpServers": {
+    "fauxshield": {
+      "command": "fauxshield-mcp",
+      "env": {
+        "FAUXSHIELD_URL": "https://fauxshield.api.serverpod.space",
+        "FAUXSHIELD_API_KEY": "fs_live_...",
+        "FAUXSHIELD_READ_ONLY": "true"
+      }
+    }
+  }
+}
+```
+
+`--json` on any CLI command makes it scriptable, and every mutating call made
+through either client lands in the workspace audit log attributed to the key,
+so `fauxshield audit list --actor api-key:<id>` shows what an agent did.
+
 ## Rolling back
 
 `serverpod cloud` keeps deployment history per project; redeploy a previous

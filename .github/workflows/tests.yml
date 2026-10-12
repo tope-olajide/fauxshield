@@ -47,6 +47,27 @@ jobs:
         working-directory: fauxshield_server
         run: serverpod generate
 
-      - name: Run tests
+      - name: Run server tests
         working-directory: fauxshield_server
         run: dart test
+
+      # The server's suite covers the API; these two clients are what
+      # operators and agents actually drive it with, so they are analyzed and
+      # tested on their own terms. Generated code is left out of the check.
+      - name: Check formatting
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            fauxshield_cli/lib fauxshield_cli/bin fauxshield_cli/test \
+            fauxshield_mcp/lib fauxshield_mcp/bin fauxshield_mcp/test
+
+      - name: Analyze and test the CLI
+        working-directory: fauxshield_cli
+        run: |
+          dart analyze
+          dart test
+
+      - name: Analyze and test the MCP server
+        working-directory: fauxshield_mcp
+        run: |
+          dart analyze
+          dart test

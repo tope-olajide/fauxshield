@@ -1,5 +1,8 @@
 name: fauxshield_client
-description: Starting point for a Serverpod client.
+description: >-
+  Generated Dart and Flutter client for the FauxShield anti-counterfeit
+  platform. Typed models and endpoint classes for products, serialized units,
+  verifications, and fraud alerts.
 
 environment:
   sdk: '^3.12.2'

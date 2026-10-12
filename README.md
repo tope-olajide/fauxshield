@@ -229,10 +229,56 @@ fauxshield alerts show --alert <uuid>
 fauxshield verify --token <token> --pin <pin>
 ```
 
-Command groups: `auth`, `products`, `batches`, `identities`, `alerts`, `verify`.
-Every command takes `--json` for scripting, and `FAUXSHIELD_URL`,
-`FAUXSHIELD_TOKEN`, and `FAUXSHIELD_PASSWORD` override the stored config, so it
-runs unattended in CI. `fauxshield --help` lists everything.
+Command groups: `auth`, `workspace`, `products`, `batches`, `identities`,
+`alerts`, `verifications`, `recalls`, `simulations`, `analytics`, `audit`,
+`team`, `keys`, `webhooks`, `notifications`, `offline`, `demo`, and `verify` —
+the whole API, not just the read paths.
+Every command takes `--json` for scripting. Automation should sign in with an
+API key, which carries its own scopes and rate limit:
+
+```bash
+fauxshield keys create --label ci --scopes productsRead,batchesRead,analyticsRead
+fauxshield auth login --api-key fs_live_...      # or export FAUXSHIELD_API_KEY
+```
+
+Minting a key is a session operation, and a few operations are reserved for a
+signed-in person rather than a key — revealing PINs, changing workspace
+settings, running simulations, and managing keys. Everything else runs happily
+off a scoped key.
+
+`FAUXSHIELD_URL`, `FAUXSHIELD_API_KEY`, `FAUXSHIELD_TOKEN`, and
+`FAUXSHIELD_PASSWORD` override the stored config, so it runs unattended in CI.
+`fauxshield --help` lists everything, and
+[`fauxshield_cli/README.md`](fauxshield_cli/README.md) documents each group.
+
+### 6. Use it from an AI agent
+
+`fauxshield_mcp` exposes the same API as Model Context Protocol tools, so an
+agent (Claude Desktop, Cursor, or anything else that speaks MCP) can read the
+fraud queue, pull evidence, and — with a key that has write scopes — work
+alerts and recalls, always attributed in the audit log.
+
+```bash
+dart pub global activate --source path fauxshield_mcp
+```
+
+```json
+{
+  "mcpServers": {
+    "fauxshield": {
+      "command": "fauxshield-mcp",
+      "env": {
+        "FAUXSHIELD_URL": "https://fauxshield.api.serverpod.space",
+        "FAUXSHIELD_API_KEY": "fs_live_...",
+        "FAUXSHIELD_READ_ONLY": "true"
+      }
+    }
+  }
+}
+```
+
+The tool surface and the client snippets are documented in
+[`fauxshield_mcp/README.md`](fauxshield_mcp/README.md).
 
 ---
 
@@ -245,10 +291,21 @@ dart test
 
 Covers the core crypto (HMAC, PBKDF2, AES-GCM), the verification pipeline
 (outcomes, replay protection, PIN lockout), the fraud pipeline (clone/PIN/offline
-signals and alert evidence), recalls, and the demo seeder — 24 tests, all green.
-The Flutter app is analyzed clean with `flutter analyze`, and the CLI has its
-own suite (`cd fauxshield_cli && dart test`) covering version parity, usage
-exit codes, and the failure path when a server is unreachable.
+signals and alert evidence), recalls, API key authentication, the product
+recycle bin, and the demo seeder — 38 tests, all green.
+
+The clients are tested on their own terms, because they are what operators and
+agents actually drive the API with:
+
+```bash
+cd fauxshield_cli && dart test    # 10 tests: version parity, exit codes, API key
+cd fauxshield_mcp && dart test    # 21 tests: config, tool surface, read-only guard, stdio handshake
+```
+
+The Flutter app is analyzed clean with `flutter analyze`, and every package
+(`fauxshield_server`, `fauxshield_cli`, `fauxshield_mcp`, `fauxshield_client`)
+is analyzed clean with `dart analyze`. CI runs all of it on every push:
+`.github/workflows/tests.yml`.
 
 ---
 
@@ -314,7 +371,12 @@ fauxshield/                      # repository root
 │       └── main.dart
 ├── fauxshield_cli/             # Dart console client for operators and scripts
 │   ├── bin/fauxshield.dart     # entry point
-│   └── lib/                    # commands, auth/config, table output
+│   ├── lib/src/commands/       # one file per command group
+│   └── README.md               # install, credentials, every command
+├── fauxshield_mcp/             # MCP server so an agent can drive the API
+│   ├── bin/fauxshield_mcp.dart # stdio entry point
+│   ├── lib/src/tools/          # catalog, operations, response tools
+│   └── README.md               # client setup and the tool surface
 ├── fauxshield_client/          # generated Dart client (do not edit)
 ├── third_party/sqlite_async/   # one-line patch for web builds (see README)
 ├── docs/                       # deployment guide + demo script
