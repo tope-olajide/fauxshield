@@ -1,6 +1,5 @@
 # FauxShield — anti-counterfeit command center
 
-**Build Something Real: The Serverpod Hackathon** — full-stack Flutter + Serverpod 4.
 
 FauxShield lets a brand serialize every physical unit it makes with a signed QR
 code and a packaging PIN, verify those units from a public consumer page, catch
