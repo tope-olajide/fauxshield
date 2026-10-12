@@ -8,13 +8,12 @@ works, so every line below names how it was checked.
 
 Audited 2026-10-12 against `main`; report updated after the implementation pass.
 
-> **A note on counting endpoints.** The project's README and demo script say
-> "18 endpoints", which counts the two authentication endpoints Serverpod's auth
-> module contributes (`emailIdp`, `jwtRefresh`) alongside the platform's own.
-> This document counts the 15 endpoint classes under
-> `fauxshield_server/lib/src/endpoints/`, because those are what the contract,
-> the SDKs, and the API reference cover; the auth endpoints are documented by
-> Serverpod.
+> **A note on counting endpoints.** The server registers 17 routes: the 15
+> endpoint classes under `fauxshield_server/lib/src/endpoints/`, plus the two
+> Serverpod's authentication module contributes (`emailIdp`, `jwtRefresh`). This
+> document and the README quote 15 where the contract, the SDKs, and the API
+> reference are the subject, because those are the platform's own endpoints; the
+> auth endpoints are documented by Serverpod.
 
 ## 1. What the platform was
 

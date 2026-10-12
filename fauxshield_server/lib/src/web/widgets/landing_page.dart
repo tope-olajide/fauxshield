@@ -429,7 +429,8 @@ class LandingPageWidget extends TemplateWidget {
         code: '''
 import 'package:fauxshield_client/fauxshield_client.dart';
 
-final client = Client('http://localhost:8080');
+// The hosted deployment. Point it at http://localhost:8080 to use your own.
+final client = Client('https://fauxshield.api.serverpod.space');
 
 // Create a product and a manufacturing batch
 final product = await client.product.create(
@@ -465,24 +466,26 @@ final alerts = await client.alert.list(page: 1, pageSize: 20);''',
         label: 'cURL',
         install: 'curl',
         code: '''
+# The hosted deployment; swap in http://localhost:8080 for your own server.
+
 # Sign in and capture the JWT from the auth strategy
-curl -s -X POST http://localhost:8080/emailIdp/login \\
+curl -s -X POST https://fauxshield.api.serverpod.space/emailIdp/login \\
   -H 'Content-Type: application/json' \\
   -d '{"email":"you@brand.test","password":"your-password"}'
 
 # Serialize 500 units for a batch
-curl -s -X POST http://localhost:8080/batch/generateIdentities \\
+curl -s -X POST https://fauxshield.api.serverpod.space/batch/generateIdentities \\
   -H 'Content-Type: application/json' \\
   -H "Authorization: Bearer \$TOKEN" \\
   -d '{"batchId":"<uuid>","quantity":500,
        "idempotencyKey":"lot-2026-04-500"}'
 
 # What a consumer scan does: resolve the token, then submit the PIN
-curl -s -X POST http://localhost:8080/verification/start \\
+curl -s -X POST https://fauxshield.api.serverpod.space/verification/start \\
   -H 'Content-Type: application/json' \\
   -d '{"token":"3f7c1a9e64b25d80...","deviceFingerprint":"pos-1"}'
 
-curl -s -X POST http://localhost:8080/verification/submitPin \\
+curl -s -X POST https://fauxshield.api.serverpod.space/verification/submitPin \\
   -H 'Content-Type: application/json' \\
   -d '{"sessionId":"<uuid>","deviceFingerprint":"pos-1","pin":"666499"}' ''',
       ),

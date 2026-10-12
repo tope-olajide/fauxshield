@@ -27,7 +27,7 @@ live feed do the talking.
 ## Alternative 30-second cuts
 
 - **Journey cut:** landing → `/verify` authentic scan → simulation → alert → close.
-- **Builder cut:** emphasize Serverpod features: 18 endpoints, streaming, future
+- **Builder cut:** emphasize Serverpod features: 15 endpoints, streaming, future
   calls, offline sync, auth/RBAC, Serverpod Cloud deploy.
 
 ## Recording tips

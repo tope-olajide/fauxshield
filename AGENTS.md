@@ -2,7 +2,7 @@
 
 FauxShield is an anti-counterfeit platform: brands serialize products with signed QR codes and packaging PINs, consumers verify them from a public page, and operators work a live fraud command center (alerts, recalls, simulations, offline field scans, webhooks, audit log).
 
-- Server package: `fauxshield_server` — 18 endpoints under `lib/src/endpoints/`, domain services under `lib/src/services/`, ~80 models under `lib/src/models/`, recurring future calls under `lib/src/future_calls/`.
+- Server package: `fauxshield_server` — 15 endpoint classes under `lib/src/endpoints/` (17 registered routes with Serverpod's auth endpoints), domain services under `lib/src/services/`, 84 models under `lib/src/models/`, recurring future calls under `lib/src/future_calls/`.
 - Flutter app: `fauxshield_flutter` — operator command center; the prebuilt web bundle is copied into `fauxshield_server/web/app` and served at `/app`.
 - Consumer web pages are server-rendered by routes in `fauxshield_server/lib/src/web/routes/` (`/` landing, `/verify`).
 - `docs/DEPLOYMENT.md` covers Serverpod Cloud deploys; `docs/DEMO_SCRIPT.md` is the hackathon demo script.

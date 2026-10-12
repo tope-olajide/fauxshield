@@ -37,7 +37,7 @@ DocsPage overviewPage() {
 <p>
   This is the developer side of that: the API, the SDKs, the CLI, and the MCP
   server. The operator app and the consumer verification page are built on the
-  same twelve endpoints — nothing in the product is reachable only through the
+  same fifteen endpoints — nothing in the product is reachable only through the
   user interface.
 </p>
 ''',
@@ -152,12 +152,16 @@ product   one thing a brand sells: name, SKU, packaging copy, images
         title: 'Signals and alerts',
         html: '''
 <p>
-  The fraud engine runs six checks on each verification — clone detection,
-  geographic impossibility, distributor leakage, velocity, recall compliance,
-  and PIN brute force. A hit records a signal; signals that share a cause are
-  deduplicated into one alert, so an operator sees one investigation rather than
-  a thousand rows. Alerts carry a severity, a status, the evidence assembled
-  from the underlying sessions, and can be assigned.
+  The fraud engine runs six checks on each verification — clone detection
+  (one token in two distant places), velocity anomalies, PIN brute force, batch
+  duplication, distributor leakage, and scans from restricted markets — against
+  that workspace's policy and inside a bounded time budget. Two further
+  protections run in the write path rather than the engine: PIN lockout after
+  repeated failures, and reconciliation of offline scans that arrive late. A hit
+  records a signal; signals that share a cause are deduplicated into one alert,
+  so an operator sees one investigation rather than a thousand rows. Alerts
+  carry a severity, a status, the evidence assembled from the underlying
+  sessions, and can be assigned.
 </p>
 ''',
       ),
@@ -226,7 +230,7 @@ ${code('''
 ${paramTable(const <DocsParam>[
               DocsParam(name: 'endpoints', type: 'lib/src/endpoints/', required: true, defaultValue: '15 endpoint classes: the wire surface'),
               DocsParam(name: 'services', type: 'lib/src/services/', defaultValue: 'the domain logic: verification, fraud engine, alerts, recalls, webhooks, RBAC'),
-              DocsParam(name: 'models', type: 'lib/src/models/', defaultValue: 'about 80 typed models and enums; the database schema is generated from them'),
+              DocsParam(name: 'models', type: 'lib/src/models/', defaultValue: '84 typed models and enums; the database schema is generated from them'),
               DocsParam(name: 'web', type: 'lib/src/web/', defaultValue: 'the public pages and the consumer flow, server-rendered'),
               DocsParam(name: 'future_calls', type: 'lib/src/future_calls/', defaultValue: 'recurring work: webhook drain, offline conversion, rollups, maintenance'),
             ], empty: '')}
@@ -234,6 +238,35 @@ ${paramTable(const <DocsParam>[
   An endpoint validates, resolves the caller's workspace and permission, and
   delegates. That is why the CLI, the MCP server, and the app cannot drift apart
   in behaviour: they all land in the same service methods.
+</p>
+''',
+      ),
+      DocsSection(
+        id: 'serverpod',
+        title: 'How Serverpod is used',
+        html: '''
+<p>
+  This server is a Serverpod 4 application from the schema up. Nothing here is
+  a framework bolted onto a hand-rolled HTTP layer:
+</p>
+<div class="table-wrap"><table class="data docs-table">
+<thead><tr><th>Serverpod feature</th><th>What this server does with it</th></tr></thead>
+<tbody>
+<tr><td>Endpoints</td><td>15 endpoint classes generate the JSON-RPC surface this portal documents. Typed parameters arrive validated; typed exceptions (<code>AuthenticationException</code>, <code>NotFoundException</code>, …) leave as structured errors.</td></tr>
+<tr><td>Models</td><td>84 <code>.spy.yaml</code> models generate the server classes, the Dart client, and the PostgreSQL schema, so a model change produces one reviewable migration instead of two divergent definitions.</td></tr>
+<tr><td>Authentication</td><td>Serverpod's email identity provider covers registration, verification codes, password resets, and JWT access and refresh tokens. Development prints codes to the console; production sends them through the Serverpod Cloud email service. Consumer endpoints opt out with <code>@unauthenticatedClientCall</code>.</td></tr>
+<tr><td>Streaming</td><td><code>verification.watchWorkspace</code> pushes scans, signals, alerts, recalls, and simulation progress to the operator app over a per-workspace channel, with automatic reconnection.</td></tr>
+<tr><td>Future calls</td><td>Recurring work runs in the server: webhook drain (30s), offline conversion (45s), daily rollup (15m), maintenance sweep (30m), plus paced simulation steps scheduled one at a time.</td></tr>
+<tr><td>Offline sync</td><td><code>OfflineScanRecord</code> is declared a synchronised model, so field devices converge through Serverpod's sync layer and the converter turns each synced row into a real verification session.</td></tr>
+<tr><td>Database</td><td>Row-locked transactions on PIN submission and unit generation, bulk <code>updateWhere</code> and <code>deleteWhere</code> operations, pagination, and aggregate rollups.</td></tr>
+<tr><td>Web server</td><td>The landing page, the marketing pages, this portal, and the consumer verification flow are server-rendered routes and static assets served by the same process as the API — one deploy, one URL to know.</td></tr>
+<tr><td>Testing</td><td><code>serverpod_test</code> with Serverpod's embedded PostgreSQL: <code>dart test</code> starts a database itself, so the suite needs no Docker.</td></tr>
+<tr><td>Deployment</td><td>Serverpod Cloud builds from this repository, provisions PostgreSQL, applies the migrations, and serves both the API and the web pages.</td></tr>
+</tbody></table></div>
+<p>
+  The practical result is one server, one schema, and one generated client per
+  language — with the operator app, the consumer page, the CLI, the SDKs, and
+  the MCP server all landing in the same service methods.
 </p>
 ''',
       ),
