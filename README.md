@@ -338,8 +338,9 @@ cd fauxshield_mcp && dart test    # 21 tests: config, tool surface, read-only gu
 The Flutter app is analyzed clean with `flutter analyze`, and every package
 (`fauxshield_server`, `fauxshield_cli`, `fauxshield_mcp`, `fauxshield_client`)
 is analyzed clean with `dart analyze`. CI runs all of it on every push:
-`.github/workflows/tests.yml`, and pushing a version tag publishes the Python SDK
-to PyPI from `.github/workflows/release-python.yml`.
+`.github/workflows/tests.yml`, and pushing a version tag publishes the SDKs to
+PyPI and npm from `.github/workflows/release-python.yml` and
+`.github/workflows/release-npm.yml`.
 
 ---
 
@@ -414,7 +415,7 @@ fauxshield/                      # repository root
 ├── fauxshield_client/          # generated Dart client (do not edit)
 ├── third_party/sqlite_async/   # one-line patch for web builds (see README)
 ├── docs/                       # deployment guide + demo script
-├── .github/workflows/          # CI: analyze, format, tests, Python release
+├── .github/workflows/          # CI: analyze, format, tests, npm + PyPI releases
 └── AGENTS.md                   # notes for AI agents working in this repo
 ```
 

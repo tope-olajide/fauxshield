@@ -1,0 +1,105 @@
+name: Release npm SDK
+
+# A release is tag-driven: pushing a version tag is the only thing this
+# workflow uploads, so a branch push can never publish something nobody asked
+# for, and the tag has to name the version fauxshield_node/package.json already
+# declares.
+#
+# `v0.2.0` releases every SDK whose manifest says 0.2.0 — the Python SDK has its
+# own release-python.yml with the same guard — while `fauxshield-v0.2.0`
+# releases this package alone. A tag naming a version this manifest has not
+# reached fails the check below instead of guessing.
+#
+# The upload authenticates with an npm token stored as the repository secret
+# NPM_TOKEN (Settings -> Secrets and variables -> Actions): an "Automation"
+# token, or a granular token with read-write access to `fauxshield`. Both work
+# unattended, which a token that still asks for a publish-time 2FA code cannot.
+# npm's trusted publishing can replace the secret later: grant the job
+# `id-token: write`, drop the NODE_AUTH_TOKEN env, and register this workflow as
+# a trusted publisher for the package on npm.
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'fauxshield-v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          # Writes the .npmrc the publish step authenticates with, and with it
+          # the registry the package belongs to.
+          registry-url: 'https://registry.npmjs.org'
+
+      # A tag that disagrees with package.json would publish a version nobody
+      # asked for, so the mismatch is an error, not a guess.
+      - name: Check the tag against the declared version
+        id: version
+        run: |
+          version="$(node -p "require('./fauxshield_node/package.json').version")"
+          case "${GITHUB_REF_NAME}" in
+            "v${version}"|"fauxshield-v${version}") ;;
+            *)
+              echo "::error::Tag ${GITHUB_REF_NAME} does not match fauxshield_node version ${version}; expected v${version} or fauxshield-v${version}."
+              exit 1
+              ;;
+          esac
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install dependencies
+        working-directory: fauxshield_node
+        run: npm ci --no-audit --no-fund
+
+      # The package is generated from the API contract. Regenerating it and
+      # demanding a clean tree proves the released code is the code the
+      # repository commits, so a stale generated file blocks the release.
+      - name: Check the generated SDK is committed as-is
+        working-directory: fauxshield_node
+        run: |
+          npm run generate
+          if [ -n "$(git status --porcelain -- src/generated)" ]; then
+            echo "::error::src/generated is out of date; run npm run generate and commit the result."
+            git status --porcelain -- src/generated
+            exit 1
+          fi
+
+      - name: Test the SDK
+        working-directory: fauxshield_node
+        run: npm test
+
+      # Pack the exact tarball that would be uploaded, install it into an empty
+      # project, and import the installed copy, so a wrong `files` list or entry
+      # point fails here instead of after npm has the version.
+      - name: Check the packed tarball installs and imports
+        working-directory: fauxshield_node
+        run: |
+          npm pack --pack-destination /tmp
+          mkdir -p /tmp/installed
+          cd /tmp/installed
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund /tmp/fauxshield-*.tgz
+          cat > check.mjs <<'EOF'
+          import assert from 'node:assert/strict';
+          import { DEFAULT_BASE_URL, FauxShieldClient } from 'fauxshield';
+
+          assert.equal(DEFAULT_BASE_URL, 'https://fauxshield.api.serverpod.space');
+          assert.equal(typeof FauxShieldClient, 'function');
+          const client = new FauxShieldClient({ apiKey: 'fs_live_check' });
+          assert.equal(client.baseUrl, DEFAULT_BASE_URL);
+          console.log('packed tarball imports and calls', client.baseUrl);
+          EOF
+          node check.mjs
+
+      - name: Publish to npm
+        working-directory: fauxshield_node
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish

@@ -16,11 +16,9 @@ fraud queue are all reachable from a Python process.
 pip install fauxshield-sdk
 ```
 
-Until the package is published, install it from the repository:
-
-```bash
-pip install ./fauxshield_python
-```
+To install the working tree instead, run `pip install ./fauxshield_python` from
+the repository root; published versions come from a version tag via
+`.github/workflows/release-python.yml`.
 
 ## Authenticate
 

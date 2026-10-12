@@ -66,7 +66,7 @@ Consequences:
 | 3. Python SDK | `fauxshield_python` (`pip install fauxshield-sdk`, import `fauxshield`): generated resources and typed models, keyword arguments, standard-library transport, typed errors, retries honouring `retry_after`, injectable transport, Python 3.9+ | 43 tests passing, wheel built and imported from the installed copy; published as `fauxshield-sdk@0.1.0` |
 | 4. Parity checks | `tools/check_parity.py` compares Dart, Node.js, and Python against the contract (methods, endpoints, models, enums), checks every published default URL, and checks CLI/MCP naming in the docs | 86/86 methods and 76/76 models in all three; exits non-zero on drift (verified by breaking a method name on purpose) |
 | 5. Documentation portal | `/docs` is a 42-page portal: overview, getting started, authentication, generated API reference (one page per endpoint with parameter tables and cURL/Dart/TypeScript/Python examples, plus model and enum references), SDK pages (Dart, Node.js, Python, parity matrix), CLI reference (18 commands, 72 names), MCP reference (55 tools), five guides, and a reference section | `fauxshield_server/lib/src/web/docs/`; 28 portal and chrome tests across `test/unit/docs_*_test.dart` and `test/unit/site_chrome_test.dart` |
-| 6. Drift and executed checks | CI regenerates and diffs the docs reference (`dart run tool/generate_docs.dart --check`), runs the parity script, both SDK suites, the Python wheel install, and the portal's own tests | `.github/workflows/tests.yml`; `.github/workflows/release-python.yml` publishes the Python SDK from a version tag |
+| 6. Drift and executed checks | CI regenerates and diffs the docs reference (`dart run tool/generate_docs.dart --check`), runs the parity script, both SDK suites, the Python wheel install, and the portal's own tests | `.github/workflows/tests.yml`; `.github/workflows/release-python.yml` and `.github/workflows/release-npm.yml` publish the SDKs from a version tag |
 
 ### Documentation portal detail
 
@@ -138,14 +138,18 @@ What could not be checked here, and why:
   `fauxshield-sdk@0.1.0` on PyPI were each installed back from their registry
   into a clean environment, and each answered a live call to the hosted API
   with the typed `AuthenticationError` an unauthenticated caller should get.
-  PyPI publishing now runs from `.github/workflows/release-python.yml` on a
-  version tag; npm releases are still run by hand.
+  Both registries now release from CI on a version tag:
+  `.github/workflows/release-python.yml` publishes `fauxshield-sdk` and
+  `.github/workflows/release-npm.yml` publishes `fauxshield`, each after
+  checking the tag against its own manifest, regenerating the SDK, running its
+  suite, and installing the exact artifact it will upload into a clean
+  environment.
 
 ## 5. Remaining gaps and what needs authorization
 
 | Item | State |
 |------|-------|
-| Publishing `fauxshield` (npm) and `fauxshield-sdk` (PyPI) | **Done** — `fauxshield@0.1.0` and `fauxshield-sdk@0.1.0` are live. Pushing a version tag publishes PyPI from `.github/workflows/release-python.yml` once the `PYPI_API_TOKEN` repository secret exists; npm releases run from a maintainer's machine. |
+| Publishing `fauxshield` (npm) and `fauxshield-sdk` (PyPI) | **Done** — `fauxshield@0.1.0` and `fauxshield-sdk@0.1.0` are live. A version tag now releases both from CI: `.github/workflows/release-npm.yml` once the `NPM_TOKEN` secret exists, and `.github/workflows/release-python.yml` once `PYPI_API_TOKEN` exists. The next tag must name a version above 0.1.0, because neither registry accepts a version it already has. |
 | `fauxshield_client` (Dart) on pub.dev | It is generated per server, so it stays a path/git dependency by design |
 | Authenticated live test suite | Needs a credential on the hosted deployment |
 | Everything committed | Nothing here is deployed; the deployed server is unchanged by this pass |
@@ -160,6 +164,9 @@ cd ../fauxshield_node && npm install && npm test
 cd ../fauxshield_python && PYTHONPATH=src python -m unittest discover -s tests
 cd .. && python tools/check_parity.py
 
-# Release the Python SDK: the tag names the version in pyproject.toml
-git tag v0.2.0 && git push origin v0.2.0
+# Release the SDKs from a tag: the tag names the version the manifest already
+# declares, and a package-scoped tag releases one package on its own.
+git tag v0.2.0 && git push origin v0.2.0                                 # both SDKs
+git tag fauxshield-v0.2.0 && git push origin fauxshield-v0.2.0           # npm only
+git tag fauxshield-sdk-v0.2.0 && git push origin fauxshield-sdk-v0.2.0   # PyPI only
 ```
