@@ -31,8 +31,15 @@ late final Uri serverBase;
 Future<void> initializeClient() async {
   final host = await serverUrl;
   serverBase = Uri.parse(host);
-  client = Client(host)
-    ..connectivityMonitor = FlutterConnectivityMonitor()
-    ..authSessionManager = FlutterAuthSessionManager();
+  client =
+      Client(
+          host,
+          // Generation runs in ~20-unit chunks; each chunk is a few seconds of
+          // PBKDF2 hashing plus DB writes. The 20s default can be tight on a cold
+          // podlet, and a client timeout mid-chunk looks like a hard failure.
+          connectionTimeout: const Duration(seconds: 45),
+        )
+        ..connectivityMonitor = FlutterConnectivityMonitor()
+        ..authSessionManager = FlutterAuthSessionManager();
   unawaited(client.auth.initialize());
 }
