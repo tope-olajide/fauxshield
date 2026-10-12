@@ -45,11 +45,11 @@ Clients published against the same API:
 
 | Client | Install | Default API |
 | --- | --- | --- |
-| Dart (`fauxshield_client`) | `dart pub add fauxshield_client` | host supplied by the caller; the app reads it from `config.json` |
-| Node.js (`fauxshield`) | `npm install fauxshield` | `https://fauxshield.api.serverpod.space` |
-| Python (`fauxshield-sdk`) | `pip install fauxshield-sdk` | `https://fauxshield.api.serverpod.space` |
-| CLI (`fauxshield`) | `dart pub global activate fauxshield_cli` | `https://fauxshield.api.serverpod.space` |
-| MCP (`fauxshield_mcp`) | `dart pub global activate fauxshield_mcp` | `https://fauxshield.api.serverpod.space` |
+| Dart ([`fauxshield_client`](https://pub.dev/packages/fauxshield_client)) | `dart pub add fauxshield_client` | host supplied by the caller; the app reads it from `config.json` |
+| Node.js ([`fauxshield`](https://www.npmjs.com/package/fauxshield)) | `npm install fauxshield` | `https://fauxshield.api.serverpod.space` |
+| Python ([`fauxshield-sdk`](https://pypi.org/project/fauxshield-sdk/)) | `pip install fauxshield-sdk` | `https://fauxshield.api.serverpod.space` |
+| CLI ([`fauxshield_cli`](https://pub.dev/packages/fauxshield_cli)) | `dart pub global activate fauxshield_cli` | `https://fauxshield.api.serverpod.space` |
+| MCP ([`fauxshield_mcp`](https://pub.dev/packages/fauxshield_mcp)) | `dart pub global activate fauxshield_mcp` | `https://fauxshield.api.serverpod.space` |
 
 `python tools/check_parity.py` compares all of them against the contract and
 reports the coverage — currently 86 of 86 methods, 76 of 76 models and enums —
@@ -324,14 +324,14 @@ dart test
 Covers the core crypto (HMAC, PBKDF2, AES-GCM), the verification pipeline
 (outcomes, replay protection, PIN lockout), the fraud pipeline (clone/PIN/offline
 signals and alert evidence), recalls, API key authentication, the product
-recycle bin, product image storage, and the demo seeder — 40 tests, all green.
+recycle bin, product image storage, and the demo seeder — 70 tests, all green.
 
 The clients are tested on their own terms, because they are what operators and
 agents actually drive the API with:
 
 ```bash
-cd fauxshield_cli && dart test    # 10 tests: version parity, exit codes, API key
-cd fauxshield_mcp && dart test    # 21 tests: config, tool surface, read-only guard, stdio handshake
+cd fauxshield_cli && dart test    # 13 tests: version parity, exit codes, API key
+cd fauxshield_mcp && dart test    # 26 tests: config, tool surface, read-only guard, stdio handshake
 ```
 
 The Flutter app is analyzed clean with `flutter analyze`, and every package
@@ -339,7 +339,9 @@ The Flutter app is analyzed clean with `flutter analyze`, and every package
 is analyzed clean with `dart analyze`. CI runs all of it on every push:
 `.github/workflows/tests.yml`, and pushing a version tag publishes the SDKs to
 PyPI and npm from `.github/workflows/release-python.yml` and
-`.github/workflows/release-npm.yml`.
+`.github/workflows/release-npm.yml`. The three Dart packages are on pub.dev
+(`fauxshield_client`, `fauxshield_cli`, `fauxshield_mcp`), published with
+`dart pub publish`.
 
 ---
 
