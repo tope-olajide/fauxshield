@@ -1,8 +1,32 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:cryptography/cryptography.dart' as c;
 import 'package:fauxshield_server/src/core/identity_crypto.dart';
 import 'package:fauxshield_server/src/core/webhook_signing.dart';
 import 'package:fauxshield_server/src/services/fraud_rules.dart';
 import 'package:fauxshield_server/src/generated/protocol.dart';
 import 'package:test/test.dart';
+
+/// The salt used by the PBKDF2 cross implementation tests.
+final Uint8List _pinTestSalt = Uint8List.fromList(
+  List<int>.generate(16, (i) => i * 7 + 1),
+);
+
+/// Derives a PIN key with package:cryptography, the implementation the PIN
+/// hasher used before it moved to a synchronous PBKDF2.
+Future<List<int>> _referencePinKey(String pin, int iterations) async {
+  final key =
+      await c.Pbkdf2(
+        macAlgorithm: c.Hmac.sha256(),
+        iterations: iterations,
+        bits: 256,
+      ).deriveKey(
+        secretKey: c.SecretKey(utf8.encode(pin)),
+        nonce: _pinTestSalt,
+      );
+  return key.extractBytes();
+}
 
 void main() {
   group('Given IdentityCrypto', () {
@@ -61,6 +85,38 @@ void main() {
       expect(await IdentityCrypto.verifyPin('123456', hash), isTrue);
       expect(await IdentityCrypto.verifyPin('654321', hash), isFalse);
     });
+
+    test('derives the same PBKDF2 key as package:cryptography', () async {
+      // Generation hashes one PIN per unit inside a single API request, so it
+      // uses a synchronous PBKDF2 instead of package:cryptography's. The
+      // derived bytes must stay identical, otherwise PINs stored by the older
+      // implementation would stop verifying.
+      for (final iterations in <int>[1000, 30000]) {
+        expect(
+          IdentityCrypto.pbkdf2Sha256(
+            password: utf8.encode('123456'),
+            salt: _pinTestSalt,
+            iterations: iterations,
+            length: 32,
+          ),
+          await _referencePinKey('123456', iterations),
+          reason: 'PBKDF2 mismatch at $iterations iterations',
+        );
+      }
+    });
+
+    test(
+      'verifies a stored PIN hash written by package:cryptography',
+      () async {
+        // Produced by package:cryptography's DartPbkdf2 at 30k iterations over
+        // the pin '123456' and _pinTestSalt, the parameters generation uses.
+        const stored =
+            'pbkdf2-sha256\$30000\$AQgPFh0kKzI5QEdOVVxjag==\$'
+            'xXCKy0Zr9KJPJc5zTz0r2Dis9KlI2PUksIcJQpQ3ZVE=';
+        expect(await IdentityCrypto.verifyPin('123456', stored), isTrue);
+        expect(await IdentityCrypto.verifyPin('654321', stored), isFalse);
+      },
+    );
 
     test(
       'encrypts and decrypts values with AES-256-GCM bound to AAD',
