@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -14,6 +13,12 @@ import '../services/workspace_service.dart';
 
 /// Maximum size of a single uploaded product image: 2 MB.
 const int _maxProductImageBytes = 2 * 1024 * 1024;
+
+/// The storage uploaded product images are written to.
+///
+/// `public` is the storage meant to be readable by anyone, which is what a
+/// product photo is; it is registered in `server.dart`.
+const String cloudStoragePublicId = 'public';
 
 /// Maximum number of images a product may carry (matches the reference app).
 const int _maxProductImages = 5;
@@ -85,8 +90,10 @@ class ProductEndpoint extends Endpoint {
   ///
   /// Flutter web cannot post multipart forms to Serverpod endpoints, so the
   /// bytes arrive base64-encoded. The payload is validated by magic-byte
-  /// sniffing and a 2 MB cap, written under `web/static/media/products/`,
-  /// and served by the static route at `/web/media/products/<file>`.
+  /// sniffing and a 2 MB cap, written to the public cloud storage under
+  /// `products/`, and returned as the absolute URL the storage serves it from.
+  /// Storage rather than the podlet's disk is what makes the image survive a
+  /// deploy, a restart, and a second instance.
   ///
   /// When [productId] is given the URL is appended to the product's
   /// `imageUrls` (capped at [_maxProductImages] images).
@@ -149,15 +156,39 @@ class ProductEndpoint extends Endpoint {
       }
     }
 
-    final directory = Directory('web/static/media/products');
-    await directory.create(recursive: true);
+    // Durable object storage, not the podlet's own disk. Files written under
+    // web/static are wiped by the next deploy or restart, so an uploaded image
+    // showed up until something recycled the container and then 404ed for
+    // everyone who had not cached it. Serverpod Cloud buckets back this in
+    // production; locally it is the database, which is just as durable.
+    final storage = session.serverpod.storage[cloudStoragePublicId];
+    if (storage == null) {
+      throw ServiceUnavailableException(
+        message: 'Image storage is not configured on this server.',
+        reason: 'storageUnavailable',
+      );
+    }
+
     final stamp = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
     final suffix = Random.secure().nextInt(0xFFFFFF).toRadixString(36);
-    final storedName = '${stamp}_$suffix.$extension';
-    await File(
-      '${directory.path}/$storedName',
-    ).writeAsBytes(bytes, flush: true);
-    final url = '/web/media/products/$storedName';
+    final path = 'products/${stamp}_$suffix.$extension';
+    final String url;
+    try {
+      await storage.storeFile(
+        session: session,
+        path: path,
+        byteData: ByteData.sublistView(bytes),
+      );
+      url = (await storage.publicDownloadUrl(
+        session: session,
+        path: path,
+      )).toString();
+    } on CloudStorageException catch (error) {
+      throw ServiceUnavailableException(
+        message: 'Could not store the image. (${error.message})',
+        reason: 'storageUnavailable',
+      );
+    }
 
     if (product != null) {
       await Product.db.updateRow(

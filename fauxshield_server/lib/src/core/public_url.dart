@@ -1,12 +1,16 @@
 import 'package:serverpod/serverpod.dart';
 
-/// Media stored by this project is saved as web-root-relative paths (for
-/// example `/web/media/products/<file>`), which keeps database rows portable
-/// across environments. Clients that are not served by the same origin as the
-/// web server — most importantly the Flutter app running on its own dev
-/// server — cannot resolve those paths, so every URL handed out at a read
-/// boundary is expanded with [absoluteWebUrl]. URLs written back by clients
-/// are collapsed again with [relativeWebPath], so rows stay relative.
+/// Media stored by this project is saved either as an absolute URL or as a
+/// web-root-relative path. Uploaded product images are the first kind: cloud
+/// storage hands back a URL on the API host, which works from anywhere.
+/// Everything else is web-root-relative (for example
+/// `/web/media/products/<file>`), which keeps database rows portable across
+/// environments. Clients that are not served by the same origin as the web
+/// server — most importantly the Flutter app running on its own dev server —
+/// cannot resolve relative paths, so every URL handed out at a read boundary is
+/// expanded with [absoluteWebUrl]. Absolute and external URLs pass through
+/// untouched, and URLs a client writes back are collapsed to relative paths
+/// with [relativeWebPath] when they point at this web server.
 
 /// Expands a web-root-relative [url] into an absolute URL on the configured
 /// web server's public origin. Absolute and external URLs pass through

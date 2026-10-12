@@ -96,6 +96,29 @@ the YAML config files.
 - [ ] **Geo provider.** Development and the cloud both run the deterministic
       `demo` provider, so scans resolve to a city without an external service.
 
+- [ ] **Product images are in object storage.** Uploaded images go through
+      `pod.storage['public']`, which `server.dart` wires with
+      `ServerpodCloudProvider.public` and falls back to `DatabaseCloudStorage`.
+      Serverpod Cloud buckets back it in production, so an image survives a
+      deploy, a restart, and a second podlet; the same code works locally
+      against the database. List what the project has:
+
+      ```bash
+      serverpod cloud storage list -p fauxshield      # the public and private buckets
+      serverpod cloud storage file list public -p fauxshield
+      ```
+
+      To point the same calls at another provider instead, register it in
+      `server.dart` — `serverpod_cloud_storage_s3_compat` covers AWS S3,
+      Cloudflare R2, MinIO, and anything else that speaks S3, and
+      `serverpod_cloud_storage_gcp` covers Google Cloud Storage. No call site
+      changes, because endpoints only ever use `pod.storage`.
+
+      Earlier builds wrote images under `fauxshield_server/web/static/media/`,
+      which is gitignored and lives on the podlet's own disk: those files are
+      gone once the container is replaced, and the products that referenced
+      them show the placeholder image until someone re-uploads.
+
 ## Deploy
 
 `serverpod cloud launch` is convenient by hand but **interactive-only** (it

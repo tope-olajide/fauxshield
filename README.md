@@ -292,7 +292,7 @@ dart test
 Covers the core crypto (HMAC, PBKDF2, AES-GCM), the verification pipeline
 (outcomes, replay protection, PIN lockout), the fraud pipeline (clone/PIN/offline
 signals and alert evidence), recalls, API key authentication, the product
-recycle bin, and the demo seeder — 38 tests, all green.
+recycle bin, product image storage, and the demo seeder — 40 tests, all green.
 
 The clients are tested on their own terms, because they are what operators and
 agents actually drive the API with:
