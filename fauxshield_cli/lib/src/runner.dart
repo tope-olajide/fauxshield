@@ -4,11 +4,23 @@ import 'package:args/command_runner.dart';
 import 'package:fauxshield_client/fauxshield_client.dart';
 
 import 'commands/alerts_command.dart';
+import 'commands/analytics_command.dart';
+import 'commands/audit_command.dart';
 import 'commands/auth_command.dart';
 import 'commands/batches_command.dart';
+import 'commands/demo_command.dart';
 import 'commands/identities_command.dart';
+import 'commands/keys_command.dart';
+import 'commands/notifications_command.dart';
+import 'commands/offline_command.dart';
 import 'commands/products_command.dart';
+import 'commands/recalls_command.dart';
+import 'commands/simulations_command.dart';
+import 'commands/team_command.dart';
+import 'commands/verifications_command.dart';
 import 'commands/verify_command.dart';
+import 'commands/webhooks_command.dart';
+import 'commands/workspace_command.dart';
 import 'config.dart';
 
 /// The version reported by `fauxshield --version`.
@@ -45,6 +57,12 @@ class FauxShieldRunner extends CommandRunner<int> {
         'token',
         help: 'JWT to authenticate with, overriding the stored value.',
       )
+      ..addOption(
+        'api-key',
+        help:
+            'API key to authenticate with, overriding the stored value. '
+            'Falls back to FAUXSHIELD_API_KEY.',
+      )
       ..addFlag(
         'version',
         abbr: 'v',
@@ -57,14 +75,26 @@ class FauxShieldRunner extends CommandRunner<int> {
     addCommand(BatchesCommand());
     addCommand(IdentitiesCommand());
     addCommand(AlertsCommand());
+    addCommand(VerificationsCommand());
+    addCommand(RecallsCommand());
+    addCommand(SimulationsCommand());
+    addCommand(AnalyticsCommand());
+    addCommand(AuditCommand());
+    addCommand(TeamCommand());
+    addCommand(KeysCommand());
+    addCommand(WebhooksCommand());
+    addCommand(NotificationsCommand());
+    addCommand(OfflineCommand());
+    addCommand(WorkspaceCommand());
+    addCommand(DemoCommand());
     addCommand(VerifyCommand());
   }
 
   @override
   String? get usageFooter =>
       '\nConfiguration: ${CliConfig.path}\n'
-      'Server URL and token can also come from the FAUXSHIELD_URL and '
-      'FAUXSHIELD_TOKEN environment variables.';
+      'Server URL and credential can also come from the FAUXSHIELD_URL, '
+      'FAUXSHIELD_TOKEN, and FAUXSHIELD_API_KEY environment variables.';
 }
 
 /// True when the invocation is asking for the version rather than work.

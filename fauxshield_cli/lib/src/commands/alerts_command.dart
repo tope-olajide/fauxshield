@@ -12,6 +12,11 @@ class AlertsCommand extends Command<int> {
   AlertsCommand() {
     addSubcommand(AlertsListCommand());
     addSubcommand(AlertsShowCommand());
+    addSubcommand(AlertsStatusCommand());
+    addSubcommand(AlertsAssignCommand());
+    addSubcommand(AlertsSignalsCommand());
+    addSubcommand(AlertsReportsCommand());
+    addSubcommand(AlertsTriageCommand());
   }
 
   @override
@@ -21,7 +26,8 @@ class AlertsCommand extends Command<int> {
   String get description => 'Read the fraud queue and an alert\'s evidence.';
 
   @override
-  String get invocation => 'fauxshield alerts <list|show>';
+  String get invocation =>
+      'fauxshield alerts <list|show|status|assign|signals|reports|triage>';
 }
 
 /// Lists fraud alerts.
@@ -170,7 +176,8 @@ class AlertsShowCommand extends CliCommand {
   }
 
   /// Signal details are stored as a JSON blob, with the reasons under
-  /// `reasons`. Anything unexpected is ignored rather than crashing the report.
+  /// `reasons`. Anything unexpected is ignored rather than crashing the
+  /// report.
   static List<String> _readReasons(String dataJson) {
     try {
       final decoded = jsonDecode(dataJson);
@@ -184,5 +191,305 @@ class AlertsShowCommand extends CliCommand {
       return const <String>[];
     }
     return const <String>[];
+  }
+}
+
+/// Moves an alert through the triage queue.
+class AlertsStatusCommand extends CliCommand {
+  AlertsStatusCommand() {
+    argParser
+      ..addOption('alert', abbr: 'a', help: 'Alert id.')
+      ..addOption(
+        'status',
+        abbr: 's',
+        help: 'New status: open, investigating, resolved, dismissed.',
+      )
+      ..addOption('note', abbr: 'n', help: 'Note kept with the change.');
+  }
+
+  @override
+  String get name => 'status';
+
+  @override
+  String get description => 'Change an alert status.';
+
+  @override
+  Future<int> run() async {
+    final alertId = parseUuid(requiredOption('alert'), '--alert');
+    final status = parseEnum(
+      requiredOption('status'),
+      AlertStatus.values,
+      '--status',
+    );
+    final context = connect();
+    final FraudAlert alert;
+    try {
+      alert = await context.client.alert.updateStatus(
+        alertId: alertId,
+        status: status,
+        note: optionalOption('note'),
+      );
+    } catch (error) {
+      throw CliException(
+        'Could not update the alert: ${describeError(error)}',
+      );
+    }
+
+    if (context.json) {
+      printJson(alert.toJson());
+      return 0;
+    }
+    stdout.writeln('${alert.title} is now ${alert.status.name}.');
+    return 0;
+  }
+}
+
+/// Hands an alert to a person.
+class AlertsAssignCommand extends CliCommand {
+  AlertsAssignCommand() {
+    argParser
+      ..addOption('alert', abbr: 'a', help: 'Alert id.')
+      ..addOption(
+        'assignee',
+        help: 'Email or name of the operator taking the alert.',
+      )
+      ..addFlag(
+        'clear',
+        negatable: false,
+        help: 'Unassign instead of assigning.',
+      );
+  }
+
+  @override
+  String get name => 'assign';
+
+  @override
+  String get description => 'Assign or unassign an alert.';
+
+  @override
+  Future<int> run() async {
+    final alertId = parseUuid(requiredOption('alert'), '--alert');
+    final assignee = optionalOption('assignee');
+    final clear = argResults?['clear'] as bool? ?? false;
+    if (assignee == null && !clear) {
+      throw CliException.usage(
+        'Pass --assignee <email>, or --clear to take the alert off its owner.',
+      );
+    }
+
+    final context = connect();
+    final FraudAlert alert;
+    try {
+      alert = await context.client.alert.assign(
+        alertId: alertId,
+        assignee: clear ? null : assignee,
+      );
+    } catch (error) {
+      throw CliException(
+        'Could not assign the alert: ${describeError(error)}',
+      );
+    }
+
+    if (context.json) {
+      printJson(alert.toJson());
+      return 0;
+    }
+    stdout.writeln(
+      clear
+          ? 'Cleared the assignee on ${alert.title}.'
+          : 'Assigned ${alert.title} to ${alert.assignee ?? assignee}.',
+    );
+    return 0;
+  }
+}
+
+/// Reads the raw fraud signals behind the alerts.
+class AlertsSignalsCommand extends CliCommand {
+  AlertsSignalsCommand() {
+    argParser
+      ..addOption('batch', abbr: 'b', help: 'Only signals for this batch.')
+      ..addOption(
+        'type',
+        abbr: 't',
+        help: 'Filter by signal type, for example impossibleTravel.',
+      )
+      ..addOption('page', help: 'Page number, starting at 1.', defaultsTo: '1')
+      ..addOption('page-size', help: 'Rows per page.', defaultsTo: '25');
+  }
+
+  @override
+  String get name => 'signals';
+
+  @override
+  String get description => 'List the fraud signals the engine raised.';
+
+  @override
+  Future<int> run() async {
+    final rawBatch = optionalOption('batch');
+    final rawType = optionalOption('type');
+    final page = int.tryParse(argResults?['page'] as String? ?? '1') ?? 1;
+    final pageSize =
+        int.tryParse(argResults?['page-size'] as String? ?? '25') ?? 25;
+    final context = connect();
+
+    final List<FraudSignalRecord> signals;
+    try {
+      signals = await context.client.alert.signals(
+        batchId: rawBatch == null ? null : parseUuid(rawBatch, '--batch'),
+        type: rawType == null || rawType.isEmpty
+            ? null
+            : parseEnum(rawType, SignalType.values, '--type'),
+        page: (page < 1 ? 1 : page) - 1,
+        pageSize: pageSize < 1 ? 25 : pageSize,
+      );
+    } catch (error) {
+      throw CliException(
+        'Could not list signals: ${describeError(error)}',
+      );
+    }
+
+    if (context.json) {
+      printJson(signals.map((signal) => signal.toJson()).toList());
+      return 0;
+    }
+
+    printTable(
+      <String>['TYPE', 'RISK', 'IDENTITY', 'BATCH', 'DETECTED'],
+      signals
+          .map(
+            (signal) => <String>[
+              signal.type.name,
+              signal.severity.name,
+              signal.identityId.uuid,
+              signal.batchId.uuid,
+              formatTime(signal.detectedAt),
+            ],
+          )
+          .toList(),
+    );
+    stdout.writeln('\n${signals.length} signal(s) on page $page.');
+    return 0;
+  }
+}
+
+/// Reads what shoppers reported as fake.
+class AlertsReportsCommand extends CliCommand {
+  AlertsReportsCommand() {
+    argParser
+      ..addOption(
+        'status',
+        abbr: 's',
+        help: 'Filter by status: open, triaged, rejected.',
+      )
+      ..addOption('page', help: 'Page number, starting at 1.', defaultsTo: '1')
+      ..addOption('page-size', help: 'Rows per page.', defaultsTo: '25');
+  }
+
+  @override
+  String get name => 'reports';
+
+  @override
+  String get description => 'List shopper fake-product reports.';
+
+  @override
+  Future<int> run() async {
+    final rawStatus = optionalOption('status');
+    final page = int.tryParse(argResults?['page'] as String? ?? '1') ?? 1;
+    final pageSize =
+        int.tryParse(argResults?['page-size'] as String? ?? '25') ?? 25;
+    final context = connect();
+
+    final List<FakeReport> reports;
+    try {
+      reports = await context.client.alert.reports(
+        status: rawStatus == null || rawStatus.isEmpty
+            ? null
+            : parseEnum(rawStatus, FakeReportStatus.values, '--status'),
+        page: (page < 1 ? 1 : page) - 1,
+        pageSize: pageSize < 1 ? 25 : pageSize,
+      );
+    } catch (error) {
+      throw CliException(
+        'Could not list reports: ${describeError(error)}',
+      );
+    }
+
+    if (context.json) {
+      printJson(reports.map((report) => report.toJson()).toList());
+      return 0;
+    }
+
+    printTable(
+      <String>['STATUS', 'REASON', 'IDENTITY', 'PLACE', 'CREATED'],
+      reports
+          .map(
+            (report) => <String>[
+              report.status.name,
+              shorten(report.reason, max: 26),
+              report.identityId.uuid,
+              shorten(
+                <String?>[
+                  report.city,
+                  report.country,
+                ].whereType<String>().join(', '),
+                max: 18,
+              ),
+              formatTime(report.createdAt),
+            ],
+          )
+          .toList(),
+    );
+    stdout.writeln('\n${reports.length} report(s) on page $page.');
+    return 0;
+  }
+}
+
+/// Closes or rejects a shopper report.
+class AlertsTriageCommand extends CliCommand {
+  AlertsTriageCommand() {
+    argParser
+      ..addOption('report', abbr: 'r', help: 'Report id.')
+      ..addOption(
+        'status',
+        abbr: 's',
+        help: 'New status: triaged or rejected.',
+      )
+      ..addOption('note', abbr: 'n', help: 'Note kept with the decision.');
+  }
+
+  @override
+  String get name => 'triage';
+
+  @override
+  String get description => 'Triage a shopper fake-product report.';
+
+  @override
+  Future<int> run() async {
+    final reportId = parseUuid(requiredOption('report'), '--report');
+    final status = parseEnum(
+      requiredOption('status'),
+      FakeReportStatus.values,
+      '--status',
+    );
+    final context = connect();
+    final FakeReport report;
+    try {
+      report = await context.client.alert.triageReport(
+        reportId: reportId,
+        status: status,
+        note: optionalOption('note'),
+      );
+    } catch (error) {
+      throw CliException(
+        'Could not triage the report: ${describeError(error)}',
+      );
+    }
+
+    if (context.json) {
+      printJson(report.toJson());
+      return 0;
+    }
+    stdout.writeln('Report ${report.id?.uuid} is now ${report.status.name}.');
+    return 0;
   }
 }

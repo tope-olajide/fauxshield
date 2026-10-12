@@ -25,7 +25,7 @@ class AuthCommand extends Command<int> {
   String get invocation => 'fauxshield auth <login|logout|whoami|token>';
 }
 
-/// Exchanges an email and password for a JWT and stores it.
+/// Signs in with an email and password, or stores an API key.
 class AuthLoginCommand extends CliCommand {
   AuthLoginCommand() {
     argParser
@@ -39,8 +39,20 @@ class AuthLoginCommand extends CliCommand {
         'password',
         abbr: 'p',
         help: 'Account password. Falls back to FAUXSHIELD_PASSWORD.',
+      )
+      ..addOption(
+        'api-key',
+        help:
+            'Store an API key instead of signing in. Create one with '
+            '`fauxshield keys create`.',
+        valueHelp: 'fs_live_…',
       );
   }
+
+  /// `login` defines its own `--api-key`, so the shared session overrides are
+  /// not registered here; signing in is what this command is for.
+  @override
+  bool get acceptsAuthToken => false;
 
   @override
   String get name => 'login';
@@ -50,6 +62,9 @@ class AuthLoginCommand extends CliCommand {
 
   @override
   Future<int> run() async {
+    final apiKey = (argResults?['api-key'] as String?)?.trim();
+    if (apiKey != null && apiKey.isNotEmpty) return _storeApiKey(apiKey);
+
     final email = (argResults?['email'] as String?)?.trim();
     final flagPassword = (argResults?['password'] as String?)?.trim();
     final environmentPassword = Platform.environment['FAUXSHIELD_PASSWORD']
@@ -88,6 +103,46 @@ class AuthLoginCommand extends CliCommand {
     if (session.scopes.isNotEmpty) {
       stdout.writeln('Scopes: ${session.scopes.join(', ')}');
     }
+    stdout.writeln('Credentials stored in ${CliConfig.path}');
+    return 0;
+  }
+
+  /// Stores a key handed in on the command line.
+  ///
+  /// The key is checked against the server before it is written, so a typo is
+  /// caught here rather than halfway through a script. `workspace.bootstrap`
+  /// is used because every authenticated caller may read it, and a successful
+  /// answer proves the key is live rather than revoked.
+  Future<int> _storeApiKey(String apiKey) async {
+    if (!apiKey.startsWith('fs_live_')) {
+      throw CliException.usage(
+        'That does not look like a FauxShield API key; keys start with '
+        '`fs_live_`.',
+      );
+    }
+    final url = resolvedUrl;
+
+    final client = Client(url);
+    client.authKeyProvider = BearerTokenProvider(apiKey);
+    try {
+      await client.workspace.bootstrap();
+    } catch (error) {
+      throw CliException(
+        'The server rejected that key: ${describeError(error)}',
+      );
+    }
+
+    CliConfig(url: url, apiKey: apiKey).save();
+
+    if (jsonOutput) {
+      printJson(<String, dynamic>{
+        'url': url,
+        'credential': 'apiKey',
+        'apiKeyPrefix': maskSecret(apiKey),
+      });
+      return 0;
+    }
+    stdout.writeln('Stored API key ${maskSecret(apiKey)} for $url.');
     stdout.writeln('Credentials stored in ${CliConfig.path}');
     return 0;
   }
@@ -144,13 +199,14 @@ class AuthLogoutCommand extends CliCommand {
   }
 }
 
-/// Shows which workspace the token resolves to.
+/// Shows which workspace the credential resolves to.
 class AuthWhoamiCommand extends CliCommand {
   @override
   String get name => 'whoami';
 
   @override
-  String get description => 'Show the workspace and role for the active token.';
+  String get description =>
+      'Show the account, workspace, and role for the active credential.';
 
   @override
   Future<int> run() async {
@@ -163,10 +219,30 @@ class AuthWhoamiCommand extends CliCommand {
     }
 
     if (bootstrap == null) {
-      throw CliException(
-        'That token is not a member of any workspace. Create one in the '
-        'operator app, or join the demo workspace.',
+      if (!context.isApiKey) {
+        throw CliException(
+          'That token is not a member of any workspace. Create one in the '
+          'operator app, or join the demo workspace.',
+        );
+      }
+      // A key is not a person, so there is no workspace membership to report:
+      // it carries scopes and acts on the workspace it was created in. The
+      // bootstrap call above still proved the key is live and accepted.
+      if (context.json) {
+        printJson(<String, dynamic>{
+          'url': context.url,
+          'credential': 'apiKey',
+          'apiKeyPrefix': context.apiKeyPrefix,
+        });
+        return 0;
+      }
+      stdout.writeln('Server:      ${context.url}');
+      stdout.writeln('Credential:  API key ${context.apiKeyPrefix}');
+      stdout.writeln('Workspace:   created in one workspace, set by the key');
+      stdout.writeln(
+        'Scopes:      run `fauxshield keys list` to see them',
       );
+      return 0;
     }
 
     if (context.json) {
@@ -183,6 +259,9 @@ class AuthWhoamiCommand extends CliCommand {
     }
 
     stdout.writeln('Server:     ${context.url}');
+    stdout.writeln(
+      'Credential: ${context.isApiKey ? 'API key ${context.apiKeyPrefix}' : 'session token'}',
+    );
     stdout.writeln('Workspace:  ${bootstrap.workspace.name}');
     stdout.writeln('Slug:       ${bootstrap.workspace.slug}');
     stdout.writeln('Role:       ${bootstrap.role.name}');
@@ -192,22 +271,28 @@ class AuthWhoamiCommand extends CliCommand {
   }
 }
 
-/// Prints the active token, so it can be piped into other tools.
+/// Prints the active credential, so it can be piped into other tools.
 class AuthTokenCommand extends CliCommand {
   @override
   String get name => 'token';
 
   @override
-  String get description => 'Print the active session token.';
+  String get description => 'Print the active session token or API key.';
 
   @override
   Future<int> run() async {
-    final token = resolvedToken;
+    final token = resolvedCredential;
     if (token == null) {
-      throw CliException('No token available. Run `fauxshield auth login`.');
+      throw CliException(
+        'No credential available. Run `fauxshield auth login`.',
+      );
     }
     if (jsonOutput) {
-      printJson(<String, dynamic>{'url': resolvedUrl, 'token': token});
+      printJson(<String, dynamic>{
+        'url': resolvedUrl,
+        'credential': resolvedApiKey != null ? 'apiKey' : 'token',
+        'token': token,
+      });
     } else {
       stdout.writeln(token);
     }

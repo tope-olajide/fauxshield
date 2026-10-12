@@ -10,6 +10,8 @@ import '../output.dart';
 class BatchesCommand extends Command<int> {
   BatchesCommand() {
     addSubcommand(BatchesListCommand());
+    addSubcommand(BatchesShowCommand());
+    addSubcommand(BatchesUpdateCommand());
     addSubcommand(BatchesCreateCommand());
     addSubcommand(BatchesStatsCommand());
   }
@@ -21,7 +23,7 @@ class BatchesCommand extends Command<int> {
   String get description => 'List, create, and inspect manufacturing batches.';
 
   @override
-  String get invocation => 'fauxshield batches <list|create|stats>';
+  String get invocation => 'fauxshield batches <list|show|create|update|stats>';
 }
 
 /// Lists batches, optionally for one product.
@@ -233,4 +235,116 @@ class BatchesStatsCommand extends CliCommand {
     );
     return 0;
   }
+}
+
+/// Shows one batch.
+class BatchesShowCommand extends CliCommand {
+  BatchesShowCommand() {
+    argParser.addOption(
+      'batch',
+      abbr: 'b',
+      help: 'Batch id.',
+      valueHelp: '<uuid>',
+    );
+  }
+
+  @override
+  String get name => 'show';
+
+  @override
+  String get description => 'Show a batch.';
+
+  @override
+  Future<int> run() async {
+    final batchId = parseUuid(requiredOption('batch'), '--batch');
+    final context = connect();
+    final Batch batch;
+    try {
+      batch = await context.client.batch.get(batchId);
+    } catch (error) {
+      throw CliException('Could not read the batch: ${describeError(error)}');
+    }
+
+    if (context.json) {
+      printJson(batch.toJson());
+      return 0;
+    }
+
+    printBatch(batch);
+    return 0;
+  }
+}
+
+/// Updates the batch fields that were passed.
+class BatchesUpdateCommand extends CliCommand {
+  BatchesUpdateCommand() {
+    argParser
+      ..addOption('batch', abbr: 'b', help: 'Batch id.')
+      ..addOption(
+        'reference',
+        abbr: 'r',
+        help: 'Batch reference, such as L-2026-04.',
+      )
+      ..addOption('region', help: 'Distribution region.')
+      ..addOption('expiry', help: 'Expiry date, as YYYY-MM-DD.')
+      ..addOption('quantity', abbr: 'q', help: 'Declared quantity.')
+      ..addOption(
+        'status',
+        abbr: 's',
+        help: 'Batch status: draft, active, recalled, complete.',
+      )
+      ..addOption('notes', help: 'Freeform notes.');
+  }
+
+  @override
+  String get name => 'update';
+
+  @override
+  String get description => 'Update a batch.';
+
+  @override
+  Future<int> run() async {
+    final batchId = parseUuid(requiredOption('batch'), '--batch');
+    final rawStatus = optionalOption('status');
+    final rawQuantity = optionalOption('quantity');
+    final context = connect();
+    final Batch batch;
+    try {
+      batch = await context.client.batch.update(
+        batchId: batchId,
+        reference: optionalOption('reference'),
+        distributionRegion: optionalOption('region'),
+        expiryDate: optionalDate('expiry', '--expiry'),
+        quantity: rawQuantity == null ? null : int.tryParse(rawQuantity),
+        status: rawStatus == null
+            ? null
+            : parseEnum(rawStatus, BatchStatus.values, '--status'),
+        notes: optionalOption('notes'),
+      );
+    } catch (error) {
+      throw CliException('Could not update the batch: ${describeError(error)}');
+    }
+
+    if (context.json) {
+      printJson(batch.toJson());
+      return 0;
+    }
+
+    stdout.writeln('Updated ${batch.reference}');
+    printBatch(batch);
+    return 0;
+  }
+}
+
+/// Prints the fields a batch record carries.
+void printBatch(Batch batch) {
+  stdout.writeln('  id:        ${batch.id?.uuid}');
+  stdout.writeln('  product:   ${batch.productId.uuid}');
+  stdout.writeln('  region:    ${batch.distributionRegion}');
+  stdout.writeln('  quantity:  ${batch.quantity}');
+  stdout.writeln('  status:    ${batch.status.name}');
+  stdout.writeln('  made:      ${formatTime(batch.manufactureDate)}');
+  stdout.writeln('  expires:   ${formatTime(batch.expiryDate)}');
+  stdout.writeln('  created:   ${formatTime(batch.createdAt)}');
+  if (batch.notes != null) stdout.writeln('  notes:     ${batch.notes}');
 }

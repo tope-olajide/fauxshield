@@ -9,11 +9,23 @@
 library;
 
 export 'src/commands/alerts_command.dart';
+export 'src/commands/analytics_command.dart';
+export 'src/commands/audit_command.dart';
 export 'src/commands/auth_command.dart';
 export 'src/commands/batches_command.dart';
+export 'src/commands/demo_command.dart';
 export 'src/commands/identities_command.dart';
+export 'src/commands/keys_command.dart';
+export 'src/commands/notifications_command.dart';
+export 'src/commands/offline_command.dart';
 export 'src/commands/products_command.dart';
+export 'src/commands/recalls_command.dart';
+export 'src/commands/simulations_command.dart';
+export 'src/commands/team_command.dart';
+export 'src/commands/verifications_command.dart';
 export 'src/commands/verify_command.dart';
+export 'src/commands/webhooks_command.dart';
+export 'src/commands/workspace_command.dart';
 export 'src/config.dart';
 export 'src/output.dart';
 export 'src/runner.dart';

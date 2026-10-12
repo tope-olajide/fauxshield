@@ -1,7 +1,9 @@
 name: fauxshield_cli
 description: >-
-  Command line client for the FauxShield anti-counterfeit platform. Manage
-  products, batches, identities, and fraud alerts from a terminal.
+  Command line client for the FauxShield anti-counterfeit platform. Drive the
+  whole API from a terminal or a script: products, batches, serialized units,
+  verifications, fraud alerts, recalls, webhooks, simulations, and the audit
+  log.
 version: 1.0.0
 publish_to: none
 

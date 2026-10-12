@@ -10,8 +10,15 @@ import '../output.dart';
 class IdentitiesCommand extends Command<int> {
   IdentitiesCommand() {
     addSubcommand(IdentitiesListCommand());
+    addSubcommand(IdentitiesShowCommand());
     addSubcommand(IdentitiesGenerateCommand());
+    addSubcommand(IdentitiesExportCommand());
     addSubcommand(IdentitiesRevealPinCommand());
+    addSubcommand(IdentitiesLockCommand());
+    addSubcommand(IdentitiesUnlockCommand());
+    addSubcommand(IdentitiesRegenerateCommand());
+    addSubcommand(IdentitiesDeleteCommand());
+    addSubcommand(IdentitiesRestoreCommand());
   }
 
   @override
@@ -21,7 +28,10 @@ class IdentitiesCommand extends Command<int> {
   String get description => 'Inspect serialized units and mint new ones.';
 
   @override
-  String get invocation => 'fauxshield identities <list|generate|reveal-pin>';
+  String get invocation =>
+      'fauxshield identities '
+      '<list|show|generate|export|reveal-pin|lock|unlock|regenerate|delete|'
+      'restore>';
 }
 
 /// Lists serialized units.
@@ -224,5 +234,334 @@ class IdentitiesRevealPinCommand extends CliCommand {
     stdout.writeln('PIN for ${revealed.identityId.uuid}: ${revealed.pin}');
     stdout.writeln('Revealed at ${formatTime(revealed.revealedAt)}.');
     return 0;
+  }
+}
+
+/// Shows one serialized unit.
+class IdentitiesShowCommand extends CliCommand {
+  IdentitiesShowCommand() {
+    argParser.addOption(
+      'identity',
+      abbr: 'i',
+      help: 'Identity id.',
+      valueHelp: '<uuid>',
+    );
+  }
+
+  @override
+  String get name => 'show';
+
+  @override
+  String get description => 'Show a serialized unit.';
+
+  @override
+  Future<int> run() async {
+    final identityId = parseUuid(requiredOption('identity'), '--identity');
+    final context = connect();
+    final ProductIdentity identity;
+    try {
+      identity = await context.client.identity.get(identityId);
+    } catch (error) {
+      throw CliException('Could not read the unit: ${describeError(error)}');
+    }
+
+    if (context.json) {
+      printJson(identity.toJson());
+      return 0;
+    }
+
+    printIdentity(identity);
+    return 0;
+  }
+}
+
+/// Writes the identities of a batch as a CSV or TSV sheet.
+class IdentitiesExportCommand extends CliCommand {
+  IdentitiesExportCommand() {
+    argParser
+      ..addOption('batch', abbr: 'b', help: 'Batch id.')
+      ..addOption(
+        'format',
+        abbr: 'f',
+        help: 'Export format: csv or tsv.',
+        defaultsTo: 'csv',
+      )
+      ..addOption(
+        'out',
+        abbr: 'o',
+        help: 'Write to this file instead of stdout.',
+      );
+  }
+
+  @override
+  String get name => 'export';
+
+  @override
+  String get description =>
+      'Export the serialized units of a batch as a CSV or TSV sheet.';
+
+  @override
+  Future<int> run() async {
+    final rawBatch = optionalOption('batch');
+    final format = parseEnum(
+      argResults?['format'] as String,
+      ExportFormat.values,
+      '--format',
+    );
+    final context = connect();
+    final ExportFile file;
+    try {
+      file = await context.client.identity.export(
+        batchId: rawBatch == null ? null : parseUuid(rawBatch, '--batch'),
+        format: format,
+      );
+    } catch (error) {
+      throw CliException('Could not export the units: ${describeError(error)}');
+    }
+
+    final out = optionalOption('out');
+    if (out != null) {
+      File(out).writeAsStringSync(file.content);
+    }
+
+    if (context.json) {
+      printJson(<String, dynamic>{
+        'filename': file.filename,
+        'mimeType': file.mimeType,
+        'rowCount': file.rowCount,
+        'truncated': file.truncated,
+        'path': out,
+        if (out == null) 'content': file.content,
+      });
+      return 0;
+    }
+
+    if (out != null) {
+      stdout.writeln(
+        'Wrote ${file.rowCount} row(s) to $out '
+        '(${file.filename}, ${file.mimeType}).',
+      );
+    } else {
+      stdout.write(file.content);
+      if (!file.content.endsWith('\n')) stdout.writeln();
+    }
+    if (file.truncated) {
+      stdout.writeln(
+        'Warning: the export stopped at the row limit. Filter by batch to get '
+        'a complete file.',
+      );
+    }
+    return 0;
+  }
+}
+
+/// Locks a unit so it can no longer be verified as authentic.
+class IdentitiesLockCommand extends CliCommand {
+  IdentitiesLockCommand() {
+    argParser
+      ..addOption('identity', abbr: 'i', help: 'Identity id.')
+      ..addOption('reason', abbr: 'r', help: 'Why the unit is locked.');
+  }
+
+  @override
+  String get name => 'lock';
+
+  @override
+  String get description => 'Lock a serialized unit.';
+
+  @override
+  Future<int> run() async {
+    final identityId = parseUuid(requiredOption('identity'), '--identity');
+    final context = connect();
+    final ProductIdentity identity;
+    try {
+      identity = await context.client.identity.lock(
+        identityId: identityId,
+        reason: optionalOption('reason'),
+      );
+    } catch (error) {
+      throw CliException('Could not lock the unit: ${describeError(error)}');
+    }
+
+    if (context.json) {
+      printJson(identity.toJson());
+      return 0;
+    }
+    stdout.writeln('Locked ${identity.id?.uuid} (${identity.status.name}).');
+    return 0;
+  }
+}
+
+/// Lifts a lock after a false alarm.
+class IdentitiesUnlockCommand extends CliCommand {
+  IdentitiesUnlockCommand() {
+    argParser
+      ..addOption('identity', abbr: 'i', help: 'Identity id.')
+      ..addOption('note', abbr: 'n', help: 'Why the lock is being lifted.');
+  }
+
+  @override
+  String get name => 'unlock';
+
+  @override
+  String get description => 'Unlock a serialized unit.';
+
+  @override
+  Future<int> run() async {
+    final identityId = parseUuid(requiredOption('identity'), '--identity');
+    final context = connect();
+    final ProductIdentity identity;
+    try {
+      identity = await context.client.identity.unlock(
+        identityId: identityId,
+        note: optionalOption('note'),
+      );
+    } catch (error) {
+      throw CliException('Could not unlock the unit: ${describeError(error)}');
+    }
+
+    if (context.json) {
+      printJson(identity.toJson());
+      return 0;
+    }
+    stdout.writeln('Unlocked ${identity.id?.uuid} (${identity.status.name}).');
+    return 0;
+  }
+}
+
+/// Mints a replacement QR token for a unit that leaked or was reprinted.
+class IdentitiesRegenerateCommand extends CliCommand {
+  IdentitiesRegenerateCommand() {
+    argParser
+      ..addOption('identity', abbr: 'i', help: 'Identity id.')
+      ..addOption(
+        'reason',
+        abbr: 'r',
+        help: 'Why the token is being replaced.',
+      );
+  }
+
+  @override
+  String get name => 'regenerate';
+
+  @override
+  String get description => 'Issue a fresh QR token for a serialized unit.';
+
+  @override
+  Future<int> run() async {
+    final identityId = parseUuid(requiredOption('identity'), '--identity');
+    final context = connect();
+    final ProductIdentity identity;
+    try {
+      identity = await context.client.identity.regenerateToken(
+        identityId: identityId,
+        reason: optionalOption('reason'),
+      );
+    } catch (error) {
+      throw CliException(
+        'Could not regenerate the token: ${describeError(error)}',
+      );
+    }
+
+    if (context.json) {
+      printJson(identity.toJson());
+      return 0;
+    }
+    stdout.writeln('The old code stops working; print the new one.');
+    printIdentity(identity);
+    return 0;
+  }
+}
+
+/// Moves a unit to the recycle bin.
+class IdentitiesDeleteCommand extends CliCommand {
+  IdentitiesDeleteCommand() {
+    argParser
+      ..addOption('identity', abbr: 'i', help: 'Identity id.')
+      ..addOption('reason', abbr: 'r', help: 'Why the unit is going away.');
+  }
+
+  @override
+  String get name => 'delete';
+
+  @override
+  String get description => 'Delete a serialized unit into the recycle bin.';
+
+  @override
+  Future<int> run() async {
+    final identityId = parseUuid(requiredOption('identity'), '--identity');
+    final context = connect();
+    final ProductIdentity identity;
+    try {
+      identity = await context.client.identity.delete(
+        identityId: identityId,
+        reason: optionalOption('reason'),
+      );
+    } catch (error) {
+      throw CliException('Could not delete the unit: ${describeError(error)}');
+    }
+
+    if (context.json) {
+      printJson(identity.toJson());
+      return 0;
+    }
+    stdout.writeln('Deleted ${identity.id?.uuid}.');
+    return 0;
+  }
+}
+
+/// Brings a deleted unit back.
+class IdentitiesRestoreCommand extends CliCommand {
+  IdentitiesRestoreCommand() {
+    argParser.addOption('identity', abbr: 'i', help: 'Identity id.');
+  }
+
+  @override
+  String get name => 'restore';
+
+  @override
+  String get description => 'Restore a deleted serialized unit.';
+
+  @override
+  Future<int> run() async {
+    final identityId = parseUuid(requiredOption('identity'), '--identity');
+    final context = connect();
+    final ProductIdentity identity;
+    try {
+      identity = await context.client.identity.restore(identityId: identityId);
+    } catch (error) {
+      throw CliException('Could not restore the unit: ${describeError(error)}');
+    }
+
+    if (context.json) {
+      printJson(identity.toJson());
+      return 0;
+    }
+    stdout.writeln('Restored ${identity.id?.uuid}.');
+    return 0;
+  }
+}
+
+/// Prints the fields a serialized unit carries.
+void printIdentity(ProductIdentity identity) {
+  stdout.writeln('  id:        ${identity.id?.uuid}');
+  stdout.writeln('  batch:     ${identity.batchId.uuid}');
+  stdout.writeln('  status:    ${identity.status.name}');
+  stdout.writeln('  token:     ${shorten(identity.qrToken, max: 48)}');
+  stdout.writeln('  scans:     ${identity.verificationCount}');
+  stdout.writeln('  first:     ${formatTime(identity.firstVerifiedAt)}');
+  stdout.writeln('  last:      ${formatTime(identity.lastVerifiedAt)}');
+  stdout.writeln('  created:   ${formatTime(identity.createdAt)}');
+  if (identity.failedPinAttempts > 0) {
+    stdout.writeln('  failed PIN attempts: ${identity.failedPinAttempts}');
+  }
+  if (identity.lockedUntil != null) {
+    stdout.writeln('  locked until: ${formatTime(identity.lockedUntil)}');
+  }
+  if (identity.recallReason != null) {
+    stdout.writeln('  recall:    ${identity.recallReason}');
+  }
+  if (identity.deletedAt != null) {
+    stdout.writeln('  deleted:   ${formatTime(identity.deletedAt)}');
   }
 }

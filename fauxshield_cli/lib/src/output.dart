@@ -42,6 +42,22 @@ void printJson(Object? value) {
   stdout.writeln(const JsonEncoder.withIndent('  ').convert(value));
 }
 
+/// Asks before something that cannot be undone.
+///
+/// Scripts pass `--yes` instead of answering; when stdin is not a terminal the
+/// prompt cannot be shown, so the answer is no rather than a hang.
+bool confirmDestructive(bool skip, String prompt) {
+  if (skip) return true;
+  if (!stdin.hasTerminal) {
+    stdout.writeln('$prompt\nRefusing without a terminal: pass --yes.');
+    return false;
+  }
+  stdout.writeln(prompt);
+  stdout.write('Type `yes` to continue: ');
+  final answer = stdin.readLineSync()?.trim().toLowerCase();
+  return answer == 'yes' || answer == 'y';
+}
+
 /// Trims a long value so a table row stays readable.
 String shorten(String? value, {int max = 38}) {
   if (value == null || value.isEmpty) return '-';
