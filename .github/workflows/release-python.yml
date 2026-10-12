@@ -1,0 +1,84 @@
+name: Release Python SDK
+
+# A PyPI release is tag-driven: pushing a version tag is the only thing this
+# workflow uploads, so a branch push can never publish something nobody asked
+# for, and the tag has to name the version the source already declares.
+# `v0.2.0` and `fauxshield-sdk-v0.2.0` are both accepted, so the tag can be
+# package-scoped once a second package needs releasing.
+#
+# The upload authenticates with a PyPI API token stored as the repository secret
+# PYPI_API_TOKEN (Settings -> Secrets and variables -> Actions), scoped to the
+# fauxshield-sdk project. PyPI's trusted publishing can replace it later: drop
+# the `password` input, change the job's permissions to `id-token: write`, and
+# register this workflow as a publisher on PyPI.
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'fauxshield-sdk-v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # A tag that disagrees with pyproject.toml would publish a version nobody
+      # asked for, so the mismatch is an error, not a guess.
+      - name: Check the tag against the declared version
+        id: version
+        run: |
+          version="$(python -c "import pathlib, tomllib; print(tomllib.loads(pathlib.Path('fauxshield_python/pyproject.toml').read_text())['project']['version'])")"
+          case "${GITHUB_REF_NAME}" in
+            "v${version}"|"fauxshield-sdk-v${version}") ;;
+            *)
+              echo "::error::Tag ${GITHUB_REF_NAME} does not match fauxshield_python version ${version}; expected v${version} or fauxshield-sdk-v${version}."
+              exit 1
+              ;;
+          esac
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+      # The package is generated from the API contract. Regenerating it and
+      # demanding a clean tree proves the released code is the code the
+      # repository commits, so a stale generated file blocks the release.
+      - name: Check the generated SDK is committed as-is
+        working-directory: fauxshield_python
+        run: |
+          python tools/generate.py
+          if [ -n "$(git status --porcelain -- src/fauxshield/generated)" ]; then
+            echo "::error::src/fauxshield/generated is out of date; run tools/generate.py and commit the result."
+            git status --porcelain -- src/fauxshield/generated
+            exit 1
+          fi
+
+      - name: Test the SDK
+        working-directory: fauxshield_python
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -v
+
+      # Build the exact artifacts that will be uploaded, then prove the wheel
+      # installs and imports before anything reaches PyPI.
+      - name: Build the distribution
+        run: |
+          python -m pip install --upgrade --quiet build twine
+          python -m build --outdir dist fauxshield_python
+          python -m twine check dist/*
+
+      - name: Check the built wheel installs and imports
+        run: |
+          python -m pip install --quiet --no-deps --target /tmp/installed dist/fauxshield_sdk-*.whl
+          PYTHONPATH=/tmp/installed python -c \
+            "import fauxshield; assert fauxshield.DEFAULT_BASE_URL == 'https://fauxshield.api.serverpod.space', fauxshield.DEFAULT_BASE_URL"
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
