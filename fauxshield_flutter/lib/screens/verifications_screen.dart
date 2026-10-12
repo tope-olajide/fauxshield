@@ -5,6 +5,7 @@ import '../app/app_state.dart';
 import '../client.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// Verification activity: the most recent verification sessions, filterable
 /// by product, batch, outcome, risk, and date range — the operator-facing
@@ -148,7 +149,7 @@ class _VerificationsScreenState extends State<VerificationsScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }

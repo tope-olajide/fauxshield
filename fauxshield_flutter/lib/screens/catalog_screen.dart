@@ -51,7 +51,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }
@@ -232,7 +232,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
       if (!mounted) return;
       showMessage(
         context,
-        error is ApiException ? error.message : error.toString(),
+        describeRequestError(error),
         error: true,
       );
     }
@@ -305,7 +305,7 @@ class _BatchListScreenState extends State<BatchListScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }
@@ -477,7 +477,7 @@ class _BatchListScreenState extends State<BatchListScreen> {
   Future<void> _createBatch() async {
     final reference = TextEditingController();
     final region = TextEditingController(text: 'NG');
-    final quantity = TextEditingController(text: '50');
+    final quantity = TextEditingController(text: '20');
     var manufactureDate = DateTime.now();
     DateTime? expiryDate;
     String formatDate(DateTime date) {
@@ -642,14 +642,14 @@ class _BatchListScreenState extends State<BatchListScreen> {
           distributionRegion: region.text.trim().isEmpty
               ? 'NG'
               : region.text.trim(),
-          quantity: int.tryParse(quantity.text) ?? 50,
+          quantity: int.tryParse(quantity.text) ?? 20,
         );
         if (mounted) showMessage(context, 'Batch created.');
       } catch (error) {
         if (mounted) {
           showMessage(
             context,
-            error is ApiException ? error.message : error.toString(),
+            describeRequestError(error),
             error: true,
           );
         }
@@ -696,19 +696,33 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
     _load();
   }
 
+  /// How long a refresh keeps retrying a connection that dropped.
+  ///
+  /// Reading a batch is idempotent, so a request that loses its answer is worth
+  /// sending again: right after a long generation run the podlet or the gateway
+  /// in front of it can drop a connection, and losing the page to that is worse
+  /// than waiting a few seconds.
+  static const Duration _refreshRetryBudget = Duration(seconds: 25);
+
   Future<void> _load() async {
     setState(() {
       _loading = _identities.isEmpty;
       _error = null;
     });
     try {
-      final stats = await client.batch.stats(widget.batch.id!);
-      final identities = await client.identity.list(
-        workspaceId: widget.controller.workspaceId,
-        batchId: widget.batch.id,
-        onlyFlagged: false,
-        page: _page,
-        pageSize: _pageSize,
+      final stats = await retryWhileServerBusy<BatchStats>(
+        budget: _refreshRetryBudget,
+        attempt: () => client.batch.stats(widget.batch.id!),
+      );
+      final identities = await retryWhileServerBusy<List<ProductIdentity>>(
+        budget: _refreshRetryBudget,
+        attempt: () => client.identity.list(
+          workspaceId: widget.controller.workspaceId,
+          batchId: widget.batch.id,
+          onlyFlagged: false,
+          page: _page,
+          pageSize: _pageSize,
+        ),
       );
       if (!mounted) return;
       setState(() {
@@ -722,8 +736,16 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
       });
     } catch (error) {
       if (!mounted) return;
+      final message = describeRequestError(error);
+      // A refresh that fails on top of data already on screen is a notice, not
+      // a dead end: the operator keeps the batch, the stats, and the units.
+      if (_stats != null || _identities.isNotEmpty) {
+        setState(() => _loading = false);
+        showMessage(context, 'Could not refresh: $message', error: true);
+        return;
+      }
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = message;
         _loading = false;
       });
     }
@@ -1151,7 +1173,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }
@@ -1211,9 +1233,14 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
 
     // Each unit costs a PBKDF2 hash of its packaging PIN, so one large request
     // outruns the client request timeout and the API gateway, which reaches the
-    // operator as an opaque CORS/504 error. Generate in small idempotent chunks
+    // operator as an opaque CORS/504 error. Generate in idempotent chunks
     // instead and report progress between them.
-    const chunkSize = 10;
+    //
+    // Twenty units is around two seconds of hashing: comfortably inside the
+    // 45s request timeout even on a cold podlet, while a 1000 unit batch costs
+    // 50 requests instead of 100, and every one of those is a chance for the
+    // connection to drop on the way back.
+    const chunkSize = 20;
     final progress = ValueNotifier<String>('Generating serialized units…');
     final runId = DateTime.now().millisecondsSinceEpoch;
     var created = 0;
@@ -1265,7 +1292,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
       }
     } catch (error) {
       if (mounted) {
-        final detail = error is ApiException ? error.message : error.toString();
+        final detail = describeRequestError(error);
         showMessage(
           context,
           created > 0
@@ -1362,7 +1389,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }
@@ -1417,7 +1444,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
         if (mounted) {
           showMessage(
             context,
-            error is ApiException ? error.message : error.toString(),
+            describeRequestError(error),
             error: true,
           );
         }

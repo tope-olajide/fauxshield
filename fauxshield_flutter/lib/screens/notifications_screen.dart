@@ -5,6 +5,7 @@ import '../app/app_state.dart';
 import '../client.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// In-app notifications plus per-channel preferences.
 class NotificationsScreen extends StatefulWidget {
@@ -54,7 +55,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }
@@ -220,7 +221,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }
@@ -238,7 +239,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }
@@ -264,7 +265,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }

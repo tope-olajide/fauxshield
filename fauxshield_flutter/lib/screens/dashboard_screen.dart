@@ -7,6 +7,7 @@ import '../utils/formatting.dart';
 import '../widgets/common.dart';
 import 'alert_detail_screen.dart';
 import 'scan_screen.dart';
+import '../utils/request_recovery.dart';
 
 /// The operator dashboard: platform health at a glance.
 class DashboardScreen extends StatefulWidget {
@@ -48,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }

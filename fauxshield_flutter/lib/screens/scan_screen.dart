@@ -7,6 +7,7 @@ import '../client.dart';
 import '../utils/device_fingerprint.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// The consumer style verification flow, straight from the command center.
 ///
@@ -56,7 +57,7 @@ class _ScanScreenState extends State<ScanScreen> {
       setState(() => _busy = false);
       showMessage(
         context,
-        error is ApiException ? error.message : error.toString(),
+        describeRequestError(error),
         error: true,
       );
       if (_stage == _ScanStage.entry) _token.clear();
@@ -158,7 +159,7 @@ class _ScanScreenState extends State<ScanScreen> {
       setState(() => _loadingDemo = false);
       showMessage(
         context,
-        error is ApiException ? error.message : error.toString(),
+        describeRequestError(error),
         error: true,
       );
     }
@@ -619,7 +620,7 @@ class _ScanScreenState extends State<ScanScreen> {
         if (mounted) {
           showMessage(
             context,
-            error is ApiException ? error.message : error.toString(),
+            describeRequestError(error),
             error: true,
           );
         }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../app/app_state.dart';
 import '../client.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// Geographic intelligence: the full per-country breakdown of verification
 /// volume and fraud, mirroring the reference app's Geographic page.
@@ -46,7 +47,7 @@ class _GeographicScreenState extends State<GeographicScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }

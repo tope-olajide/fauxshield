@@ -7,6 +7,7 @@ import '../app/app_state.dart';
 import '../client.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// Append-only audit log.
 class AuditScreen extends StatefulWidget {
@@ -61,7 +62,7 @@ class _AuditScreenState extends State<AuditScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }

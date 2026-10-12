@@ -7,6 +7,7 @@ import '../app/app_state.dart';
 import '../client.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// Full investigation view for one alert.
 ///
@@ -54,7 +55,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }
@@ -71,7 +72,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
       if (!mounted) return;
       showMessage(
         context,
-        error is ApiException ? error.message : error.toString(),
+        describeRequestError(error),
         error: true,
       );
     } finally {

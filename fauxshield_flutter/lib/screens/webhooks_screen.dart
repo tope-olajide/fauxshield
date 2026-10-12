@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../app/app_state.dart';
 import '../client.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// Webhook endpoint administration.
 ///
@@ -47,7 +48,7 @@ class _WebhooksScreenState extends State<WebhooksScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }
@@ -61,7 +62,7 @@ class _WebhooksScreenState extends State<WebhooksScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }
@@ -326,7 +327,7 @@ class _WebhooksScreenState extends State<WebhooksScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }
@@ -356,7 +357,7 @@ class _WebhooksScreenState extends State<WebhooksScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }
@@ -503,7 +504,7 @@ class _WebhooksScreenState extends State<WebhooksScreen> {
         if (mounted) {
           showMessage(
             context,
-            error is ApiException ? error.message : error.toString(),
+            describeRequestError(error),
             error: true,
           );
         }
@@ -562,7 +563,7 @@ class _WebhookDeliveriesScreenState extends State<WebhookDeliveriesScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }
@@ -647,7 +648,7 @@ class _WebhookDeliveriesScreenState extends State<WebhookDeliveriesScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }

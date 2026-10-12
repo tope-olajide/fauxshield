@@ -6,6 +6,7 @@ import '../client.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
 import 'alert_detail_screen.dart';
+import '../utils/request_recovery.dart';
 
 /// The fraud alert queue.
 class AlertsScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }

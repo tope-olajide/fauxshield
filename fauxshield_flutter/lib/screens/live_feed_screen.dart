@@ -9,6 +9,7 @@ import '../client.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
 import 'alert_detail_screen.dart';
+import '../utils/request_recovery.dart';
 
 /// The live command center.
 ///
@@ -65,7 +66,7 @@ class _LiveFeedScreenState extends State<LiveFeedScreen> {
           if (!mounted) return;
           setState(() {
             _connected = false;
-            _error = error is ApiException ? error.message : error.toString();
+            _error = describeRequestError(error);
           });
           _scheduleRetry();
         },

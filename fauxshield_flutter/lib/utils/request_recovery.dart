@@ -23,6 +23,26 @@ bool isRecoverableServerError(Object error) {
   return false;
 }
 
+/// A sentence an operator can act on.
+///
+/// A dropped connection otherwise reaches the screen as a minified runtime
+/// type plus the browser's `Failed to fetch`, which tells nobody anything.
+String describeRequestError(Object error) {
+  if (error is ApiException) return error.message;
+  if (error is ServerpodClientNetworkException) {
+    return 'The server did not answer. It may still be finishing the previous '
+        'request, or the connection dropped; try again in a moment.';
+  }
+  if (error is ServerpodClientHttpException) {
+    final detail = error.message.trim();
+    return detail.isEmpty
+        ? 'The server answered ${error.statusCode}.'
+        : 'The server answered ${error.statusCode}: $detail';
+  }
+  final text = error.toString();
+  return text.startsWith('Exception: ') ? text.substring(11) : text;
+}
+
 /// The wait before retry number [attempt] (the first retry is attempt 1).
 Duration defaultRetryDelay(int attempt) =>
     Duration(seconds: attempt < 6 ? attempt * 2 : 12);

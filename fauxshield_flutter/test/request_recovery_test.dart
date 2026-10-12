@@ -132,4 +132,41 @@ void main() {
       expect(attempts, 1);
     });
   });
+
+  group('Given describeRequestError', () {
+    test('keeps the message the server sent for an ApiException', () {
+      expect(
+        describeRequestError(
+          ValidationException(
+            message: 'Quantity must be between 1 and 5000.',
+            field: 'quantity',
+          ),
+        ),
+        'Quantity must be between 1 and 5000.',
+      );
+    });
+
+    test('turns a dropped connection into a sentence', () {
+      // This is the exact shape the batch screen used to print: a minified
+      // runtime type followed by the browser's own words.
+      final message = describeRequestError(
+        const ServerpodClientNetworkException(
+          'Unknown server response code. (ClientException: Failed to fetch, '
+          'uri=https://fauxshield.api.serverpod.space/batch/stats)',
+        ),
+      );
+      expect(message, contains('did not answer'));
+      expect(message, isNot(contains('Failed to fetch')));
+      expect(message, isNot(contains('Unknown server response code')));
+    });
+
+    test('names the status code of an HTTP failure', () {
+      expect(
+        describeRequestError(
+          ServerpodClientUnknownHttpException('gateway', 504),
+        ),
+        contains('504'),
+      );
+    });
+  });
 }

@@ -8,6 +8,7 @@ import '../app/app_state.dart';
 import '../client.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// Attack simulations: rehearse the brand's fraud response.
 ///
@@ -60,7 +61,7 @@ class _SimulationsScreenState extends State<SimulationsScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }
@@ -85,7 +86,7 @@ class _SimulationsScreenState extends State<SimulationsScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }

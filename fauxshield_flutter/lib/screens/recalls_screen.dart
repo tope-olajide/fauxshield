@@ -5,6 +5,7 @@ import '../app/app_state.dart';
 import '../client.dart';
 import '../utils/formatting.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// Recall management: the recall history for the workspace, mirroring the
 /// reference app's Recalls page. Active recalls can be lifted by operators
@@ -60,7 +61,7 @@ class _RecallsScreenState extends State<RecallsScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _errorState = true;
         _loading = false;
       });
@@ -89,7 +90,7 @@ class _RecallsScreenState extends State<RecallsScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }

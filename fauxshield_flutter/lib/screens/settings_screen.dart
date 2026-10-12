@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../app/app_state.dart';
 import '../client.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// Workspace settings: branding, restricted countries, and fraud policy.
 class SettingsScreen extends StatefulWidget {
@@ -257,7 +258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         showMessage(
           context,
-          error is ApiException ? error.message : error.toString(),
+          describeRequestError(error),
           error: true,
         );
       }

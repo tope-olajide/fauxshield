@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../app/app_state.dart';
 import '../client.dart';
 import '../widgets/common.dart';
+import '../utils/request_recovery.dart';
 
 /// Deleted products waiting to be restored or permanently erased.
 ///
@@ -47,7 +48,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error is ApiException ? error.message : error.toString();
+        _error = describeRequestError(error);
         _loading = false;
       });
     }
@@ -142,7 +143,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
       if (!mounted) return;
       showMessage(
         context,
-        error is ApiException ? error.message : error.toString(),
+        describeRequestError(error),
         error: true,
       );
     }
@@ -204,7 +205,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
       if (!mounted) return;
       showMessage(
         context,
-        error is ApiException ? error.message : error.toString(),
+        describeRequestError(error),
         error: true,
       );
     }
