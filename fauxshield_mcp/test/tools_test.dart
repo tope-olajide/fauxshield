@@ -79,6 +79,7 @@ void main() {
           'list_products',
           'get_product',
           'create_product',
+          'upload_product_image',
           'list_batches',
           'create_batch',
           'generate_units',
@@ -145,6 +146,53 @@ void main() {
 
       expect(result.isError, isTrue);
       expect(_text(result), contains('Could not reach the FauxShield API'));
+    });
+
+    test('asks for the image itself when no source is given', () async {
+      final result = await pair.client.callTool(
+        const CallToolRequest(
+          name: 'upload_product_image',
+          arguments: <String, dynamic>{
+            'product_id': '11111111-1111-1111-1111-111111111111',
+          },
+        ),
+      );
+
+      expect(result.isError, isTrue);
+      expect(_text(result), contains('Missing the image itself'));
+      expect(_text(result), isNot(contains('Could not reach')));
+    });
+
+    test('refuses two image sources instead of picking one', () async {
+      final result = await pair.client.callTool(
+        const CallToolRequest(
+          name: 'upload_product_image',
+          arguments: <String, dynamic>{
+            'product_id': '11111111-1111-1111-1111-111111111111',
+            'file_path': 'label.png',
+            'base64_data': 'aGk=',
+          },
+        ),
+      );
+
+      expect(result.isError, isTrue);
+      expect(_text(result), contains('not both'));
+    });
+
+    test('names the file it could not find', () async {
+      final result = await pair.client.callTool(
+        const CallToolRequest(
+          name: 'upload_product_image',
+          arguments: <String, dynamic>{
+            'product_id': '11111111-1111-1111-1111-111111111111',
+            'file_path': 'definitely-not-here/label.png',
+          },
+        ),
+      );
+
+      expect(result.isError, isTrue);
+      expect(_text(result), contains('definitely-not-here/label.png'));
+      expect(_text(result), isNot(contains('Could not reach')));
     });
   });
 

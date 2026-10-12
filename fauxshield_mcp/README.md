@@ -102,6 +102,7 @@ when `FAUXSHIELD_READ_ONLY=true`.
 |------|------|--------------|
 | `list_products` / `get_product` | read | Browse products by name or SKU |
 | `create_product` / `update_product` | write | Register or amend a product |
+| `upload_product_image` | write | Attach a product image from a file path or base64 |
 | `archive_product` / `restore_product` | write | Move a product in or out of the archive |
 | `product_delete_impact` | read | Report what deleting a product would remove |
 | `list_batches` / `get_batch` / `batch_stats` | read | Batches and their unit counts by state |

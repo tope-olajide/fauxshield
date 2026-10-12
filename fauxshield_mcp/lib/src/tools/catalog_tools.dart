@@ -1,8 +1,18 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:fauxshield_client/fauxshield_client.dart';
 import 'package:mcp_dart/mcp_dart.dart';
 
 import '../gateway.dart';
 import '../tool_support.dart';
+
+/// Image size the API accepts for a product photo.
+const int _maxProductImageBytes = 2 * 1024 * 1024;
+
+/// How many images one product may carry; the API enforces the same cap.
+const int _maxProductImages = 5;
 
 /// Products, manufacturing batches, and the serialized units inside them.
 void registerCatalogTools(ToolRegistry registry, FauxShieldGateway gateway) {
@@ -145,6 +155,52 @@ void registerCatalogTools(ToolRegistry registry, FauxShieldGateway gateway) {
       workspaceId: workspaceId,
       productId: args.requiredUuid('product_id'),
     ),
+  );
+
+  // ------------------------------------------------------------- product art
+
+  registry.write(
+    'upload_product_image',
+    description:
+        'Attach an image to a product, so the catalog and the consumer verify '
+        'page can show the real packaging. The image is stored durably and '
+        'appended to the product images (at most $_maxProductImages per '
+        'product). PNG, JPEG, WebP, and SVG, up to 2 MB. Send the bytes either '
+        'as a local file path or as base64.',
+    properties: <String, JsonSchema>{
+      'product_id': JsonSchema.string(description: 'Product uuid.'),
+      'file_path': JsonSchema.string(
+        description:
+            'Path to the image on this machine. Relative paths resolve from '
+            'the directory the MCP server was started in.',
+      ),
+      'base64_data': JsonSchema.string(
+        description:
+            'The image bytes, base64 encoded, when the image is not a file '
+            'on disk.',
+      ),
+      'file_name': JsonSchema.string(
+        description:
+            'Name to store the image under. Defaults to the source file name.',
+      ),
+    },
+    required: <String>['product_id'],
+    body: (args, context) async {
+      final productId = args.requiredUuid('product_id');
+      final image = _imageSource(args);
+      final url = await client.product.uploadImage(
+        workspaceId: workspaceId,
+        productId: productId,
+        fileName: image.fileName,
+        data: base64Encode(image.bytes),
+      );
+      return <String, dynamic>{
+        'product_id': productId.uuid,
+        'file_name': image.fileName,
+        'size_bytes': image.bytes.length,
+        'image_url': url,
+      };
+    },
   );
 
   // ---------------------------------------------------------------- batches
@@ -420,3 +476,72 @@ void registerCatalogTools(ToolRegistry registry, FauxShieldGateway gateway) {
     ),
   );
 }
+
+// -------------------------------------------------------------- image input
+
+/// The bytes and name an image upload should send.
+///
+/// A file and an inline payload are mutually exclusive, so a call can never
+/// upload one source while silently ignoring the other.
+({Uint8List bytes, String fileName}) _imageSource(ToolArgs args) {
+  final path = args.optionalString('file_path');
+  final inline = args.optionalString('base64_data');
+  if (path != null && inline != null) {
+    throw ToolError(
+      'Pass either file_path or base64_data, not both.',
+      hint: 'Use file_path for an image already on disk.',
+    );
+  }
+  if (path == null && inline == null) {
+    throw ToolError(
+      'Missing the image itself: pass file_path or base64_data.',
+      hint: 'An agent with the image on disk passes file_path.',
+    );
+  }
+
+  final name = args.optionalString('file_name');
+  final Uint8List bytes;
+  final String fileName;
+  if (inline != null) {
+    try {
+      bytes = base64Decode(inline.replaceAll(RegExp(r'\s'), ''));
+    } on FormatException {
+      throw ToolError(
+        'base64_data is not valid base64.',
+        hint: 'Send the raw image bytes, without a data: prefix.',
+      );
+    }
+    fileName = name ?? 'image';
+  } else {
+    final file = File(path!);
+    if (!file.existsSync()) {
+      throw ToolError(
+        'No file at "$path".',
+        hint:
+            'Relative paths resolve from the MCP server working directory; an '
+            'absolute path avoids the guesswork.',
+      );
+    }
+    try {
+      bytes = file.readAsBytesSync();
+    } on FileSystemException catch (error) {
+      throw ToolError('Could not read "$path": ${error.message}');
+    }
+    fileName = name ?? _baseName(path);
+  }
+
+  if (bytes.isEmpty) {
+    throw ToolError('The image is empty.');
+  }
+  if (bytes.length > _maxProductImageBytes) {
+    throw ToolError(
+      'The image is ${(bytes.length / (1024 * 1024)).toStringAsFixed(1)} MB; '
+      'the limit is 2 MB.',
+      hint: 'Resize the image and try again.',
+    );
+  }
+  return (bytes: bytes, fileName: fileName);
+}
+
+/// The last segment of a path, on either separator.
+String _baseName(String path) => path.split(RegExp(r'[\\/]')).last;

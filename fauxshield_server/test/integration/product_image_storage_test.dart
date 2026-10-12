@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:fauxshield_server/src/generated/protocol.dart';
 import 'package:test/test.dart';
 
 import 'test_fixture.dart';
