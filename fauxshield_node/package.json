@@ -11,8 +11,18 @@
   ],
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
   "engines": {
     "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tope-olajide/fauxshield.git",
+    "directory": "fauxshield_node"
+  },
+  "homepage": "https://github.com/tope-olajide/fauxshield#readme",
+  "bugs": {
+    "url": "https://github.com/tope-olajide/fauxshield/issues"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
