@@ -503,88 +503,98 @@ class _BatchListScreenState extends State<BatchListScreen> {
         builder: (context, setDialogState) => AlertDialog(
           title: const Text('New batch'),
           content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                LabeledField(label: 'Reference', controller: reference),
-                LabeledField(
-                  label: 'Distribution region',
-                  controller: region,
-                  hint: 'Country name or ISO code',
-                ),
-                LabeledField(
-                  label: 'Planned quantity',
-                  controller: quantity,
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Manufacture date',
-                    style: Theme.of(context).textTheme.labelLarge,
+            child: SizedBox(
+              // On wide screens the dialog shrinks to the intrinsic width of
+              // its fields, which looks cramped. Give it a fixed desktop
+              // width, but leave mobile intrinsic so it can't overflow.
+              width: MediaQuery.sizeOf(context).width < 600 ? null : 520,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  LabeledField(label: 'Reference', controller: reference),
+                  LabeledField(
+                    label: 'Distribution region',
+                    controller: region,
+                    hint: 'Country name or ISO code',
                   ),
-                ),
-                const SizedBox(height: 4),
-                InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: manufactureDate,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      setDialogState(() => manufactureDate = picked);
-                    }
-                  },
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.calendar_today_rounded),
-                    ),
-                    child: Text(formatDate(manufactureDate)),
+                  LabeledField(
+                    label: 'Planned quantity',
+                    controller: quantity,
+                    keyboardType: TextInputType.number,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Expiry date (optional)',
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: expiryDate ?? manufactureDate,
-                      firstDate: manufactureDate,
-                      lastDate: DateTime.now().add(const Duration(days: 3650)),
-                    );
-                    if (picked != null) {
-                      setDialogState(() => expiryDate = picked);
-                    }
-                  },
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.event_rounded),
-                      suffixIcon: expiryDate == null
-                          ? null
-                          : IconButton(
-                              icon: const Icon(Icons.clear_rounded),
-                              onPressed: () =>
-                                  setDialogState(() => expiryDate = null),
-                            ),
-                    ),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerLeft,
                     child: Text(
-                      expiryDate == null ? 'Not set' : formatDate(expiryDate!),
+                      'Manufacture date',
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: manufactureDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null) {
+                        setDialogState(() => manufactureDate = picked);
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.calendar_today_rounded),
+                      ),
+                      child: Text(formatDate(manufactureDate)),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Expiry date (optional)',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: expiryDate ?? manufactureDate,
+                        firstDate: manufactureDate,
+                        lastDate: DateTime.now().add(
+                          const Duration(days: 3650),
+                        ),
+                      );
+                      if (picked != null) {
+                        setDialogState(() => expiryDate = picked);
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.event_rounded),
+                        suffixIcon: expiryDate == null
+                            ? null
+                            : IconButton(
+                                icon: const Icon(Icons.clear_rounded),
+                                onPressed: () =>
+                                    setDialogState(() => expiryDate = null),
+                              ),
+                      ),
+                      child: Text(
+                        expiryDate == null
+                            ? 'Not set'
+                            : formatDate(expiryDate!),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: <Widget>[
@@ -1150,7 +1160,9 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
   }
 
   Future<void> _generateDialog() async {
-    final quantity = TextEditingController(text: '50');
+    // Default to the batch's planned quantity so the operator confirms
+    // rather than re-types the number they already entered at creation.
+    final quantity = TextEditingController(text: '${widget.batch.quantity}');
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1209,7 +1221,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
         final result = await client.batch.generateIdentities(
           workspaceId: widget.controller.workspaceId,
           batchId: widget.batch.id!,
-          quantity: int.tryParse(quantity.text) ?? 50,
+          quantity: int.tryParse(quantity.text) ?? widget.batch.quantity,
           idempotencyKey:
               'gen-${widget.batch.id!.uuid}-${DateTime.now().millisecondsSinceEpoch}',
         );

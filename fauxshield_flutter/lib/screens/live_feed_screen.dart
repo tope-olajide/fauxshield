@@ -46,6 +46,7 @@ class _LiveFeedScreenState extends State<LiveFeedScreen> {
 
   void _subscribe() {
     _subscription?.cancel();
+    var subscribed = false;
     try {
       final stream = client.verification.watchWorkspace(
         workspaceId: widget.controller.workspaceId,
@@ -74,6 +75,7 @@ class _LiveFeedScreenState extends State<LiveFeedScreen> {
           _scheduleRetry();
         },
       );
+      subscribed = true;
     } catch (error) {
       setState(() {
         _error = error.toString();
@@ -81,6 +83,11 @@ class _LiveFeedScreenState extends State<LiveFeedScreen> {
       });
       _scheduleRetry();
     }
+    // Listening to the stream is what opens the connection. It stays open
+    // while idle, so an empty feed is "live, nothing yet", not "connecting".
+    // Failures arrive through the error/done handlers, which flip the state
+    // back to reconnecting.
+    if (subscribed && mounted) setState(() => _connected = true);
   }
 
   void _scheduleRetry() {
@@ -122,16 +129,18 @@ class _LiveFeedScreenState extends State<LiveFeedScreen> {
       body: _events.isEmpty
           ? EmptyState(
               icon: Icons.sensors_rounded,
-              title: _connected ? 'Listening for activity' : 'Connecting…',
+              title: _connected ? 'No activity yet' : 'Reconnecting…',
               message:
                   _error ??
                   'Scans, alerts, recalls, offline ingest, and simulations '
                       'will appear here in real time. Run a simulation to see it live.',
-              action: FilledButton.tonalIcon(
-                onPressed: _subscribe,
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Refresh'),
-              ),
+              action: _connected && _error == null
+                  ? null
+                  : FilledButton.tonalIcon(
+                      onPressed: _subscribe,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Retry'),
+                    ),
             )
           : ListView.separated(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
