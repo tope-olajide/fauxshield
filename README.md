@@ -45,7 +45,7 @@ Clients published against the same API:
 
 | Client | Install | Default API |
 | --- | --- | --- |
-| Dart (`fauxshield_client`) | path dependency in this workspace | host supplied by the caller; the app reads it from `config.json` |
+| Dart (`fauxshield_client`) | `dart pub add fauxshield_client` | host supplied by the caller; the app reads it from `config.json` |
 | Node.js (`fauxshield`) | `npm install fauxshield` | `https://fauxshield.api.serverpod.space` |
 | Python (`fauxshield-sdk`) | `pip install fauxshield-sdk` | `https://fauxshield.api.serverpod.space` |
 | CLI (`fauxshield`) | `dart pub global activate --source path fauxshield_cli` | `https://fauxshield.api.serverpod.space` |

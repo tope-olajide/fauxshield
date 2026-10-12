@@ -4,7 +4,7 @@ description: >-
   Gives AI agents scoped, auditable access to products, batches, serialized
   units, fraud alerts, recalls, and the audit trail.
 version: 1.0.0
-publish_to: none
+repository: https://github.com/tope-olajide/fauxshield
 
 environment:
   sdk: '^3.12.2'
@@ -12,8 +12,10 @@ environment:
 resolution: workspace
 
 dependencies:
-  fauxshield_client:
-    path: ../fauxshield_client
+  # The published Dart client; inside the workspace pub resolves it to the
+  # local member the generator rewrites, so development always uses the
+  # generated protocol.
+  fauxshield_client: ^1.0.0
   mcp_dart: ^2.4.2
 
 executables:

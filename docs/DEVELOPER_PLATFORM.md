@@ -134,23 +134,25 @@ What could not be checked here, and why:
   anchors, pager, links). Serving it over HTTP and clicking through it needs a
   running server, which this environment does not start.
 - **Package publishing** is done, and was verified from the registries rather
-  than from the working tree: `fauxshield@0.1.0` on npm and
-  `fauxshield-sdk@0.1.0` on PyPI were each installed back from their registry
-  into a clean environment, and each answered a live call to the hosted API
-  with the typed `AuthenticationError` an unauthenticated caller should get.
-  Both registries now release from CI on a version tag:
-  `.github/workflows/release-python.yml` publishes `fauxshield-sdk` and
-  `.github/workflows/release-npm.yml` publishes `fauxshield`, each after
-  checking the tag against its own manifest, regenerating the SDK, running its
-  suite, and installing the exact artifact it will upload into a clean
-  environment.
+  than from the working tree: `fauxshield@0.1.0` on npm,
+  `fauxshield-sdk@0.1.0` on PyPI, and `fauxshield_client` 1.0.0 on pub.dev were
+  each installed back from their registry into a clean environment, and each
+  answered a live call to the hosted API with the typed refusal an
+  unauthenticated caller should get (`AuthenticationError` in Node.js and
+  Python, `AuthenticationException` in Dart). npm and PyPI release from CI on a
+  version tag: `.github/workflows/release-python.yml` publishes
+  `fauxshield-sdk` and `.github/workflows/release-npm.yml` publishes
+  `fauxshield`, each after checking the tag against its own manifest,
+  regenerating the SDK, running its suite, and installing the exact artifact
+  it will upload into a clean environment. pub.dev publishing is still manual.
 
 ## 5. Remaining gaps and what needs authorization
 
 | Item | State |
 |------|-------|
-| Publishing `fauxshield` (npm) and `fauxshield-sdk` (PyPI) | **Done** — `fauxshield@0.1.0` and `fauxshield-sdk@0.1.0` are live. A version tag now releases both from CI: `.github/workflows/release-npm.yml` once the `NPM_TOKEN` secret exists, and `.github/workflows/release-python.yml` once `PYPI_API_TOKEN` exists. The next tag must name a version above 0.1.0, because neither registry accepts a version it already has. |
-| `fauxshield_client` (Dart) on pub.dev | It is generated per server, so it stays a path/git dependency by design |
+| Publishing the SDKs | **Done** — `fauxshield@0.1.0` (npm), `fauxshield-sdk@0.1.0` (PyPI), and `fauxshield_client` 1.0.0 (pub.dev) are live. A version tag now releases npm and PyPI from CI (`.github/workflows/release-npm.yml` once the `NPM_TOKEN` secret exists, `.github/workflows/release-python.yml` once `PYPI_API_TOKEN` exists); the next tag must name a version above 0.1.0, because neither registry accepts a version it already has. |
+| `fauxshield_client` (Dart) on pub.dev | **Done** — 1.0.0 is live, installed back from pub.dev in a scratch project, where a live call was refused with `AuthenticationException`. In this repository the Flutter app, CLI, and MCP keep resolving the local workspace copy, because the generator rewrites it on every server change. |
+| `fauxshield_cli` and `fauxshield_mcp` on pub.dev | **Prepared** — `publish_to: none` removed, LICENSE and CHANGELOG added, `repository` set, and both depend on the published `fauxshield_client ^1.0.0`, which the workspace resolves to the local copy; both dry runs pass. The first `dart pub publish` in each is interactive and left to the maintainer. |
 | Authenticated live test suite | Needs a credential on the hosted deployment |
 | Everything committed | Nothing here is deployed; the deployed server is unchanged by this pass |
 
@@ -169,4 +171,9 @@ cd .. && python tools/check_parity.py
 git tag v0.2.0 && git push origin v0.2.0                                 # both SDKs
 git tag fauxshield-v0.2.0 && git push origin fauxshield-v0.2.0           # npm only
 git tag fauxshield-sdk-v0.2.0 && git push origin fauxshield-sdk-v0.2.0   # PyPI only
+
+# Publish a Dart package (the first publish of a name is interactive)
+cd fauxshield_client && dart pub publish
+cd ../fauxshield_cli && dart pub publish
+cd ../fauxshield_mcp && dart pub publish
 ```

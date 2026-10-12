@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fauxshield_cli/fauxshield.dart';
+import 'package:fauxshield_cli/fauxshield_cli.dart';
 import 'package:test/test.dart';
 
 /// Finds this package's pubspec.yaml, however the test was started.
