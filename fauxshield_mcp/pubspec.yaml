@@ -1,0 +1,24 @@
+name: fauxshield_mcp
+description: >-
+  Model Context Protocol server for the FauxShield anti-counterfeit platform.
+  Gives AI agents scoped, auditable access to products, batches, serialized
+  units, fraud alerts, recalls, and the audit trail.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '^3.12.2'
+
+resolution: workspace
+
+dependencies:
+  fauxshield_client:
+    path: ../fauxshield_client
+  mcp_dart: ^2.4.2
+
+executables:
+  fauxshield-mcp: fauxshield_mcp
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.0
