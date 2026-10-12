@@ -1,29 +1,72 @@
 # Deploying FauxShield to Serverpod Cloud
 
-FauxShield is a normal Serverpod 4 project, so a Serverpod Cloud deployment is
-one command after authentication. This guide lists what to check before you
-deploy, the commands to run, and the post-deploy smoke test used for the
-hackathon submission.
+FauxShield is a normal Serverpod 4 project, so once the CLI is authenticated a
+deployment uploads the server, builds it in the cloud, and rolls it out. This
+guide records the flow that was actually used, the checks worth repeating, and
+the traps that are specific to this repository.
 
-> Everything below assumes the repository is checked out and the `serverpod`
-> CLI (4.0.3+) is on your `PATH`. The Serverpod Cloud CLI installs itself the
-> first time you run `serverpod cloud`.
+> Requirements: the repository checked out, the `serverpod` CLI (4.0.4+) on your
+> `PATH`, and a logged-in CLI (`serverpod cloud auth login`, which opens the
+> browser and waits for the callback).
+
+## URLs
+
+The project is deployed as **`fauxshield`** on the **Starter** plan, region
+Europe. Every project gets three hosts on `serverpod.space`:
+
+| Host | URL |
+| --- | --- |
+| web (landing, `/verify`, `/app`) | https://fauxshield.serverpod.space/ |
+| api | https://fauxshield.api.serverpod.space/ |
+| insights | https://fauxshield.insights.serverpod.space/ |
+
+The public hosts are injected by the platform. The placeholders in
+`config/production.yaml` do **not** leak into the running server: the generated
+`/app/assets/assets/config.json` returns the real API URL
+(`{"apiUrl":"https://fauxshield.api.serverpod.space"}`), because Serverpod
+Cloud sets the `SERVERPOD_*_PUBLIC_HOST` variables, which take precedence over
+the YAML config files.
 
 ## Pre-flight checklist
 
 - [ ] **Flutter web bundle is fresh.** The server serves the operator app from
-      `fauxshield_server/web/app`. Rebuild it whenever the app changes:
+      `fauxshield_server/web/app`; the cloud build does *not* rebuild it (the
+      `flutter_build` pre-deploy hook is off by default). Rebuild it whenever
+      the app changes:
 
       ```bash
       cd fauxshield_flutter
-      flutter build web --release --base-href /app/
-      cp -r build/web/. ../fauxshield_server/web/app/
+      MSYS_NO_PATHCONV=1 flutter build web --release --base-href /app/
+      rm -rf ../fauxshield_server/web/app
+      cp -r build/web ../fauxshield_server/web/app
       ```
 
-- [ ] **Migrations are committed.** `fauxshield_server/migrations/` contains the
-      schema; Serverpod Cloud applies pending migrations on boot. Run
-      `serverpod create-migration` locally first if you changed a model, and
-      verify with `dart test`.
+      (On Windows, `MSYS_NO_PATHCONV=1` stops Git Bash from rewriting
+      `--base-href /app/` into `C:/Program Files/Git/app/`.)
+
+- [ ] **No path overrides in the workspace.** A deploy uploads only the
+      workspace packages the **server** depends on, plus the root
+      `pubspec.yaml`/`pubspec.lock` and `.scloud/`. `third_party/` is never
+      uploaded, so a `dependency_overrides: <pkg>: path: third_party/...` makes
+      the cloud build fail — first with
+      `depends on <pkg> from path which doesn't exist`, and, from a workspace
+      member where it resolves locally, with
+      `Unable to satisfy ../pubspec.yaml using ../pubspec.lock` during
+      `dart pub get --enforce-lockfile`. Keep dependencies hosted. See
+      `third_party/sqlite_async/README_GUARD.md` for the case that used to
+      require one.
+
+- [ ] **Migrations are committed.** `fauxshield_server/migrations/` is uploaded
+      and `applyMigrations` runs at boot; the log prints
+      `Latest database migration already applied.` once the schema is current.
+
+- [ ] **Boot code tolerates disabled future calls.** Serverpod Cloud runs the
+      app podlets without a future call manager (it executes scheduled work in
+      a separate role), so `pod.futureCalls` throws
+      `Bad state: FutureCalls is not initialized` unless it is guarded. That
+      guard lives in `_scheduleRecurringTasks` in `fauxshield_server/lib/server.dart`
+      and must stay.
+
 - [ ] **Server analysis and tests pass.**
 
       ```bash
@@ -32,99 +75,84 @@ hackathon submission.
       dart test
       ```
 
-- [ ] **Production config is sane.** `config/production.yaml` ships with
-      placeholder public hosts (`api.examplepod.com`). Serverpod Cloud manages
-      the actual URLs; if your deployment keeps the placeholders visible, set
-      the three `publicHost` values (api, insights, web) to the domains shown in
-      `serverpod cloud status`.
-- [ ] **Secrets are ready.** `config/passwords.yaml` holds development values.
-      For the cloud, set the same keys through the CLI so they are stored as
-      managed secrets (see step 3).
-- [ ] **Geo provider.** Development uses the deterministic `demo` provider so
-      scans always resolve to a city. To use real IP geolocation in the cloud,
-      set `geoProvider: http` and `geoLookupUrlTemplate` in
-      `config/passwords.yaml` (any `{ip}`-templated JSON endpoint works); leave
-      it on `demo` for the hackathon demo.
-- [ ] **Outbound webhooks.** Webhook endpoints are validated against
-      private/loopback ranges before delivery (SSRF guard), so only public
-      HTTPS targets are accepted.
+- [ ] **Secrets.** `config/passwords.yaml` *is* uploaded (the CLI's
+      `.scloudignore` template lists `config/passwords.yaml`, but those patterns
+      are relative to a non-workspace root and do not match
+      `fauxshield_server/config/...` in this repo), so the development values
+      from the repository drive the deployment. To move off them, store managed
+      values — they are injected as `SERVERPOD_PASSWORD_*` and take precedence:
+
+      ```bash
+      serverpod cloud password set hmacSecretKey        # signs QR tokens
+      serverpod cloud password set pinEncryptionKey     # AES-GCM for PIN reveals
+      serverpod cloud password set webhookEncryptionKey # encrypts endpoint secrets
+      serverpod cloud password set demoSeedSecret       # gates demo resets
+      serverpod cloud password list                     # verify
+      ```
+
+      `hmacSecretKey` and `pinEncryptionKey` must not change once data exists:
+      rotating them invalidates printed QR codes and stored PINs.
+
+- [ ] **Geo provider.** Development and the cloud both run the deterministic
+      `demo` provider, so scans resolve to a city without an external service.
 
 ## Deploy
 
-```bash
-# from the repository root
-serverpod cloud auth login          # browser-based login
+`serverpod cloud launch` is convenient by hand but **interactive-only** (it
+opens a TUI and refuses to run non-interactively). For scripted or agent-driven
+deploys, use the two non-interactive commands instead:
 
+```bash
+# once, per project
+serverpod cloud project create -p fauxshield --plan=starter --enable-db
+
+# every deploy (from the repository root or the server directory)
 cd fauxshield_server
-serverpod cloud launch              # first time: creates the project, Postgres,
-                                    # and deployments, then uploads this server
+serverpod cloud deploy -p fauxshield --await
 ```
 
-`launch` links the local server directory to a new cloud project. Subsequent
-deploys are:
+Useful options:
 
 ```bash
-cd fauxshield_server
-serverpod cloud deploy              # or: serverpod cloud deploy --await
+serverpod cloud deploy -p fauxshield --wet-run --show-files   # preview the payload
+serverpod cloud deploy -p fauxshield --wet-run --output proof.zip
+serverpod cloud status live -p fauxshield                     # podlet health
+serverpod cloud status deployment show -p fauxshield          # latest deployment
+serverpod cloud log -p fauxshield                             # stream server logs
 ```
 
-Useful options while iterating:
-
-```bash
-serverpod cloud deploy --show-files     # preview the upload (respects .gitignore)
-serverpod cloud deploy --wet-run --show-files
-serverpod cloud status                  # project + deployment state
-serverpod cloud log                     # stream server logs
-```
-
-Before the first real deploy, run `serverpod cloud deploy --wet-run --show-files`
-and confirm the upload includes the workspace pieces the build needs:
-
-- `fauxshield_server/` (including `web/app`, now un-ignored, and `migrations/`)
-- `fauxshield_flutter/` if you want the pre-deploy `flutter_build` script to
-  rebuild the web app in the cloud rather than shipping the committed bundle
-- `third_party/sqlite_async/` (the root `pubspec.yaml` dependency override)
-- `pubspec.lock` at the workspace root
-
-## Secrets
-
-Set every key the server expects as a cloud password. The values in
-`config/passwords.yaml` are development values; generate fresh ones for a real
-deployment (the CLI prompts for the value, keeping it out of your shell
-history):
-
-```bash
-serverpod cloud password set hmacSecretKey          # signs QR tokens
-serverpod cloud password set pinEncryptionKey       # AES-GCM for PIN reveals
-serverpod cloud password set webhookEncryptionKey   # encrypts endpoint secrets
-serverpod cloud password set demoSeedSecret         # gates demo resets
-serverpod cloud password list                       # verify
-```
-
-Notes:
-
-- `hmacSecretKey`, `pinEncryptionKey`, and `webhookEncryptionKey` must not
-  change after data exists; rotating `hmacSecretKey` invalidates printed QR
-  codes, and rotating `pinEncryptionKey` makes existing PINs unreadable.
-- The demo workspace is created on the first authenticated call to
-  `demo.seed`. Anyone signed in can join it; only a caller presenting the
-  `demoSeedSecret` can reset it.
+Before a first or risky deploy, confirm the zip contains what the build needs
+(`fauxshield_server/**` including `web/app` and `migrations/`, the regenerated
+root `pubspec.yaml`, `pubspec.lock`) and that the regenerated pubspec has no
+`dependency_overrides`. Running `dart pub get` inside the extracted zip
+reproduces the first build step.
 
 ## Post-deploy smoke test
 
-1. Open `https://<web-host>/` — the landing page shows live counters and, once
-   the demo workspace exists, a demo code **and its packaging PIN**.
-2. Follow **Try demo code** → `https://<web-host>/verify?t=<token>` → enter the
-   PIN → expect **Authentic** (or **Already verified** after the first scan).
-3. Open `https://<web-host>/app`, create an account (email + password), and
-   choose **Open demo workspace**.
-4. In the app: **Dashboard** shows stats; **Live** shows events; run
-   **Simulations → Clone attack** and watch alerts arrive in **Alerts**.
-5. Send a test webhook from **More → Webhooks** if you configured an endpoint.
+Verified against the live deployment:
+
+1. `serverpod cloud status live -p fauxshield` → `Status ● Running`,
+   `Podlets 1/1 ready`; `serverpod cloud log` shows
+   `WebServer: Webserver listening on http://fauxshield.serverpod.space:8082`
+   with no unhandled exceptions.
+2. `curl https://fauxshield.serverpod.space/` → 200 with the landing page.
+3. `curl "https://fauxshield.serverpod.space/verify?t=<unknown token>"` →
+   200 and `This code is not registered by any brand on FauxShield.`, which
+   exercises the database lookup and the scan logging.
+4. `curl https://fauxshield.serverpod.space/app/assets/assets/config.json` →
+   `{"apiUrl":"https://fauxshield.api.serverpod.space"}`, plus 200s for
+   `/app/index.html`, `/app/main.dart.js`, `/app/flutter_bootstrap.js` and the
+   cache-busted `/web/css/...` asset.
+5. In a browser: follow **Try demo code** from the landing page. The demo
+   workspace is seeded on the first authenticated call to `demo.seed`, so the
+   landing page only shows a demo code and PIN after someone signs in to
+   `/app` once and chooses **Open demo workspace**.
+6. In the app: **Dashboard** shows stats, **Live** shows events, and
+   **Simulations → Clone attack** produces alerts in **Alerts**.
 
 ## Rolling back
 
 `serverpod cloud` keeps deployment history per project; redeploy a previous
-build from the console or with `serverpod cloud deploy --redeploy` after
-restoring the secrets. Database migrations are forward-only — take a snapshot
-with `serverpod cloud db` before destructive model changes.
+build from the console or with `serverpod cloud deploy --redeploy`. Database
+migrations are forward-only — take a snapshot with `serverpod cloud db` before
+destructive model changes.

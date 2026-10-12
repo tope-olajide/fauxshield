@@ -10,9 +10,3 @@ workspace:
   - fauxshield_server
   - fauxshield_flutter
 
-dependency_overrides:
-  # Local patch so dart2js can compile the client-side database dependency.
-  # See third_party/sqlite_async/README_GUARD.md.
-  sqlite_async:
-    path: third_party/sqlite_async
-

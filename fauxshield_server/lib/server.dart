@@ -125,7 +125,23 @@ void run(List<String> args) async {
 /// * `offline-scan-converter` turns synced field scans into sessions.
 /// * `daily-rollup` materializes analytics rollups for every workspace.
 /// * `maintenance-sweep` prunes expired idempotency keys and stale runs.
+///
+/// Future calls require a database and can be disabled for a deployment
+/// (`futureCall.enabled`, or the `SERVERPOD_FUTURE_CALL_*` variables a host may
+/// set). Serverpod Cloud runs its app podlets that way and executes scheduled
+/// work in a separate role, where this same boot sequence schedules the
+/// recurring calls. Without the guard the dispatcher below is uninitialized
+/// and its throw leaves the podlet permanently unready.
 Future<void> _scheduleRecurringTasks(Serverpod pod) async {
+  final futureCallsEnabled =
+      pod.config.database != null && pod.config.futureCall.enabled;
+  if (!futureCallsEnabled) {
+    pod.logVerbose(
+      'Future calls are disabled; skipping recurring task scheduling.',
+    );
+    return;
+  }
+
   await pod.futureCalls.cancel('webhook-drain');
   await pod.futureCalls
       .callRecurring(identifier: 'webhook-drain')

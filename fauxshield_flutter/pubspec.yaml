@@ -51,6 +51,15 @@ dev_dependencies:
 
 dependency_overrides:
   flutter_secure_storage: ^10.0.0
+  # No `sqlite_async` override here on purpose. This app used to point the
+  # transitive `sqlite_async` (via fauxshield_client) at a patched copy under
+  # third_party/, because dart2js rejected the published package. serverpod
+  # 4.0.4 now pins `sqlite3_web: '>=0.9.4 <0.9.5'`, the release where
+  # `WorkerDatabase` is not yet `base`, so the published `sqlite_async`
+  # compiles. Keep the override out: a path override makes pubspec.lock record
+  # a path source, and Serverpod Cloud builds the server from a filtered
+  # workspace that never receives third_party/.
+  # See third_party/sqlite_async/README_GUARD.md for the full history.
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
