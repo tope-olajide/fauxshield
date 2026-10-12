@@ -6,6 +6,7 @@ import 'package:serverpod_cloud_storage/serverpod_cloud_storage.dart';
 
 import 'src/cache_busting.dart';
 import 'src/core/constants.dart';
+import 'src/services/api_key_auth.dart';
 import 'src/generated/serverpod.dart';
 import 'src/web/routes/app_config_route.dart';
 import 'src/web/routes/landing_route.dart';
@@ -37,6 +38,14 @@ void run(List<String> args) async {
         appDisplayName: 'fauxshield',
       ),
     ],
+  );
+
+  // Machine access. Keys issued from the workspace's API keys screen are
+  // prefixed, so they are tried before the JWT handler and everything else is
+  // handed straight to it. Scope checks and the per-key rate limit happen in
+  // WorkspaceService, where every endpoint already passes.
+  pod.authenticationHandler = withApiKeyAuthentication(
+    pod.authenticationHandler,
   );
 
   // Landing page with live platform stats.

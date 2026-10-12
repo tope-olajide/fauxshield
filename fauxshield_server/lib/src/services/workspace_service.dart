@@ -2,6 +2,8 @@ import 'package:serverpod/serverpod.dart';
 
 import '../core/identity_crypto.dart';
 import '../generated/protocol.dart';
+import 'api_key_auth.dart';
+import 'api_key_service.dart';
 import 'audit_service.dart';
 import 'rbac.dart';
 
@@ -31,22 +33,45 @@ abstract final class WorkspaceResolver {
   }
 }
 
-/// The authenticated operator's identity inside one workspace.
+/// The authenticated caller's identity inside one workspace.
+///
+/// A caller is either an operator with a membership record, or a machine key
+/// bound to the workspace. Both resolve to the same kind of context so every
+/// endpoint keeps one authorization gate; only the source of [permissions]
+/// differs (role matrix versus key scopes).
 class WorkspaceContext {
   const WorkspaceContext({
     required this.workspace,
-    required this.member,
-    required this.role,
+    required this.permissions,
+    this.member,
+    this.apiKey,
   });
 
   final Workspace workspace;
-  final WorkspaceMember member;
-  final MembershipRole role;
+
+  /// Everything the caller may do in [workspace].
+  final Set<Permission> permissions;
+
+  /// The membership this context came from. Null for a machine key.
+  final WorkspaceMember? member;
+
+  /// The key that authenticated this request. Null for a signed-in operator.
+  final ApiKey? apiKey;
 
   UuidValue get workspaceId => workspace.id!;
-  String get userIdentifier => member.userIdentifier;
 
-  bool can(Permission permission) => hasPermission(role, permission);
+  /// The identity recorded in audit records and `createdBy` columns.
+  String get userIdentifier => apiKey != null
+      ? apiKeyIdentifier(apiKey!.id!)
+      : member!.userIdentifier;
+
+  /// The role for an operator, null for a machine key.
+  MembershipRole? get role => member?.role;
+
+  /// Whether the caller is a machine key rather than a person.
+  bool get isMachine => apiKey != null;
+
+  bool can(Permission permission) => permissions.contains(permission);
 }
 
 /// Builds the app bootstrap payload for a workspace and member.
@@ -70,10 +95,11 @@ WorkspaceBootstrap bootstrapFor(Workspace workspace, WorkspaceMember member) {
 /// membership record. A client supplied workspace id is verified against that
 /// membership, never trusted on its own.
 abstract final class WorkspaceService {
-  /// Resolves the workspace the signed-in operator belongs to.
+  /// Resolves the workspace the caller belongs to.
   ///
   /// When [workspaceId] is supplied it must match a membership for the
-  /// authenticated user. Otherwise the operator's first workspace is used.
+  /// authenticated user, or the key's own workspace. Otherwise the operator's
+  /// first workspace is used.
   static Future<WorkspaceContext> contextFor(
     Session session, {
     UuidValue? workspaceId,
@@ -84,6 +110,9 @@ abstract final class WorkspaceService {
         message: 'Sign in to continue.',
         reason: 'notAuthenticated',
       );
+    }
+    if (isApiKeyIdentifier(userIdentifier)) {
+      return _apiKeyContext(session, userIdentifier, workspaceId: workspaceId);
     }
 
     WorkspaceMember? member;
@@ -121,7 +150,46 @@ abstract final class WorkspaceService {
     return WorkspaceContext(
       workspace: workspace,
       member: member,
-      role: member.role,
+      permissions: rolePermissions[member.role] ?? const <Permission>{},
+    );
+  }
+
+  /// Builds the context for a request authenticated with an API key.
+  ///
+  /// The key carries its own workspace and scope list, so there is no
+  /// membership to consult. The key is re-read here: revocation, scope edits,
+  /// and the per-key rate limit must all take effect on the next request, not
+  /// on the next sign-in.
+  static Future<WorkspaceContext> _apiKeyContext(
+    Session session,
+    String userIdentifier, {
+    UuidValue? workspaceId,
+  }) async {
+    final apiKeyId = apiKeyIdFromIdentifier(userIdentifier);
+    final apiKey = apiKeyId == null
+        ? null
+        : await ApiKey.db.findById(session, apiKeyId);
+    if (apiKey == null || apiKey.revoked) {
+      throw AuthenticationException(
+        message: 'This API key is no longer valid.',
+        reason: 'notAuthenticated',
+      );
+    }
+    if (workspaceId != null && apiKey.workspaceId != workspaceId) {
+      throw AuthenticationException(
+        message: 'You do not have access to this workspace.',
+        reason: 'forbidden',
+      );
+    }
+    ApiKeyService.enforceRateLimit(apiKey);
+    final workspace = await WorkspaceResolver.resolve(
+      session,
+      apiKey.workspaceId,
+    );
+    return WorkspaceContext(
+      workspace: workspace,
+      apiKey: apiKey,
+      permissions: apiKeyPermissions(apiKey.scopes),
     );
   }
 
@@ -137,14 +205,26 @@ abstract final class WorkspaceService {
   }
 
   /// Enforces one permission on an existing context.
+  ///
+  /// A machine key is told which scope it is missing, because that is what the
+  /// person holding the key can act on.
   static void require(WorkspaceContext context, Permission permission) {
-    if (!context.can(permission)) {
+    if (context.can(permission)) return;
+    final apiKey = context.apiKey;
+    if (apiKey != null) {
+      final scope = scopeForPermission(permission);
       throw AuthenticationException(
-        message:
-            'Your role (${roleLabel(context.role)}) cannot perform this action.',
+        message: scope == null
+            ? 'This action is reserved for signed in operators, not API keys.'
+            : 'The key "${apiKey.label}" is missing the ${scope.name} scope.',
         reason: 'forbidden',
       );
     }
+    throw AuthenticationException(
+      message:
+          'Your role (${roleLabel(context.role!)}) cannot perform this action.',
+      reason: 'forbidden',
+    );
   }
 
   /// Creates a workspace and makes the creator its owner.
@@ -160,6 +240,12 @@ abstract final class WorkspaceService {
       throw AuthenticationException(
         message: 'Sign in to continue.',
         reason: 'notAuthenticated',
+      );
+    }
+    if (isApiKeyIdentifier(userIdentifier)) {
+      throw AuthenticationException(
+        message: 'API keys cannot create workspaces.',
+        reason: 'forbidden',
       );
     }
     final trimmed = name.trim();
@@ -208,7 +294,8 @@ abstract final class WorkspaceService {
     return WorkspaceContext(
       workspace: workspace,
       member: member,
-      role: MembershipRole.owner,
+      permissions:
+          rolePermissions[MembershipRole.owner] ?? const <Permission>{},
     );
   }
 
@@ -319,6 +406,12 @@ abstract final class WorkspaceService {
         reason: 'notAuthenticated',
       );
     }
+    if (isApiKeyIdentifier(userIdentifier)) {
+      throw AuthenticationException(
+        message: 'API keys cannot accept invitations.',
+        reason: 'forbidden',
+      );
+    }
 
     final hash = IdentityCrypto.sha256Hex(code.trim());
     final invitation = await Invitation.db.findFirstRow(
@@ -362,7 +455,8 @@ abstract final class WorkspaceService {
       return WorkspaceContext(
         workspace: workspace,
         member: existing,
-        role: existing.role,
+        permissions:
+            rolePermissions[existing.role] ?? const <Permission>{},
       );
     }
 
@@ -400,7 +494,7 @@ abstract final class WorkspaceService {
     return WorkspaceContext(
       workspace: workspace,
       member: member,
-      role: member.role,
+      permissions: rolePermissions[member.role] ?? const <Permission>{},
     );
   }
 

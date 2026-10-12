@@ -65,7 +65,9 @@ class WorkspaceEndpoint extends Endpoint {
       branding: branding,
       authenticMessage: authenticMessage,
     );
-    return _bootstrap(context.workspace, context.member);
+    // Machine keys are rejected by `WorkspaceService.create`, so a caller that
+    // creates a workspace always brings a membership with it.
+    return _bootstrap(context.workspace, context.member!);
   }
 
   /// Joins the public demo workspace.
@@ -211,7 +213,9 @@ class WorkspaceEndpoint extends Endpoint {
       code: code,
       displayName: displayName,
     );
-    return _bootstrap(context.workspace, context.member);
+    // As above: accepting an invitation always creates a membership, and API
+    // keys cannot accept one.
+    return _bootstrap(context.workspace, context.member!);
   }
 
   /// Changes a member's role. Requires the `teamWrite` permission.
