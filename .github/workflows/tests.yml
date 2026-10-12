@@ -17,9 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Keep this on the same stable channel the project is developed against,
+      # so CI resolves the same SDK and dependency graph as a local build.
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.4'
+          flutter-version: '3.47.7'
 
       # The test config sets `database.dataPath`, so the tests run against an
       # embedded PostgreSQL that Serverpod starts itself. No Docker needed.
