@@ -29,14 +29,127 @@ class _LiveFeedScreenState extends State<LiveFeedScreen> {
   final List<LiveEvent> _events = <LiveEvent>[];
   StreamSubscription<LiveEvent>? _subscription;
   bool _connected = false;
+  bool _historyLoaded = false;
   String? _error;
   Timer? _retry;
+
+  /// How many of each record the feed opens with.
+  static const int _historyPerSource = 25;
 
   @override
   void initState() {
     super.initState();
+    _loadHistory();
     _subscribe();
   }
+
+  /// Seeds the feed with what already happened.
+  ///
+  /// The event channel only carries what happens while it is open, so a
+  /// refresh used to empty the feed even though the activity is all in the
+  /// database. Scans, alerts, and recalls are read back first; the stream then
+  /// appends live on top of them, in the same order.
+  Future<void> _loadHistory() async {
+    final workspaceId = widget.controller.workspaceId;
+    final history = <LiveEvent>[];
+    try {
+      final sessions = await client.verification.list(
+        workspaceId: workspaceId,
+        page: 0,
+        pageSize: _historyPerSource,
+      );
+      history.addAll(sessions.map(_eventFromSession));
+    } catch (_) {
+      // A source that fails leaves the rest of the history in place.
+    }
+    try {
+      final alerts = await client.alert.list(
+        workspaceId: workspaceId,
+        page: 0,
+        pageSize: _historyPerSource,
+      );
+      history.addAll(alerts.map(_eventFromAlert));
+    } catch (_) {}
+    try {
+      final recalls = await client.recall.list(includeLifted: true);
+      history.addAll(recalls.map(_eventFromRecall));
+    } catch (_) {}
+
+    if (!mounted) return;
+    setState(() {
+      _historyLoaded = true;
+      _merge(history);
+    });
+  }
+
+  /// Adds events to the feed, drops the duplicates, and keeps it newest first.
+  void _merge(Iterable<LiveEvent> incoming) {
+    final seen = <String>{
+      for (final event in _events) _eventKey(event),
+    };
+    for (final event in incoming) {
+      if (seen.add(_eventKey(event))) _events.add(event);
+    }
+    _events.sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
+    if (_events.length > 250) _events.removeRange(250, _events.length);
+  }
+
+  /// One event per record, so a stream event does not repeat a seeded one.
+  static String _eventKey(LiveEvent event) => <String>[
+    event.type.name,
+    event.sessionId?.uuid ??
+        event.alertId?.uuid ??
+        event.batchId?.uuid ??
+        event.identityId?.uuid ??
+        event.occurredAt.toIso8601String(),
+    event.title,
+  ].join(':');
+
+  static LiveEvent _eventFromSession(VerificationSession session) => LiveEvent(
+    type: LiveEventType.verificationCompleted,
+    workspaceId: session.workspaceId,
+    occurredAt: session.completedAt ?? session.createdAt,
+    title: session.outcome == null
+        ? 'Scan recorded'
+        : outcomeLabel(session.outcome),
+    subtitle: 'source: ${session.source.name}',
+    outcome: session.outcome,
+    riskScore: session.riskScore,
+    country: session.country,
+    countryCode: session.countryCode,
+    city: session.city,
+    latitude: session.latitude,
+    longitude: session.longitude,
+    identityId: session.identityId,
+    sessionId: session.id,
+  );
+
+  static LiveEvent _eventFromAlert(FraudAlert alert) => LiveEvent(
+    type: alert.status == AlertStatus.open
+        ? LiveEventType.fraudAlertCreated
+        : LiveEventType.fraudAlertUpdated,
+    workspaceId: alert.workspaceId,
+    occurredAt: alert.updatedAt.isAfter(alert.createdAt)
+        ? alert.updatedAt
+        : alert.createdAt,
+    title: alert.title,
+    subtitle: alert.description,
+    severity: alert.severity,
+    identityId: alert.identityId,
+    sessionId: alert.sessionId,
+    alertId: alert.id,
+    batchId: alert.batchId,
+  );
+
+  static LiveEvent _eventFromRecall(RecallRecord recall) => LiveEvent(
+    type: LiveEventType.batchRecalled,
+    workspaceId: recall.workspaceId,
+    occurredAt: recall.liftedAt ?? recall.issuedAt,
+    title: recall.lifted ? 'Recall lifted' : 'Batch recalled',
+    subtitle: recall.reason,
+    identityId: recall.identityId,
+    batchId: recall.batchId,
+  );
 
   @override
   void dispose() {
@@ -58,8 +171,7 @@ class _LiveFeedScreenState extends State<LiveFeedScreen> {
           setState(() {
             _connected = true;
             _error = null;
-            _events.insert(0, event);
-            if (_events.length > 250) _events.removeLast();
+            _merge(<LiveEvent>[event]);
           });
         },
         onError: (Object error) {
@@ -133,8 +245,11 @@ class _LiveFeedScreenState extends State<LiveFeedScreen> {
               title: _connected ? 'No activity yet' : 'Reconnecting…',
               message:
                   _error ??
-                  'Scans, alerts, recalls, offline ingest, and simulations '
-                      'will appear here in real time. Run a simulation to see it live.',
+                  (_historyLoaded
+                      ? 'Nothing has happened in this workspace yet. Scans, '
+                            'alerts, recalls, offline ingest, and simulations '
+                            'appear here in real time.'
+                      : 'Loading recent activity…'),
               action: _connected && _error == null
                   ? null
                   : FilledButton.tonalIcon(

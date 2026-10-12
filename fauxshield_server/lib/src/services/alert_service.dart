@@ -29,12 +29,22 @@ abstract final class AlertService {
   }) async {
     final policy = workspace.fraudPolicy ?? FraudPolicy();
     final risk = assessment.riskScore;
-    if (!shouldAlert(risk, policy) || assessment.signals.isEmpty) {
+    // Signals that only fire past their own threshold (a PIN attack, a lockout)
+    // carry their evidence in the signal itself, so they are queued even when
+    // the workspace policy keeps this risk score out of the queue.
+    final required = assessment.signals.where(
+      (signal) => signal.alertWorthy,
+    );
+    if (assessment.signals.isEmpty ||
+        (!shouldAlert(risk, policy) && required.isEmpty)) {
       return null;
     }
-
+    // The threshold-crossed signal is named first: it describes the incident
+    // ("3 failed PIN attempts") rather than the single attempt behind it.
     final severity = alertSeverityFor(risk);
-    final primary = assessment.signals.first;
+    final primary = required.isNotEmpty
+        ? required.first
+        : assessment.signals.first;
     final identityId = identity?.id;
     final batchId = batch?.id ?? identity?.batchId;
     final bucket = _dedupeBucket();

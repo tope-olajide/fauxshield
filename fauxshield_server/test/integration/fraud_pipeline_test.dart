@@ -97,6 +97,61 @@ void main() {
       );
     });
 
+    test(
+      'a PIN attack reaches the alert queue without locking the unit',
+      () async {
+        await endpoints.simulation.start(
+          owner,
+          workspaceId: fixture.workspaceId,
+          request: SimulationRequest(
+            type: SimulationType.pinBruteForce,
+            batchId: fixture.batch.id,
+            stepDelaySeconds: 0,
+          ),
+        );
+
+        final alerts = await endpoints.alert.list(
+          owner,
+          workspaceId: fixture.workspaceId,
+          page: 0,
+          pageSize: 25,
+        );
+        final pinAlerts = alerts.where(
+          (alert) => alert.signalTypes?.contains(SignalType.pinAttack) ?? false,
+        );
+        expect(
+          pinAlerts,
+          isNotEmpty,
+          reason:
+              'crossing the PIN attack threshold is the evidence, so it has to '
+              'be queued even though medium risk is below the alert line',
+        );
+        expect(
+          alerts.every((alert) => alert.autoLocked == false),
+          isTrue,
+          reason:
+              'a PIN attack is a temporary lockout, not a fraud lock, so nothing '
+              'should be auto-locked',
+        );
+
+        final identities = await endpoints.identity.list(
+          owner,
+          workspaceId: fixture.workspaceId,
+          batchId: fixture.batch.id!,
+          onlyFlagged: false,
+          page: 0,
+          pageSize: 25,
+        );
+        expect(
+          identities.every(
+            (identity) => identity.status != IdentityStatus.locked,
+          ),
+          isTrue,
+          reason: 'the brute forced unit should stay unlockable by an operator',
+        );
+      },
+    );
+
     test('offline scans convert into authoritative verdicts', () async {
       final identity = fixture.identities.first;
       final verdicts = await endpoints.offline.ingest(

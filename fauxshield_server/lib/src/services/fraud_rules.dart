@@ -6,11 +6,22 @@ class SignalAssessment {
     required this.type,
     required this.severity,
     required this.reasons,
+    this.alertWorthy = false,
   });
 
   final SignalType type;
   final RiskScore severity;
   final List<String> reasons;
+
+  /// Whether this signal belongs in the alert queue on its own, even when the
+  /// overall risk score stays under the workspace's alert threshold.
+  ///
+  /// Used by checks that only fire once their own threshold is crossed — a PIN
+  /// attack, where the count *is* the evidence. Both PIN signals carry medium
+  /// severity, so without this a code being attacked could never produce an
+  /// alert, and an operator looking at an empty queue would conclude that
+  /// nothing was happening.
+  final bool alertWorthy;
 }
 
 /// Human readable label for a signal type.

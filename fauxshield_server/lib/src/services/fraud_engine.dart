@@ -133,6 +133,11 @@ class FraudEngine {
     return SignalAssessment(
       type: SignalType.pinAttack,
       severity: signalSeverity(SignalType.pinAttack),
+      // Marked alert worthy because this only fires at or above the policy's
+      // attack threshold: the attempt count is the evidence, so it has to reach
+      // the queue even though a PIN attack on its own stays medium risk (which
+      // the policy keeps below the alert line) and must not auto-lock the unit.
+      alertWorthy: true,
       reasons: <String>[
         '${identity.failedPinAttempts} failed PIN attempts '
             '(threshold ${policy.pinAttackThreshold})',

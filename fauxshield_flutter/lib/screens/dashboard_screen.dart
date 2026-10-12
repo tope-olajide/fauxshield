@@ -290,9 +290,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _outcomeBreakdown(DashboardSummary summary) {
-    final total = summary.totalVerifications == 0
-        ? 1
-        : summary.totalVerifications;
+    if (summary.totalVerifications == 0) {
+      return Text(
+        'No verifications recorded in this window yet.',
+        style: Theme.of(context).textTheme.bodySmall,
+      );
+    }
+    // Percentages make a quiet workspace readable: "1 invalid PIN" says little
+    // next to "1 of 3 verifications".
+    final total = summary.totalVerifications;
     final entries = <(String, int, Color)>[
       ('Authentic', summary.authentic, const Color(0xFF0F7B4D)),
       ('Already verified', summary.alreadyVerified, const Color(0xFF2563EB)),
@@ -334,9 +340,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(width: 10),
                 SizedBox(
-                  width: 44,
+                  width: 78,
                   child: Text(
-                    '${entry.$2}',
+                    '${entry.$2}  ·  ${(entry.$2 * 100 / total).round()}%',
                     textAlign: TextAlign.end,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
@@ -477,73 +483,206 @@ class _MetricCard extends StatelessWidget {
   }
 }
 
-/// A compact bar chart of verifications per day.
+/// A compact stacked bar chart of verifications per day.
+///
+/// Every day gets its own bar on the brand colour, with the share that was
+/// flagged for fraud stacked on top in the error colour. Reading a bar is meant
+/// to answer two questions at once — how much traffic, and how much of it was
+/// suspicious — which a single flat colour cannot do, especially in the first
+/// days of a workspace when every bar is the same height.
 class _TrendChart extends StatelessWidget {
   const _TrendChart({required this.trend});
 
   final List<TrendPoint> trend;
 
+  static const double _plotHeight = 150;
+
   @override
   Widget build(BuildContext context) {
-    if (trend.isEmpty) {
+    final theme = Theme.of(context);
+    final total = trend.fold<int>(0, (sum, point) => sum + point.verifications);
+    final flagged = trend.fold<int>(0, (sum, point) => sum + point.fraud);
+
+    // Nothing recorded yet: say so, rather than drawing a row of absence.
+    if (trend.isEmpty || total == 0) {
       return Text(
-        'No data in this window yet.',
-        style: Theme.of(context).textTheme.bodySmall,
+        trend.isEmpty
+            ? 'No data in this window yet.'
+            : 'No verifications in this window yet. The chart fills in with '
+                  'the first scan.',
+        style: theme.textTheme.bodySmall,
       );
     }
+
     final maxValue = trend
         .map((point) => point.verifications)
         .fold<int>(0, (a, b) => a > b ? a : b);
-    final scheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      height: 160,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          for (final point in trend)
-            Expanded(
-              child: Tooltip(
-                message:
-                    '${shortDate(point.date)}: ${point.verifications} scans, ${point.fraud} fraud',
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 1.5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      if (point.fraud > 0)
-                        Container(
-                          height: 3,
-                          margin: const EdgeInsets.only(bottom: 2),
-                          decoration: BoxDecoration(
-                            color: scheme.error,
-                            borderRadius: BorderRadius.circular(2),
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            _LegendDot(color: theme.colorScheme.primary, label: '$total scans'),
+            const SizedBox(width: 16),
+            _LegendDot(
+              color: theme.colorScheme.error,
+              label: flagged == 0 ? 'none flagged' : '$flagged flagged',
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: _plotHeight,
+          child: Stack(
+            children: <Widget>[
+              // Guides at the top and the middle, so a quiet day and a busy day
+              // are told apart by position instead of by colour alone.
+              Positioned.fill(child: _gridlines(theme)),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  for (final point in trend)
+                    Expanded(child: _bar(theme, point, maxValue)),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        _axisLabels(theme, maxValue),
+      ],
+    );
+  }
+
+  Widget _gridlines(ThemeData theme) {
+    final color = theme.colorScheme.outlineVariant.withValues(alpha: 0.45);
+    return Column(
+      children: <Widget>[
+        Container(height: 1, color: color),
+        const Spacer(),
+        Container(height: 1, color: color),
+        const Spacer(),
+        Container(height: 1, color: color),
+      ],
+    );
+  }
+
+  Widget _bar(ThemeData theme, TrendPoint point, int maxValue) {
+    final scheme = theme.colorScheme;
+    final flagged = point.fraud.clamp(0, point.verifications);
+    final authentic = point.verifications - flagged;
+    // A day with no scans keeps a hairline on the baseline: it shows the day
+    // exists without pretending there was traffic.
+    final quiet = point.verifications == 0;
+    return Tooltip(
+      message:
+          '${shortDate(point.date)}: ${point.verifications} scan(s), '
+          '$flagged flagged',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 1.5),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            if (quiet)
+              Container(
+                height: 2,
+                decoration: BoxDecoration(
+                  color: scheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              )
+            else
+              Flexible(
+                child: FractionallySizedBox(
+                  heightFactor: (point.verifications / maxValue).clamp(
+                    0.06,
+                    1.0,
+                  ),
+                  alignment: Alignment.bottomCenter,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4),
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        // Flagged share on top, so the suspicious part of a day
+                        // is the first thing read off the bar.
+                        if (flagged > 0)
+                          Expanded(
+                            flex: flagged,
+                            child: Container(color: scheme.error),
                           ),
-                        ),
-                      Flexible(
-                        child: FractionallySizedBox(
-                          heightFactor: maxValue == 0
-                              ? 0.02
-                              : (point.verifications / maxValue).clamp(
-                                  0.02,
-                                  1.0,
-                                ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: scheme.primary.withValues(alpha: 0.75),
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(4),
-                              ),
+                        if (authentic > 0)
+                          Expanded(
+                            flex: authentic,
+                            child: Container(
+                              color: scheme.primary.withValues(alpha: 0.85),
                             ),
                           ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  /// Names the window and the peak, which is what a bar height is relative to.
+  Widget _axisLabels(ThemeData theme, int maxValue) {
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    if (trend.length == 1) {
+      return Row(
+        children: <Widget>[
+          Text(shortDate(trend.first.date), style: style),
+          const Spacer(),
+          Text('peak $maxValue', style: style),
+        ],
+      );
+    }
+    return Row(
+      children: <Widget>[
+        Text(shortDate(trend.first.date), style: style),
+        const Spacer(),
+        Text('peak $maxValue', style: style),
+        const Spacer(),
+        Text(shortDate(trend.last.date), style: style),
+      ],
+    );
+  }
+}
+
+/// A coloured dot and a label, for the chart legend.
+class _LegendDot extends StatelessWidget {
+  const _LegendDot({required this.color, required this.label});
+
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Container(
+          width: 9,
+          height: 9,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

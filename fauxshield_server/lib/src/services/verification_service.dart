@@ -700,6 +700,11 @@ class VerificationService {
         SignalAssessment(
           type: SignalType.pinLockout,
           severity: signalSeverity(SignalType.pinLockout),
+          // A lockout is the clearest evidence that the code is in someone
+          // else's hands, so it takes a queue slot of its own. It still keeps
+          // medium severity: locking the identity for good is a human decision,
+          // and this already locks it temporarily.
+          alertWorthy: true,
           reasons: <String>[
             'Identity locked for ${FauxShieldLimits.pinLockoutDuration.inMinutes} minutes '
                 'after ${identity.failedPinAttempts} failed attempts',
