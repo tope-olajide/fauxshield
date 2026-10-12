@@ -16,6 +16,14 @@ abstract final class SiteChrome {
   /// Public source repository, shown in the footer.
   static const String repoUrl = 'https://github.com/tope-olajide/fauxshield';
 
+  /// The hosted API. Every published client defaults to it, and the docs use it
+  /// in examples so a reader sees the same URL the SDKs do.
+  static const String hostedApiUrl = 'https://fauxshield.api.serverpod.space';
+
+  /// The API a local `serverpod start` serves, used in local-development
+  /// instructions only.
+  static const String localApiUrl = 'http://localhost:8080';
+
   /// Primary navigation, mirroring the reference site's information structure.
   static const List<(String, String, String)> navItems =
       <(String, String, String)>[
@@ -47,6 +55,12 @@ abstract final class SiteChrome {
   }
 
   /// The sticky site header. [active] is one of the nav item keys.
+  ///
+  /// The single action on the right is the dashboard, not a sign in or sign up
+  /// pair: every page that carries this chrome is public, and the app behind
+  /// [appPath] already routes a visitor without a session to its own sign in
+  /// screen. The consumer verification page has its own header and is not
+  /// rendered from here, so a scan never offers an operator way out.
   static String nav({required String active}) {
     final links = StringBuffer();
     for (final (key, label, href) in navItems) {
@@ -66,9 +80,9 @@ abstract final class SiteChrome {
     </div>
     <div class="site-nav-actions">
       <a class="btn btn-ghost btn-sm" href="$verifyPath">Verify a product</a>
-      <a class="btn btn-outline btn-sm hide-xs" href="$appPath">Sign in</a>
-      <a class="btn btn-primary btn-sm" href="$appPath">
-        Get started${icon('chevron-right')}
+      <a class="btn btn-primary btn-sm" href="$appPath"
+        title="Open the operator dashboard">
+        Dashboard${icon('chevron-right')}
       </a>
     </div>
   </nav>

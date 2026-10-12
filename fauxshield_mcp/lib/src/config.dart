@@ -31,7 +31,11 @@ class McpConfig {
   /// Whether the token is an API key rather than a session JWT.
   bool get usesApiKey => token.startsWith('fs_live_');
 
-  static const String defaultServerUrl = 'http://localhost:8080';
+  /// The API the server talks to when `FAUXSHIELD_URL` is not set: the hosted
+  /// deployment, so an agent configured with nothing but a key works. A local
+  /// or staging server is opt-in through `FAUXSHIELD_URL`.
+  static const String defaultServerUrl =
+      'https://fauxshield.api.serverpod.space';
 
   /// The file the CLI writes, or wherever `FAUXSHIELD_CONFIG` points.
   static String get configFilePath => resolveConfigPath(Platform.environment);

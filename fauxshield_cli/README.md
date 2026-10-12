@@ -52,7 +52,7 @@ default, so CI never has to write a file:
 
 | Setting | Flag | Environment | Default |
 |---------|------|-------------|---------|
-| Server URL | `--url` | `FAUXSHIELD_URL` | `~/.fauxshield/config.json`, then `http://localhost:8080` |
+| Server URL | `--url` | `FAUXSHIELD_URL` | `~/.fauxshield/config.json`, then the hosted API `https://fauxshield.api.serverpod.space` |
 | API key | `--api-key` | `FAUXSHIELD_API_KEY` | stored by `auth login --api-key` |
 | Session token | `--token` | `FAUXSHIELD_TOKEN` | stored by `auth login` |
 | Password | `--password` | `FAUXSHIELD_PASSWORD` | — |

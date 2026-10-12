@@ -61,9 +61,8 @@ class WorkspaceContext {
   UuidValue get workspaceId => workspace.id!;
 
   /// The identity recorded in audit records and `createdBy` columns.
-  String get userIdentifier => apiKey != null
-      ? apiKeyIdentifier(apiKey!.id!)
-      : member!.userIdentifier;
+  String get userIdentifier =>
+      apiKey != null ? apiKeyIdentifier(apiKey!.id!) : member!.userIdentifier;
 
   /// The role for an operator, null for a machine key.
   MembershipRole? get role => member?.role;
@@ -455,8 +454,7 @@ abstract final class WorkspaceService {
       return WorkspaceContext(
         workspace: workspace,
         member: existing,
-        permissions:
-            rolePermissions[existing.role] ?? const <Permission>{},
+        permissions: rolePermissions[existing.role] ?? const <Permission>{},
       );
     }
 

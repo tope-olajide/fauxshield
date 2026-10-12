@@ -37,7 +37,7 @@ the narrowest scopes the agent needs, then pass it in the environment:
 |----------|----------|-------------|
 | `FAUXSHIELD_API_KEY` | one of these | API key, `fs_live_...` |
 | `FAUXSHIELD_TOKEN` | one of these | Session JWT, for a human's own session |
-| `FAUXSHIELD_URL` | no | API base URL. Defaults to the URL stored by the CLI, then `http://localhost:8080` |
+| `FAUXSHIELD_URL` | no | API base URL. Defaults to the URL stored by the CLI, then the hosted API `https://fauxshield.api.serverpod.space` |
 | `FAUXSHIELD_WORKSPACE_ID` | no | Pin the workspace. Omit to use the key's workspace or the user's first |
 | `FAUXSHIELD_READ_ONLY` | no | `true` disables every mutating tool |
 | `FAUXSHIELD_CONFIG` | no | Path to the CLI's session file, if not `~/.fauxshield/config.json` |

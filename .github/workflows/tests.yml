@@ -58,7 +58,9 @@ jobs:
         run: |
           dart format --output=none --set-exit-if-changed \
             fauxshield_cli/lib fauxshield_cli/bin fauxshield_cli/test \
-            fauxshield_mcp/lib fauxshield_mcp/bin fauxshield_mcp/test
+            fauxshield_mcp/lib fauxshield_mcp/bin fauxshield_mcp/test \
+            fauxshield_contract/lib fauxshield_contract/bin \
+            fauxshield_contract/test
 
       - name: Analyze and test the CLI
         working-directory: fauxshield_cli
@@ -71,3 +73,62 @@ jobs:
         run: |
           dart analyze
           dart test
+
+      # The contract is read from the same generated client the server just
+      # regenerated, so a client change that leaves it behind fails here instead
+      # of drifting into the Node.js and Python SDKs.
+      - name: Check the API contract against the generated client
+        working-directory: fauxshield_contract
+        run: |
+          dart analyze
+          dart test
+          dart run bin/extract.dart --check
+
+      # The reference pages, the SDK pages, and the parity matrix are generated
+      # from that contract. If they are stale, the portal would describe an API
+      # that no longer exists — so this is a build failure, not a warning.
+      - name: Check the generated documentation reference
+        working-directory: fauxshield_server
+        run: dart run tool/generate_docs.dart --check
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The SDK is generated from the contract that was just checked, built with
+      # tsc, and tested against a fake transport, so nothing here needs the API.
+      - name: Build and test the Node.js SDK
+        working-directory: fauxshield_node
+        run: |
+          npm install --no-audit --no-fund
+          npm run generate
+          npm test
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Same contract, same seam: the Python SDK is generated, then tested with
+      # an injected transport, so the suite needs no network either.
+      - name: Test the Python SDK
+        working-directory: fauxshield_python
+        env:
+          PYTHONPATH: src
+        run: |
+          python tools/generate.py
+          python -m unittest discover -s tests -v
+
+      # A wheel that does not install is not an SDK, so the package is built
+      # and imported from the installed copy, not from the working tree.
+      - name: Build and install the Python SDK wheel
+        run: |
+          python -m pip wheel ./fauxshield_python --no-deps -w /tmp/wheel
+          python -m pip install --no-deps --target /tmp/installed /tmp/wheel/fauxshield_sdk-*.whl
+          PYTHONPATH=/tmp/installed python -c \
+            "import fauxshield; assert fauxshield.DEFAULT_BASE_URL == 'https://fauxshield.api.serverpod.space', fauxshield.DEFAULT_BASE_URL"
+
+      # The one check that spans all of it: every SDK against the contract,
+      # every published client against the hosted API URL rather than localhost,
+      # and the CLI and MCP surfaces against the pages that document them.
+      - name: Check cross-language parity and documentation coverage
+        run: python tools/check_parity.py

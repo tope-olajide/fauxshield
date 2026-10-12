@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{pageTitle}}</title>
+    <meta name="description" content="{{pageDescription}}" />
+    {{{docsNoindex}}}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="{{{@/web/css/public.css}}}" />
+    <link rel="stylesheet" href="{{{@/web/css/docs.css}}}" />
+  </head>
+  <body class="site docs">
+    {{{siteNav}}}
+
+    <div class="docs-shell wrap">
+      <button
+        class="docs-sidebar-toggle"
+        type="button"
+        aria-controls="docs-sidebar"
+        aria-expanded="false"
+        id="docs-sidebar-toggle"
+      >
+        Documentation menu
+      </button>
+
+      <aside class="docs-sidebar" id="docs-sidebar">
+        <form class="docs-search" role="search" autocomplete="off">
+          <label class="docs-search-label" for="docs-search-input">
+            Search the docs
+          </label>
+          <input
+            class="docs-search-input"
+            id="docs-search-input"
+            type="search"
+            name="q"
+            placeholder="Search or press /"
+            aria-describedby="docs-search-hint"
+          />
+          <p class="docs-search-hint" id="docs-search-hint">
+            Endpoints, SDK methods, CLI commands, MCP tools, errors
+          </p>
+          <div
+            class="docs-search-results"
+            id="docs-search-results"
+            role="listbox"
+            aria-label="Search results"
+            hidden
+          ></div>
+        </form>
+        {{{docsSidebar}}}
+      </aside>
+
+      <div class="docs-content">
+        {{{docsBreadcrumbs}}}
+        <main id="docs-main">{{{docsBody}}}</main>
+        {{{docsPager}}}
+        <p class="docs-edit">
+          Found something wrong in this page?
+          <a href="https://github.com/tope-olajide/fauxshield/issues"
+            >Report it</a
+          >, or open a pull request against
+          <code>fauxshield_server/lib/src/web/docs/</code>.
+        </p>
+      </div>
+
+      {{{docsToc}}}
+    </div>
+
+    {{{siteFooter}}}
+
+    <script src="{{{@/web/js/docs.js}}}" defer></script>
+  </body>
+</html>

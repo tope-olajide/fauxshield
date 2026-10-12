@@ -1,0 +1,20 @@
+name: fauxshield_contract
+description: >-
+  Extracts a language-neutral API contract from the generated Dart client and
+  checks that the checked-in contract still matches the client it came from.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '^3.12.2'
+
+resolution: workspace
+
+dependencies:
+  analyzer: ^13.3.0
+
+dev_dependencies:
+  test: ^1.31.1
+
+executables:
+  extract:

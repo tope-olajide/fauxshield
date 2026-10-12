@@ -1,0 +1,5210 @@
+{
+  "schemaVersion": 1,
+  "sourceHash": "b22a41d3",
+  "endpoints": [
+    {
+      "name": "alert",
+      "methods": [
+        {
+          "name": "assign",
+          "returns": "FraudAlert",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "alertId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "assignee",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "evidence",
+          "returns": "AlertEvidence",
+          "params": [
+            {
+              "name": "alertId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "get",
+          "returns": "FraudAlert",
+          "params": [
+            {
+              "name": "alertId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "returns": "List<FraudAlert>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "status",
+              "type": "AlertStatus",
+              "nullable": true
+            },
+            {
+              "name": "severity",
+              "type": "AlertSeverity",
+              "nullable": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "reports",
+          "returns": "List<FakeReport>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "status",
+              "type": "FakeReportStatus",
+              "nullable": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "signals",
+          "returns": "List<FraudSignalRecord>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "batchId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "type",
+              "type": "SignalType",
+              "nullable": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "triageReport",
+          "returns": "FakeReport",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "reportId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "status",
+              "type": "FakeReportStatus",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "note",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "updateStatus",
+          "returns": "FraudAlert",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "alertId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "status",
+              "type": "AlertStatus",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "note",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "analytics",
+      "methods": [
+        {
+          "name": "dashboard",
+          "returns": "DashboardSummary",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "windowDays",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "rollupNow",
+          "returns": "DailyWorkspaceStat",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "day",
+              "type": "DateTime",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "methods": [
+        {
+          "name": "create",
+          "returns": "ApiKeySecret",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "scopes",
+              "type": "List<ApiScope>",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "rateLimitPerMinute",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "returns": "List<ApiKey>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "revoke",
+          "returns": "ApiKey",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "apiKeyId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "audit",
+      "methods": [
+        {
+          "name": "query",
+          "returns": "List<AuditEvent>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "action",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "actorIdentifier",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "targetType",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "targetId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "from",
+              "type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "to",
+              "type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "batch",
+      "methods": [
+        {
+          "name": "create",
+          "returns": "Batch",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "reference",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "manufactureDate",
+              "type": "DateTime",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "expiryDate",
+              "type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "distributionRegion",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "quantity",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "notes",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "generateIdentities",
+          "returns": "IdentityGenerationResult",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "batchId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "quantity",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "idempotencyKey",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "get",
+          "returns": "Batch",
+          "params": [
+            {
+              "name": "batchId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "returns": "List<Batch>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "stats",
+          "returns": "BatchStats",
+          "params": [
+            {
+              "name": "batchId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "update",
+          "returns": "Batch",
+          "params": [
+            {
+              "name": "batchId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "reference",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "expiryDate",
+              "type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "distributionRegion",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "quantity",
+              "type": "int",
+              "nullable": true
+            },
+            {
+              "name": "notes",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "status",
+              "type": "BatchStatus",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "demo",
+      "methods": [
+        {
+          "name": "isSeeded",
+          "returns": "bool",
+          "params": []
+        },
+        {
+          "name": "seed",
+          "returns": "WorkspaceBootstrap",
+          "params": [
+            {
+              "name": "email",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "displayName",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "secret",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "identity",
+      "methods": [
+        {
+          "name": "delete",
+          "returns": "ProductIdentity",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "identityId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "reason",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "export",
+          "returns": "ExportFile",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "batchId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "format",
+              "type": "ExportFormat",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "get",
+          "returns": "ProductIdentity",
+          "params": [
+            {
+              "name": "identityId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "returns": "List<ProductIdentity>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "batchId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "status",
+              "type": "IdentityStatus",
+              "nullable": true
+            },
+            {
+              "name": "onlyFlagged",
+              "type": "bool",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "lock",
+          "returns": "ProductIdentity",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "identityId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "reason",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "regenerateToken",
+          "returns": "ProductIdentity",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "identityId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "reason",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "restore",
+          "returns": "ProductIdentity",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "identityId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "revealPin",
+          "returns": "RevealedPin",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "identityId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "unlock",
+          "returns": "ProductIdentity",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "identityId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "note",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "notification",
+      "methods": [
+        {
+          "name": "list",
+          "returns": "List<Notification>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "onlyUnread",
+              "type": "bool",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "markAllRead",
+          "returns": "int",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "markRead",
+          "returns": "Notification",
+          "params": [
+            {
+              "name": "notificationId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "preferences",
+          "returns": "List<NotificationPreference>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "updatePreference",
+          "returns": "NotificationPreference",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "channel",
+              "type": "NotificationChannel",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "minSeverity",
+              "type": "AlertSeverity",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "email",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "offline",
+      "methods": [
+        {
+          "name": "convertNow",
+          "returns": "int",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "ingest",
+          "returns": "List<OfflineScanVerdict>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "deviceId",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "scans",
+              "type": "List<OfflineScanInput>",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "records",
+          "returns": "List<OfflineScanRecord>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "deviceId",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "onlyPending",
+              "type": "bool",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "product",
+      "methods": [
+        {
+          "name": "archive",
+          "returns": "Product",
+          "params": [
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "create",
+          "returns": "Product",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "name",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "sku",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "category",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "description",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "imageUrls",
+              "type": "List<String>",
+              "nullable": true
+            },
+            {
+              "name": "packaging",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "shelfLife",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "countryRestrictions",
+              "type": "List<String>",
+              "nullable": true
+            },
+            {
+              "name": "safetyInstructions",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "returns": "Product",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "reason",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "deleteImpact",
+          "returns": "ProductDeleteImpact",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "get",
+          "returns": "Product",
+          "params": [
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "returns": "List<Product>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "search",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "includeArchived",
+              "type": "bool",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "listDeleted",
+          "returns": "List<Product>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "purge",
+          "returns": "void",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "restore",
+          "returns": "Product",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "update",
+          "returns": "Product",
+          "params": [
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "name",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "sku",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "category",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "description",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "imageUrls",
+              "type": "List<String>",
+              "nullable": true
+            },
+            {
+              "name": "packaging",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "shelfLife",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "countryRestrictions",
+              "type": "List<String>",
+              "nullable": true
+            },
+            {
+              "name": "safetyInstructions",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "uploadImage",
+          "returns": "String",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "fileName",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "data",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "recall",
+      "methods": [
+        {
+          "name": "lift",
+          "returns": "RecallResult",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "recallId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "note",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "returns": "List<RecallRecord>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "includeLifted",
+              "type": "bool",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "recallBatch",
+          "returns": "RecallResult",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "batchId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "reason",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "notes",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "recallIdentity",
+          "returns": "RecallResult",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "identityId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "reason",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "notes",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "simulation",
+      "methods": [
+        {
+          "name": "cancel",
+          "returns": "AttackSimulation",
+          "params": [
+            {
+              "name": "simulationId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "get",
+          "returns": "AttackSimulation",
+          "params": [
+            {
+              "name": "simulationId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "returns": "List<AttackSimulation>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "run",
+          "returns": "AttackSimulation",
+          "params": [
+            {
+              "name": "simulationId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "start",
+          "returns": "AttackSimulation",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "request",
+              "type": "SimulationRequest",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "step",
+          "returns": "AttackSimulation",
+          "params": [
+            {
+              "name": "simulationId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "verification",
+      "methods": [
+        {
+          "name": "acknowledge",
+          "returns": "VerificationPresentation",
+          "params": [
+            {
+              "name": "sessionId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "deviceFingerprint",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "get",
+          "returns": "VerificationSession",
+          "params": [
+            {
+              "name": "sessionId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "returns": "List<VerificationSession>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "identityId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "batchId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "productId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "state",
+              "type": "VerificationState",
+              "nullable": true
+            },
+            {
+              "name": "outcome",
+              "type": "VerificationOutcome",
+              "nullable": true
+            },
+            {
+              "name": "riskScore",
+              "type": "RiskScore",
+              "nullable": true
+            },
+            {
+              "name": "source",
+              "type": "ScanSource",
+              "nullable": true
+            },
+            {
+              "name": "from",
+              "type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "to",
+              "type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "reportFake",
+          "returns": "ReportAcknowledgement",
+          "params": [
+            {
+              "name": "sessionId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "deviceFingerprint",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "reason",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "comment",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "result",
+          "returns": "VerificationPresentation",
+          "params": [
+            {
+              "name": "sessionId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "deviceFingerprint",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "start",
+          "returns": "VerificationPresentation",
+          "params": [
+            {
+              "name": "token",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "deviceFingerprint",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "submitPin",
+          "returns": "VerificationPresentation",
+          "params": [
+            {
+              "name": "sessionId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "deviceFingerprint",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pin",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "webhookAdmin",
+      "methods": [
+        {
+          "name": "create",
+          "returns": "WebhookEndpointSecret",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "url",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "events",
+              "type": "List<WebhookEventType>",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "description",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "returns": "WebhookEndpoint",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "endpointId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "deliveries",
+          "returns": "List<WebhookDelivery>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "endpointId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "page",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "pageSize",
+              "type": "int",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "drainNow",
+          "returns": "int",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "returns": "List<WebhookEndpoint>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "redeliver",
+          "returns": "WebhookDelivery",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "deliveryId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "rotateSecret",
+          "returns": "WebhookEndpointSecret",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "endpointId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "test",
+          "returns": "WebhookTestResult",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "endpointId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "update",
+          "returns": "WebhookEndpoint",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "endpointId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "url",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "events",
+              "type": "List<WebhookEventType>",
+              "nullable": true
+            },
+            {
+              "name": "description",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "workspace",
+      "methods": [
+        {
+          "name": "acceptInvitation",
+          "returns": "WorkspaceBootstrap",
+          "params": [
+            {
+              "name": "code",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "displayName",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "bootstrap",
+          "returns": "WorkspaceBootstrap?",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "changeRole",
+          "returns": "WorkspaceMember",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "memberId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "role",
+              "type": "MembershipRole",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "create",
+          "returns": "WorkspaceBootstrap",
+          "params": [
+            {
+              "name": "name",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "email",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "authenticMessage",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "branding",
+              "type": "Branding",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "invitations",
+          "returns": "List<Invitation>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "invite",
+          "returns": "InvitationCreated",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "email",
+              "type": "String",
+              "nullable": false,
+              "required": true
+            },
+            {
+              "name": "role",
+              "type": "MembershipRole",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "joinDemo",
+          "returns": "WorkspaceBootstrap",
+          "params": [
+            {
+              "name": "email",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "displayName",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "members",
+          "returns": "List<WorkspaceMember>",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "removeMember",
+          "returns": "void",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "memberId",
+              "type": "UuidValue",
+              "nullable": false,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "update",
+          "returns": "Workspace",
+          "params": [
+            {
+              "name": "workspaceId",
+              "type": "UuidValue",
+              "nullable": true
+            },
+            {
+              "name": "name",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "branding",
+              "type": "Branding",
+              "nullable": true
+            },
+            {
+              "name": "authenticMessage",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "restrictedCountries",
+              "type": "List<String>",
+              "nullable": true
+            },
+            {
+              "name": "fraudPolicy",
+              "type": "FraudPolicy",
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "models": [
+    {
+      "name": "AlertEvidence",
+      "fields": [
+        {
+          "name": "alert",
+          "type": "FraudAlert",
+          "nullable": false
+        },
+        {
+          "name": "identity",
+          "type": "ProductIdentity",
+          "nullable": true
+        },
+        {
+          "name": "batch",
+          "type": "Batch",
+          "nullable": true
+        },
+        {
+          "name": "product",
+          "type": "Product",
+          "nullable": true
+        },
+        {
+          "name": "sessions",
+          "type": "List<VerificationSession>",
+          "nullable": false
+        },
+        {
+          "name": "identitySessions",
+          "type": "List<VerificationSession>",
+          "nullable": false
+        },
+        {
+          "name": "signals",
+          "type": "List<FraudSignalRecord>",
+          "nullable": false
+        },
+        {
+          "name": "reports",
+          "type": "List<FakeReport>",
+          "nullable": false
+        },
+        {
+          "name": "recall",
+          "type": "RecallRecord",
+          "nullable": true
+        },
+        {
+          "name": "generatedAt",
+          "type": "DateTime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ApiKey",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "label",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "keyPrefix",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "scopes",
+          "type": "List<ApiScope>",
+          "nullable": false
+        },
+        {
+          "name": "rateLimitPerMinute",
+          "type": "int",
+          "nullable": false,
+          "default": "120"
+        },
+        {
+          "name": "lastUsedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "revoked",
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "createdBy",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "revokedAt",
+          "type": "DateTime",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "ApiKeySecret",
+      "fields": [
+        {
+          "name": "apiKey",
+          "type": "ApiKey",
+          "nullable": false
+        },
+        {
+          "name": "secret",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "warning",
+          "type": "String",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "AttackSimulation",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "type",
+          "type": "SimulationType",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "SimulationStatus",
+          "nullable": false,
+          "default": "SimulationStatus.queued"
+        },
+        {
+          "name": "label",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "paramsJson",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "progress",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "totalSteps",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "summaryJson",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdBy",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "startedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "completedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "cancelledAt",
+          "type": "DateTime",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "AuditEvent",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "actorType",
+          "type": "ActorType",
+          "nullable": false,
+          "default": "ActorType.system"
+        },
+        {
+          "name": "actorIdentifier",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "apiKeyId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "action",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "targetType",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "targetId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "metadataJson",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "ipAddress",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "Batch",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "productId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "reference",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "manufactureDate",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "expiryDate",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "distributionRegion",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "quantity",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "BatchStatus",
+          "nullable": false,
+          "default": "BatchStatus.created"
+        },
+        {
+          "name": "notes",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "recallReason",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "recalledAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "recalledBy",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "BatchStats",
+      "fields": [
+        {
+          "name": "batchId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "totalIdentities",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "generated",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "active",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "verified",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "locked",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "recalled",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "deleted",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "flagged",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "generatedAt",
+          "type": "DateTime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "Branding",
+      "fields": [
+        {
+          "name": "displayName",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "logoUrl",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "themeColor",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "tagline",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "CountryStat",
+      "fields": [
+        {
+          "name": "country",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "countryCode",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "verifications",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "fraud",
+          "type": "int",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "DailyWorkspaceStat",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "date",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "verifications",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "authentic",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "alreadyVerified",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "invalidPin",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "fraudSuspected",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "highRisk",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "recalled",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "alertsCreated",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "alertsResolved",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "topCountriesJson",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "DashboardSummary",
+      "fields": [
+        {
+          "name": "windowDays",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "totalVerifications",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "authentic",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "alreadyVerified",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "invalidPin",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "fraudSuspected",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "highRisk",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "recalled",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "openAlerts",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "criticalAlerts",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "identitiesTotal",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "identitiesLocked",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "identitiesRecalled",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "batchesTotal",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "productsTotal",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "trend",
+          "type": "List<TrendPoint>",
+          "nullable": false
+        },
+        {
+          "name": "topCountries",
+          "type": "List<CountryStat>",
+          "nullable": false
+        },
+        {
+          "name": "outcomes",
+          "type": "List<OutcomeBreakdown>",
+          "nullable": false
+        },
+        {
+          "name": "recentAlerts",
+          "type": "List<FraudAlert>",
+          "nullable": false
+        },
+        {
+          "name": "generatedAt",
+          "type": "DateTime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ExportFile",
+      "fields": [
+        {
+          "name": "filename",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "mimeType",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "content",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "rowCount",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "truncated",
+          "type": "bool",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "FakeReport",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "sessionId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "reason",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "comment",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "photoStorageId",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "photoPath",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "deviceFingerprint",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "country",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "city",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "status",
+          "type": "FakeReportStatus",
+          "nullable": false,
+          "default": "FakeReportStatus.open"
+        },
+        {
+          "name": "source",
+          "type": "ScanSource",
+          "nullable": false,
+          "default": "ScanSource.consumerWeb"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "triagedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "triagedBy",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "FraudAlert",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "batchId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "sessionId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "severity",
+          "type": "AlertSeverity",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "AlertStatus",
+          "nullable": false,
+          "default": "AlertStatus.open"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "recommendedAction",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "signalTypes",
+          "type": "List<SignalType>",
+          "nullable": true
+        },
+        {
+          "name": "dedupeKey",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "autoLocked",
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "assignee",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "simulationId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "acknowledgedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "resolvedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "resolvedBy",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "resolutionNote",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "FraudPolicy",
+      "fields": [
+        {
+          "name": "velocityWindowMinutes",
+          "type": "int",
+          "nullable": false,
+          "default": "60"
+        },
+        {
+          "name": "velocityThreshold",
+          "type": "int",
+          "nullable": false,
+          "default": "10"
+        },
+        {
+          "name": "pinAttackThreshold",
+          "type": "int",
+          "nullable": false,
+          "default": "5"
+        },
+        {
+          "name": "batchDuplicationThreshold",
+          "type": "int",
+          "nullable": false,
+          "default": "3"
+        },
+        {
+          "name": "cloneWindowMinutes",
+          "type": "int",
+          "nullable": false,
+          "default": "60"
+        },
+        {
+          "name": "cloneDistanceThresholdKm",
+          "type": "int",
+          "nullable": false,
+          "default": "100"
+        },
+        {
+          "name": "geoIpTimeoutMs",
+          "type": "int",
+          "nullable": false,
+          "default": "500"
+        },
+        {
+          "name": "evaluationBudgetMs",
+          "type": "int",
+          "nullable": false,
+          "default": "2000"
+        },
+        {
+          "name": "autoLockOnFraud",
+          "type": "bool",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "alertOnHigh",
+          "type": "bool",
+          "nullable": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "name": "FraudSignalRecord",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "sessionId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "batchId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "type",
+          "type": "SignalType",
+          "nullable": false
+        },
+        {
+          "name": "severity",
+          "type": "RiskScore",
+          "nullable": false
+        },
+        {
+          "name": "dataJson",
+          "type": "String",
+          "nullable": false,
+          "default": "'{}'"
+        },
+        {
+          "name": "detectedAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "GeoSummary",
+      "fields": [
+        {
+          "name": "country",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "countryCode",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "city",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "latitude",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "longitude",
+          "type": "double",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "IdempotencyRecord",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "idempotencyKey",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "operation",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "requestHash",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "expiresAt",
+          "type": "DateTime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "IdentityGenerationResult",
+      "fields": [
+        {
+          "name": "batchId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "requested",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "created",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "startedAt",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "completedAt",
+          "type": "DateTime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "InspectorCacheEntry",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "qrToken",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "productName",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "sku",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "productDescription",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "imageUrlsJson",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "packaging",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "shelfLife",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "countryRestrictionsJson",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "safetyInstructions",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "batchReference",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "batchStatus",
+          "type": "BatchStatus",
+          "nullable": false
+        },
+        {
+          "name": "manufactureDate",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "distributionRegion",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "identityStatus",
+          "type": "IdentityStatus",
+          "nullable": false
+        },
+        {
+          "name": "recallReason",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "recalledAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "refreshedAt",
+          "type": "DateTime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "InspectorCatalog",
+      "fields": [
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "generatedAt",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "entries",
+          "type": "List<InspectorCatalogEntry>",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "InspectorCatalogEntry",
+      "fields": [
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "qrToken",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "productName",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "sku",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "productDescription",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "imageUrls",
+          "type": "List<String>",
+          "nullable": true
+        },
+        {
+          "name": "packaging",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "shelfLife",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "countryRestrictions",
+          "type": "List<String>",
+          "nullable": true
+        },
+        {
+          "name": "safetyInstructions",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "batchReference",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "batchStatus",
+          "type": "BatchStatus",
+          "nullable": false
+        },
+        {
+          "name": "manufactureDate",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "distributionRegion",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "identityStatus",
+          "type": "IdentityStatus",
+          "nullable": false
+        },
+        {
+          "name": "recallReason",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "recalledAt",
+          "type": "DateTime",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "Invitation",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "role",
+          "type": "MembershipRole",
+          "nullable": false,
+          "default": "MembershipRole.member"
+        },
+        {
+          "name": "codePrefix",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "InvitationStatus",
+          "nullable": false,
+          "default": "InvitationStatus.pending"
+        },
+        {
+          "name": "invitedBy",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "expiresAt",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "acceptedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "acceptedBy",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "InvitationCreated",
+      "fields": [
+        {
+          "name": "invitation",
+          "type": "Invitation",
+          "nullable": false
+        },
+        {
+          "name": "code",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "warning",
+          "type": "String",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "LiveEvent",
+      "fields": [
+        {
+          "name": "type",
+          "type": "LiveEventType",
+          "nullable": false
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "occurredAt",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "severity",
+          "type": "AlertSeverity",
+          "nullable": true
+        },
+        {
+          "name": "outcome",
+          "type": "VerificationOutcome",
+          "nullable": true
+        },
+        {
+          "name": "riskScore",
+          "type": "RiskScore",
+          "nullable": true
+        },
+        {
+          "name": "country",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "countryCode",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "city",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "latitude",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "longitude",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "sessionId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "alertId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "batchId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "payloadJson",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "Notification",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "userIdentifier",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "type",
+          "type": "NotificationType",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "body",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "targetType",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "targetId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "read",
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "NotificationPreference",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "userIdentifier",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "channel",
+          "type": "NotificationChannel",
+          "nullable": false
+        },
+        {
+          "name": "enabled",
+          "type": "bool",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "minSeverity",
+          "type": "AlertSeverity",
+          "nullable": false,
+          "default": "AlertSeverity.low"
+        },
+        {
+          "name": "email",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "OfflineScanInput",
+      "fields": [
+        {
+          "name": "localId",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "deviceId",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "deviceFingerprint",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "qrToken",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "scannedAt",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "latitude",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "longitude",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "country",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "city",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "provisionalOutcome",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "OfflineScanRecord",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "spaceId",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "deviceId",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "deviceFingerprint",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "qrToken",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "scannedAt",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "latitude",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "longitude",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "country",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "city",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "provisionalOutcome",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "processed",
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "processedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "verdictJson",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "OfflineScanVerdict",
+      "fields": [
+        {
+          "name": "localId",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "outcome",
+          "type": "VerificationOutcome",
+          "nullable": true
+        },
+        {
+          "name": "riskScore",
+          "type": "RiskScore",
+          "nullable": true
+        },
+        {
+          "name": "sessionId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "processedAt",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "message",
+          "type": "String",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "OutcomeBreakdown",
+      "fields": [
+        {
+          "name": "outcome",
+          "type": "VerificationOutcome",
+          "nullable": false
+        },
+        {
+          "name": "count",
+          "type": "int",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "sku",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "category",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "imageUrls",
+          "type": "List<String>",
+          "nullable": true
+        },
+        {
+          "name": "packaging",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "shelfLife",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "countryRestrictions",
+          "type": "List<String>",
+          "nullable": true
+        },
+        {
+          "name": "safetyInstructions",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdBy",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "archivedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "deletedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "deletedBy",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "deleteReason",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "ProductDeleteImpact",
+      "fields": [
+        {
+          "name": "productId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "productName",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "batchCount",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "identityCount",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "verificationCount",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "alertCount",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "inRecycleBin",
+          "type": "bool",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ProductIdentity",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "batchId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "qrToken",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "hmacSignature",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "IdentityStatus",
+          "nullable": false,
+          "default": "IdentityStatus.active"
+        },
+        {
+          "name": "failedPinAttempts",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "lockedUntil",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "firstVerified",
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "verificationCount",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "firstVerifiedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "lastVerifiedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "recallReason",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "recalledAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "regeneratedFromId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "deletedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "deletedBy",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "deleteReason",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "QueuedFakeReport",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "qrToken",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "reason",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "comment",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "photoLocalPath",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "synced",
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "syncedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "lastError",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "RecallRecord",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "batchId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "scope",
+          "type": "RecallScope",
+          "nullable": false
+        },
+        {
+          "name": "reason",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "issuedBy",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "issuedAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "lifted",
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "liftedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "liftedBy",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "RecallResult",
+      "fields": [
+        {
+          "name": "recall",
+          "type": "RecallRecord",
+          "nullable": false
+        },
+        {
+          "name": "affected",
+          "type": "int",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ReportAcknowledgement",
+      "fields": [
+        {
+          "name": "reportId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "message",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "RevealedPin",
+      "fields": [
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "pin",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "revealedAt",
+          "type": "DateTime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "SimulationRequest",
+      "fields": [
+        {
+          "name": "type",
+          "type": "SimulationType",
+          "nullable": false
+        },
+        {
+          "name": "label",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "batchId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "steps",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "stepDelaySeconds",
+          "type": "int",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "SimulationStepRequest",
+      "fields": [
+        {
+          "name": "simulationId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "delaySeconds",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "TrendPoint",
+      "fields": [
+        {
+          "name": "date",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "verifications",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "fraud",
+          "type": "int",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "VerificationPresentation",
+      "fields": [
+        {
+          "name": "sessionId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "state",
+          "type": "VerificationState",
+          "nullable": false
+        },
+        {
+          "name": "outcome",
+          "type": "VerificationOutcome",
+          "nullable": true
+        },
+        {
+          "name": "riskScore",
+          "type": "RiskScore",
+          "nullable": true
+        },
+        {
+          "name": "verifiedAt",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "firstVerified",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "name": "verificationCount",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "location",
+          "type": "GeoSummary",
+          "nullable": true
+        },
+        {
+          "name": "branding",
+          "type": "Branding",
+          "nullable": true
+        },
+        {
+          "name": "workspaceName",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "authenticMessage",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "productName",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "sku",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "batchReference",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "imageUrls",
+          "type": "List<String>",
+          "nullable": true
+        },
+        {
+          "name": "packaging",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "shelfLife",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "countryRestrictions",
+          "type": "List<String>",
+          "nullable": true
+        },
+        {
+          "name": "safetyInstructions",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "recallReason",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "recalledAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "recallScope",
+          "type": "RecallScope",
+          "nullable": true
+        },
+        {
+          "name": "tokenMasked",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "verifyUrl",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "verifiedByThisDevice",
+          "type": "DateTime",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "VerificationSession",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "identityId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "qrToken",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "deviceFingerprint",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "ipAddress",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "country",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "countryCode",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "city",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "latitude",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "longitude",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "state",
+          "type": "VerificationState",
+          "nullable": false,
+          "default": "VerificationState.tokenResolved"
+        },
+        {
+          "name": "outcome",
+          "type": "VerificationOutcome",
+          "nullable": true
+        },
+        {
+          "name": "riskScore",
+          "type": "RiskScore",
+          "nullable": true
+        },
+        {
+          "name": "source",
+          "type": "ScanSource",
+          "nullable": false,
+          "default": "ScanSource.consumerWeb"
+        },
+        {
+          "name": "offlineScanId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "simulationId",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "lastStateChange",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "expiresAt",
+          "type": "DateTime",
+          "nullable": false
+        },
+        {
+          "name": "completedAt",
+          "type": "DateTime",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "WebhookDelivery",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "endpointId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "eventType",
+          "type": "WebhookEventType",
+          "nullable": false
+        },
+        {
+          "name": "payloadJson",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "DeliveryStatus",
+          "nullable": false,
+          "default": "DeliveryStatus.pending"
+        },
+        {
+          "name": "attemptCount",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "maxAttempts",
+          "type": "int",
+          "nullable": false,
+          "default": "5"
+        },
+        {
+          "name": "lastAttemptAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "nextAttemptAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "lastHttpStatus",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "lastError",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "responseTimeMs",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "processingStartedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "deliveredAt",
+          "type": "DateTime",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "WebhookEndpoint",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "url",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "subscribedEvents",
+          "type": "List<WebhookEventType>",
+          "nullable": false
+        },
+        {
+          "name": "enabled",
+          "type": "bool",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "consecutiveFailures",
+          "type": "int",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "secretRotatedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "deletedAt",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "WebhookEndpointSecret",
+      "fields": [
+        {
+          "name": "endpoint",
+          "type": "WebhookEndpoint",
+          "nullable": false
+        },
+        {
+          "name": "secret",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "warning",
+          "type": "String",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "WebhookTestResult",
+      "fields": [
+        {
+          "name": "success",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "name": "statusCode",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "responseTimeMs",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "error",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "deliveryId",
+          "type": "UuidValue",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "Workspace",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "slug",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "branding",
+          "type": "Branding",
+          "nullable": true
+        },
+        {
+          "name": "authenticMessage",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "restrictedCountries",
+          "type": "List<String>",
+          "nullable": true
+        },
+        {
+          "name": "fraudPolicy",
+          "type": "FraudPolicy",
+          "nullable": true
+        },
+        {
+          "name": "demoMode",
+          "type": "bool",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    },
+    {
+      "name": "WorkspaceBootstrap",
+      "fields": [
+        {
+          "name": "workspace",
+          "type": "Workspace",
+          "nullable": false
+        },
+        {
+          "name": "member",
+          "type": "WorkspaceMember",
+          "nullable": false
+        },
+        {
+          "name": "role",
+          "type": "MembershipRole",
+          "nullable": false
+        },
+        {
+          "name": "permissions",
+          "type": "List<String>",
+          "nullable": false
+        },
+        {
+          "name": "isDemo",
+          "type": "bool",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "WorkspaceMember",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UuidValue",
+          "nullable": true
+        },
+        {
+          "name": "workspaceId",
+          "type": "UuidValue",
+          "nullable": false
+        },
+        {
+          "name": "userIdentifier",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "displayName",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "role",
+          "type": "MembershipRole",
+          "nullable": false,
+          "default": "MembershipRole.member"
+        },
+        {
+          "name": "notificationEmail",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "nullable": false,
+          "default": "DateTime.now()"
+        }
+      ]
+    }
+  ],
+  "enums": [
+    {
+      "name": "ActorType",
+      "values": [
+        "user",
+        "apiKey",
+        "system",
+        "consumer"
+      ]
+    },
+    {
+      "name": "AlertSeverity",
+      "values": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    {
+      "name": "AlertStatus",
+      "values": [
+        "open",
+        "investigating",
+        "resolved",
+        "dismissed"
+      ]
+    },
+    {
+      "name": "ApiScope",
+      "values": [
+        "productsRead",
+        "productsWrite",
+        "batchesRead",
+        "batchesWrite",
+        "identitiesRead",
+        "identitiesGenerate",
+        "identitiesExport",
+        "verificationsRead",
+        "fraudRead",
+        "fraudWrite",
+        "auditRead",
+        "analyticsRead",
+        "webhooksRead",
+        "webhooksWrite",
+        "teamRead",
+        "teamWrite"
+      ]
+    },
+    {
+      "name": "BatchStatus",
+      "values": [
+        "created",
+        "inProduction",
+        "shipped",
+        "recalled"
+      ]
+    },
+    {
+      "name": "DeliveryStatus",
+      "values": [
+        "pending",
+        "processing",
+        "retrying",
+        "delivered",
+        "failed",
+        "disabled"
+      ]
+    },
+    {
+      "name": "ExportFormat",
+      "values": [
+        "csv",
+        "tsv"
+      ]
+    },
+    {
+      "name": "FakeReportStatus",
+      "values": [
+        "open",
+        "triaged",
+        "rejected"
+      ]
+    },
+    {
+      "name": "GeoProvider",
+      "values": [
+        "demo",
+        "http",
+        "disabled"
+      ]
+    },
+    {
+      "name": "IdentityStatus",
+      "values": [
+        "active",
+        "locked",
+        "recalled",
+        "regenerated",
+        "deleted"
+      ]
+    },
+    {
+      "name": "InvitationStatus",
+      "values": [
+        "pending",
+        "accepted",
+        "expired",
+        "revoked"
+      ]
+    },
+    {
+      "name": "LiveEventType",
+      "values": [
+        "verificationCompleted",
+        "fraudAlertCreated",
+        "fraudAlertUpdated",
+        "batchRecalled",
+        "identityStatusChanged",
+        "offlineScanIngested",
+        "simulationProgress",
+        "fakeReportCreated"
+      ]
+    },
+    {
+      "name": "MembershipRole",
+      "values": [
+        "owner",
+        "admin",
+        "member",
+        "viewer"
+      ]
+    },
+    {
+      "name": "NotificationChannel",
+      "values": [
+        "inApp",
+        "email"
+      ]
+    },
+    {
+      "name": "NotificationType",
+      "values": [
+        "fraudAlert",
+        "recall",
+        "verificationDigest",
+        "system"
+      ]
+    },
+    {
+      "name": "RecallScope",
+      "values": [
+        "batch",
+        "instance"
+      ]
+    },
+    {
+      "name": "RiskScore",
+      "values": [
+        "low",
+        "medium",
+        "high",
+        "fraudSuspected"
+      ]
+    },
+    {
+      "name": "ScanSource",
+      "values": [
+        "consumerWeb",
+        "operatorApp",
+        "inspectorOffline",
+        "simulation",
+        "machineApi"
+      ]
+    },
+    {
+      "name": "SignalType",
+      "values": [
+        "cloneDetection",
+        "velocityAnomaly",
+        "pinAttack",
+        "batchDuplication",
+        "distributorLeakage",
+        "greyMarket",
+        "offlineBackfill",
+        "pinLockout"
+      ]
+    },
+    {
+      "name": "SimulationStatus",
+      "values": [
+        "queued",
+        "running",
+        "completed",
+        "cancelled",
+        "failed"
+      ]
+    },
+    {
+      "name": "SimulationType",
+      "values": [
+        "cloneAttack",
+        "pinBruteForce",
+        "scanBurst",
+        "greyMarketLeak"
+      ]
+    },
+    {
+      "name": "VerificationErrorReason",
+      "values": [
+        "tokenNotFound",
+        "tokenInvalid",
+        "sessionNotFound",
+        "sessionExpired",
+        "invalidState",
+        "pinRequired",
+        "pinLockout",
+        "identityLocked",
+        "identityRecalled",
+        "alreadyDetermined",
+        "evaluationUnavailable"
+      ]
+    },
+    {
+      "name": "VerificationOutcome",
+      "values": [
+        "authentic",
+        "alreadyVerified",
+        "invalidPin",
+        "fraudSuspected",
+        "highRisk",
+        "recalled"
+      ]
+    },
+    {
+      "name": "VerificationState",
+      "values": [
+        "tokenResolved",
+        "pinPrompted",
+        "pinSubmitted",
+        "resultDetermined"
+      ]
+    },
+    {
+      "name": "WebhookEventType",
+      "values": [
+        "verificationCompleted",
+        "fraudAlertCreated",
+        "fraudAlertUpdated",
+        "batchStatusChanged",
+        "identityStatusChanged",
+        "recallIssued",
+        "fakeReportCreated",
+        "testEvent"
+      ]
+    }
+  ],
+  "exceptions": [
+    {
+      "name": "ApiException",
+      "fields": [
+        {
+          "name": "message",
+          "type": "String",
+          "nullable": false
+        },
+        {
+          "name": "code",
+          "type": "String",
+          "nullable": false,
+          "default": "'api_error'"
+        }
+      ]
+    },
+    {
+      "name": "AuthenticationException",
+      "fields": [
+        {
+          "name": "reason",
+          "type": "String",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ConflictException",
+      "fields": [
+        {
+          "name": "resource",
+          "type": "String",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "NotFoundException",
+      "fields": [
+        {
+          "name": "resource",
+          "type": "String",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "RateLimitException",
+      "fields": [
+        {
+          "name": "retryAfterSeconds",
+          "type": "int",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ServiceUnavailableException",
+      "fields": [
+        {
+          "name": "reason",
+          "type": "String",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ValidationException",
+      "fields": [
+        {
+          "name": "field",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "VerificationException",
+      "fields": [
+        {
+          "name": "reason",
+          "type": "VerificationErrorReason",
+          "nullable": false
+        }
+      ]
+    }
+  ]
+}

@@ -2,7 +2,6 @@ import 'package:serverpod/serverpod.dart';
 
 import '../../cache_busting.dart';
 import '../widgets/about_page.dart';
-import '../widgets/docs_page.dart';
 import '../widgets/features_page.dart';
 import '../widgets/pricing_page.dart';
 
@@ -45,19 +44,5 @@ class AboutRoute extends WidgetRoute {
   @override
   Future<WebWidget> build(Session session, Request request) async {
     return AboutPageWidget.build();
-  }
-}
-
-/// The `/docs` page.
-class DocsRoute extends WidgetRoute {
-  DocsRoute()
-    : super(
-        methods: const {Method.get},
-        cacheBustingConfig: cacheBustingConfig,
-      );
-
-  @override
-  Future<WebWidget> build(Session session, Request request) async {
-    return DocsPageWidget.build();
   }
 }

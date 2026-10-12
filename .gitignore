@@ -25,3 +25,16 @@ references/
 # Stale snapshot of server sources from an earlier session, superseded by
 # fauxshield_server/lib. Kept on disk, never committed.
 .staging/
+
+# Node.js SDK dependencies and its TypeScript build output, both rebuilt by
+# `npm install` and `npm run build`.
+fauxshield_node/node_modules/
+fauxshield_node/dist/
+
+# Python SDK build artifacts and bytecode: recreated by `pip wheel` and by
+# running the test suite.
+fauxshield_python/build/
+fauxshield_python/dist/
+fauxshield_python/src/**/__pycache__/
+fauxshield_python/tests/**/__pycache__/
+fauxshield_python/**/*.egg-info/

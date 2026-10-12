@@ -7,6 +7,7 @@ environment:
 workspace:
   - fauxshield_cli
   - fauxshield_client
+  - fauxshield_contract
   - fauxshield_flutter
   - fauxshield_mcp
   - fauxshield_server

@@ -37,6 +37,36 @@ void main() {
       expect(config.serverUrl, McpConfig.defaultServerUrl);
     });
 
+    test('defaults to the hosted API, never to localhost', () {
+      // The published default has to be an API a new user can reach without
+      // configuring anything; a localhost default only ever works on the
+      // machine that happens to be running the dev server.
+      expect(
+        McpConfig.defaultServerUrl,
+        'https://fauxshield.api.serverpod.space',
+      );
+      expect(McpConfig.defaultServerUrl, isNot(contains('localhost')));
+      expect(McpConfig.defaultServerUrl, isNot(contains('127.0.0.1')));
+
+      final fallback = McpConfig.fromEnvironment(
+        environment: const <String, String>{'FAUXSHIELD_TOKEN': 'jwt-token'},
+        configFile: _missingFile,
+      );
+      expect(fallback.serverUrl, 'https://fauxshield.api.serverpod.space');
+    });
+
+    test('a supplied base URL beats the built-in default', () {
+      final local = McpConfig.fromEnvironment(
+        environment: const <String, String>{
+          'FAUXSHIELD_TOKEN': 'jwt-token',
+          'FAUXSHIELD_URL': 'http://localhost:8080',
+        },
+        configFile: _missingFile,
+      );
+
+      expect(local.serverUrl, 'http://localhost:8080');
+    });
+
     test('falls back to the file the CLI writes', () {
       final file =
           File(

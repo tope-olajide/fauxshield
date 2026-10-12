@@ -9,6 +9,7 @@ import 'src/core/constants.dart';
 import 'src/services/api_key_auth.dart';
 import 'src/generated/serverpod.dart';
 import 'src/web/routes/app_config_route.dart';
+import 'src/web/routes/docs_routes.dart';
 import 'src/web/routes/landing_route.dart';
 import 'src/web/routes/marketing_routes.dart';
 import 'src/web/routes/verify_route.dart';
@@ -61,7 +62,12 @@ void run(List<String> args) async {
   pod.webServer.addRoute(FeaturesRoute(), '/features');
   pod.webServer.addRoute(PricingRoute(), '/pricing');
   pod.webServer.addRoute(AboutRoute(), '/about');
+
+  // The developer documentation portal. One route serves every page under
+  // /docs, the search index the pages fetch, and a helpful page for a slug that
+  // does not exist — so a page in the sidebar is always a page that answers.
   pod.webServer.addRoute(DocsRoute(), '/docs');
+  pod.webServer.addRoute(DocsRoute(), '/docs/**');
 
   // Serve all files in the web/static relative directory under /web.
   // These are used by the default web page.

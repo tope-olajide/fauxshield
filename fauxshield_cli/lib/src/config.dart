@@ -164,8 +164,14 @@ class CliContext {
   final String? apiKeyPrefix;
 }
 
-/// The default server used when nothing is configured.
-const String defaultServerUrl = 'http://localhost:8080';
+/// The API an installed CLI talks to when nothing is configured.
+///
+/// This is the hosted deployment, so a developer who installs the CLI can sign
+/// in and work against a real account with no configuration at all. Point it
+/// somewhere else — a local `serverpod start`, a staging deployment — with
+/// `--url`, `FAUXSHIELD_URL`, or `fauxshield auth login --url`, which take
+/// precedence in that order over the stored value and this default.
+const String defaultServerUrl = 'https://fauxshield.api.serverpod.space';
 
 /// Base class for every command in this CLI.
 ///
@@ -184,7 +190,9 @@ abstract class CliCommand extends Command<int> {
       )
       ..addOption(
         'url',
-        help: 'Server URL, overriding the stored value.',
+        help:
+            'Server URL, overriding the stored value and the built-in '
+            'hosted default.',
         valueHelp: 'http://localhost:8080',
       );
     if (acceptsAuthToken) {

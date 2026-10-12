@@ -14,7 +14,7 @@ that consumers and operators open.
 | Features | What each module does, in detail | http://localhost:8082/features |
 | Pricing | The three supported deployment options | http://localhost:8082/pricing |
 | About | Why it exists and how it was built | http://localhost:8082/about |
-| Documentation | Setup, concepts, API, webhooks, offline sync | http://localhost:8082/docs |
+| Documentation | Developer portal: setup, concepts, generated API reference, SDK, CLI, and MCP guides | http://localhost:8082/docs |
 | Consumer verification | Scan → PIN → verdict, with product reports | http://localhost:8082/verify |
 | Operator app | Flutter web command center (also runs on mobile/desktop) | http://localhost:8082/app |
 | Command line | Products, batches, units, and alerts from a terminal | `fauxshield` (step 5) |
@@ -24,6 +24,39 @@ The marketing pages are server-rendered by Serverpod from Mustache templates in
 `fauxshield_server/web/templates/` with shared chrome built in
 `lib/src/web/widgets/site_chrome.dart`, and the design tokens in
 `web/static/css/public.css` match the reference design system.
+
+Every public page — the landing page, features, pricing, about, and the
+documentation — offers a single **Dashboard** action that opens `/app`, rather
+than a sign in / sign up pair: the operator app already routes a visitor without
+a session to its own sign in screen. The consumer `/verify` page has its own
+header and offers no operator path, so a shopper scanning a pack never gets an
+invitation to sign in.
+
+### Developer platform
+
+The same server hosts the developer documentation at `/docs`: 42 pages with a
+persistent sidebar, full-text search, an API reference generated from the
+machine-readable contract in `fauxshield_contract/`, SDK pages for Dart, Node.js,
+and Python, a CLI reference, an MCP reference, and task guides. Every endpoint,
+model, and enum page is generated, so the reference cannot describe an API the
+server does not have — CI fails when it is out of date.
+
+Clients published against the same API:
+
+| Client | Install | Default API |
+| --- | --- | --- |
+| Dart (`fauxshield_client`) | path dependency in this workspace | host supplied by the caller; the app reads it from `config.json` |
+| Node.js (`fauxshield`) | `npm install fauxshield` | `https://fauxshield.api.serverpod.space` |
+| Python (`fauxshield-sdk`) | `pip install fauxshield-sdk` | `https://fauxshield.api.serverpod.space` |
+| CLI (`fauxshield`) | `dart pub global activate --source path fauxshield_cli` | `https://fauxshield.api.serverpod.space` |
+| MCP (`fauxshield_mcp`) | `dart run fauxshield_mcp:main` | `https://fauxshield.api.serverpod.space` |
+
+`python tools/check_parity.py` compares all of them against the contract and
+reports the coverage — currently 86 of 86 methods, 76 of 76 models and enums —
+and fails if any client stops defaulting to the hosted API.
+
+See `docs/DEVELOPER_PLATFORM.md` for the audit, the architecture decision, the
+verification results, and what still needs authorization.
 
 ---
 
