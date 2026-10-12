@@ -3,6 +3,8 @@ description: >-
   Generated Dart and Flutter client for the FauxShield anti-counterfeit
   platform. Typed models and endpoint classes for products, serialized units,
   verifications, and fraud alerts.
+version: 1.0.0
+repository: https://github.com/tope-olajide/fauxshield
 
 environment:
   sdk: '^3.12.2'
@@ -10,7 +12,11 @@ environment:
 resolution: workspace
 
 dependencies:
-  serverpod_auth_idp_client: 4.0.4
-  serverpod_client: 4.0.4
+  # `http` and `serverpod_auth_core_client` are imported by the generated
+  # protocol code, so they are declared here rather than left transitive.
+  http: ^1.6.0
+  serverpod_auth_core_client: ^4.0.4
+  serverpod_auth_idp_client: ^4.0.4
+  serverpod_client: ^4.0.4
   serverpod_database: ^4.0.4
   serverpod_offline_sync_client: ^0.0.9
