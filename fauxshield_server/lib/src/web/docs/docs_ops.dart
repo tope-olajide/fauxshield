@@ -30,11 +30,11 @@ DocsPage cliPage() {
   the operator app, so it needs no Flutter runtime and runs anywhere Dart does.
 </p>
 ${code('''
-# From this repository
-dart pub global activate --source path fauxshield_cli
+# Install it from pub.dev
+dart pub global activate fauxshield_cli
 
-# Or run it without installing
-dart run fauxshield_cli:main --help
+# The `fauxshield` command is now on your PATH
+fauxshield --help
 ''', lang: DocsLang.bash)}
 <p>
   The executable is <code>fauxshield</code>. Without a running server it is
@@ -356,22 +356,23 @@ ${callout('warning', 'It writes', '<p>Read tools are marked read-only; write too
             '''
 <p>
   The server speaks MCP over stdio, which is what an MCP client expects, and
-  needs three things: the API URL, a credential, and the workspace id.
+  needs three things: the API URL, a credential, and the workspace id. The
+  installed command is <code>fauxshield-mcp</code>.
 </p>
 ${code('''
-dart run fauxshield_mcp:main
+# Install it from pub.dev
+dart pub global activate fauxshield_mcp
 ''', lang: DocsLang.bash)}
 ${code('''
 {
   "mcpServers": {
     "fauxshield": {
-      "command": "dart",
-      "args": ["run", "fauxshield_mcp:main"],
+      "command": "fauxshield-mcp",
       "env": {
         "FAUXSHIELD_URL": "${SiteChrome.hostedApiUrl}",
         "FAUXSHIELD_API_KEY": "fs_live_...",
         "FAUXSHIELD_WORKSPACE_ID": "<workspace uuid>",
-        "FAUXSHIELD_MCP_READ_ONLY": "false"
+        "FAUXSHIELD_READ_ONLY": "false"
       }
     }
   }
@@ -382,7 +383,7 @@ ${paramTable(const <DocsParam>[
               DocsParam(name: 'FAUXSHIELD_API_KEY', type: 'String', defaultValue: 'workspace key; the CLI session is used when it is absent'),
               DocsParam(name: 'FAUXSHIELD_TOKEN', type: 'String', defaultValue: 'session JWT instead of an API key'),
               DocsParam(name: 'FAUXSHIELD_WORKSPACE_ID', type: 'String', defaultValue: 'workspace every call is scoped to'),
-              DocsParam(name: 'FAUXSHIELD_MCP_READ_ONLY', type: 'String', defaultValue: '"true" refuses every write tool'),
+              DocsParam(name: 'FAUXSHIELD_READ_ONLY', type: 'String', defaultValue: '"true" refuses every write tool'),
             ], empty: '')}
 <p>
   With no API key it reads the session the CLI stored, so
@@ -753,7 +754,7 @@ DocsPage environmentPage() {
             defaultValue: 'the workspace every tool is scoped to',
           ),
           DocsParam(
-            name: 'FAUXSHIELD_MCP_READ_ONLY',
+            name: 'FAUXSHIELD_READ_ONLY',
             type: 'String',
             defaultValue: '"true" refuses every write tool',
           ),

@@ -48,8 +48,8 @@ Clients published against the same API:
 | Dart (`fauxshield_client`) | `dart pub add fauxshield_client` | host supplied by the caller; the app reads it from `config.json` |
 | Node.js (`fauxshield`) | `npm install fauxshield` | `https://fauxshield.api.serverpod.space` |
 | Python (`fauxshield-sdk`) | `pip install fauxshield-sdk` | `https://fauxshield.api.serverpod.space` |
-| CLI (`fauxshield`) | `dart pub global activate --source path fauxshield_cli` | `https://fauxshield.api.serverpod.space` |
-| MCP (`fauxshield_mcp`) | `dart run fauxshield_mcp:main` | `https://fauxshield.api.serverpod.space` |
+| CLI (`fauxshield`) | `dart pub global activate fauxshield_cli` | `https://fauxshield.api.serverpod.space` |
+| MCP (`fauxshield_mcp`) | `dart pub global activate fauxshield_mcp` | `https://fauxshield.api.serverpod.space` |
 
 `python tools/check_parity.py` compares all of them against the contract and
 reports the coverage — currently 86 of 86 methods, 76 of 76 models and enums —
@@ -247,8 +247,7 @@ it needs no Flutter runtime and no browser. It is the third client of the same
 server, alongside the operator app and the consumer web flow.
 
 ```bash
-# from the repository root
-dart pub global activate --source path fauxshield_cli
+dart pub global activate fauxshield_cli
 
 fauxshield auth login --email you@brand.test --password '<your password>'
 fauxshield auth whoami
@@ -292,7 +291,7 @@ fraud queue, pull evidence, and — with a key that has write scopes — work
 alerts and recalls, always attributed in the audit log.
 
 ```bash
-dart pub global activate --source path fauxshield_mcp
+dart pub global activate fauxshield_mcp
 ```
 
 ```json

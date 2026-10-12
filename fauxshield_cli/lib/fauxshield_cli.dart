@@ -4,8 +4,9 @@
 /// operator app and any Dart or Flutter integration use, so it is a thin
 /// wrapper over the generated client rather than a second implementation.
 ///
-/// Run it with `dart run fauxshield_cli:fauxshield`, or `fauxshield` once the
-/// package is activated with `dart pub global activate --source path .`.
+/// Install it with `dart pub global activate fauxshield_cli` and run
+/// `fauxshield`, or run it from a checkout with
+/// `dart run fauxshield_cli:fauxshield`.
 library;
 
 export 'src/commands/alerts_command.dart';

@@ -265,8 +265,30 @@ DocsPage quickstartPage() {
     group: 'getting-started',
     sections: <DocsSection>[
       DocsSection(
+        id: 'install',
+        title: '1. Install a client',
+        html:
+            '''
+<p>
+  Every client is published, and each one defaults to the hosted API, so
+  installing it is the whole setup. Pick the language you are working in:
+</p>
+${tabs(name: 'quickstart-install', samples: <(String, String)>[
+              (DocsLang.dart, 'dart pub add fauxshield_client\n'),
+              (DocsLang.ts, 'npm install fauxshield\n'),
+              (DocsLang.python, 'pip install fauxshield-sdk\n'),
+              (DocsLang.cli, 'dart pub global activate fauxshield_cli\n'),
+              ('MCP', 'dart pub global activate fauxshield_mcp\n'),
+            ])}
+<p>
+  The CLI puts a <code>fauxshield</code> command on your PATH, and the MCP
+  server a <code>fauxshield-mcp</code> command an MCP client can launch.
+</p>
+''',
+      ),
+      DocsSection(
         id: 'credential',
-        title: '1. Get a credential',
+        title: '2. Get a credential',
         html:
             '''
 <p>
@@ -288,7 +310,7 @@ export FAUXSHIELD_API_KEY="fs_live_..."
       ),
       DocsSection(
         id: 'call',
-        title: '2. Make a call',
+        title: '3. Make a call',
         html:
             '''
 <p>
@@ -344,7 +366,7 @@ print(products.length);
       ),
       DocsSection(
         id: 'next',
-        title: '3. Go further',
+        title: '4. Go further',
         html: '''
 <ul>
   <li><a href="/docs/getting-started/first-request">A real workflow</a>: create a product, a batch, and 500 units.</li>

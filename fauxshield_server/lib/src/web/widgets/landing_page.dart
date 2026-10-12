@@ -488,7 +488,7 @@ curl -s -X POST http://localhost:8080/verification/submitPin \\
       ),
       CodeSample(
         label: 'fauxshield CLI',
-        install: 'dart pub global activate --source path fauxshield_cli',
+        install: 'dart pub global activate fauxshield_cli',
         code: '''
 # Sign in once. The token is kept in ~/.fauxshield/config.json
 fauxshield auth login --email you@brand.test --password '<your password>'
@@ -507,6 +507,26 @@ fauxshield alerts show --alert <uuid>
 
 # Reproduce a consumer scan, exactly as the web page does
 fauxshield verify --token <token> --pin <pin>''',
+      ),
+      CodeSample(
+        label: 'fauxshield MCP',
+        install: 'dart pub global activate fauxshield_mcp',
+        code: '''
+{
+  "mcpServers": {
+    "fauxshield": {
+      "command": "fauxshield-mcp",
+      "env": {
+        "FAUXSHIELD_URL": "https://fauxshield.api.serverpod.space",
+        "FAUXSHIELD_API_KEY": "fs_live_...",
+        "FAUXSHIELD_READ_ONLY": "true"
+      }
+    }
+  }
+}
+
+# 55 tools over the same API: read the fraud queue and the audit log,
+# pull an alert's evidence, lock a unit, or recall a batch.''',
       ),
     ],
   );

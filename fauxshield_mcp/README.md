@@ -15,14 +15,14 @@ mutating call lands in the workspace audit trail.
 
 ## Install
 
-From this repository:
+From pub.dev:
 
 ```bash
-# Run straight from source
-dart run fauxshield_mcp:fauxshield-mcp
+# Install the `fauxshield-mcp` command on your PATH
+dart pub global activate fauxshield_mcp
 
-# Or install the `fauxshield-mcp` command on your PATH
-dart pub global activate --source path fauxshield_mcp
+# Or, in a checkout of this repository, run it straight from source
+dart run fauxshield_mcp:fauxshield_mcp
 
 # Or build a standalone binary to ship to a machine without Dart
 dart compile exe fauxshield_mcp/bin/fauxshield_mcp.dart -o fauxshield-mcp

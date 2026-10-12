@@ -17,13 +17,13 @@ thin wrapper over the generated [`fauxshield_client`](../fauxshield_client).
 ## Install
 
 ```bash
-# from the repository root
-dart pub global activate --source path fauxshield_cli
+# install from pub.dev
+dart pub global activate fauxshield_cli
 
-# or run it without installing
-dart run fauxshield_cli:fauxshield --help
+# then the `fauxshield` command is on your PATH
+fauxshield --help
 
-# or build a standalone binary for a machine without Dart
+# or, from a checkout of this repository, build a standalone binary
 dart compile exe fauxshield_cli/bin/fauxshield.dart -o fauxshield
 ```
 
