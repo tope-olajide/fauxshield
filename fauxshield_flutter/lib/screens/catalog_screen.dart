@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../app/app_state.dart';
 import '../client.dart';
 import '../utils/formatting.dart';
+import '../utils/request_recovery.dart';
 import '../widgets/batch_qr_dialog.dart';
 import '../widgets/batch_stats_grid.dart';
 import '../widgets/common.dart';
@@ -1208,11 +1209,11 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
       return;
     }
 
-    // Each unit costs a PBKDF2 hash (~0.3s of CPU), so one large request
-    // overruns the client connection timeout and the API gateway, which
-    // surfaces as an opaque CORS/504 error. Generate in small idempotent
-    // chunks instead and report progress between them.
-    const chunkSize = 20;
+    // Each unit costs a PBKDF2 hash of its packaging PIN, so one large request
+    // outruns the client request timeout and the API gateway, which reaches the
+    // operator as an opaque CORS/504 error. Generate in small idempotent chunks
+    // instead and report progress between them.
+    const chunkSize = 10;
     final progress = ValueNotifier<String>('Generating serialized units…');
     final runId = DateTime.now().millisecondsSinceEpoch;
     var created = 0;
@@ -1247,11 +1248,12 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
         final size = remaining > chunkSize ? chunkSize : remaining;
         // The chunk index keeps each key unique within the run, while the
         // run id keeps keys from colliding across attempts.
-        final result = await client.batch.generateIdentities(
-          workspaceId: widget.controller.workspaceId,
-          batchId: widget.batch.id!,
-          quantity: size,
+        final result = await _generateChunk(
           idempotencyKey: 'gen-${widget.batch.id!.uuid}-$runId-$chunkIndex',
+          size: size,
+          created: created,
+          total: total,
+          progress: progress,
         );
         created += result.created;
         remaining -= size;
@@ -1282,6 +1284,38 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
     quantity.dispose();
     _page = 0;
     _load();
+  }
+
+  /// How long one chunk may keep being retried while the server finishes it.
+  static const Duration _chunkRetryBudget = Duration(minutes: 4);
+
+  /// Generates one chunk, tolerating a response that never arrives.
+  ///
+  /// A chunk that outlives the client timeout or the API gateway keeps running
+  /// on the server: the work is inside a transaction behind an idempotency key.
+  /// Retrying the same key therefore either replays the finished result or
+  /// reports that it is still processing, and a slow run costs the operator a
+  /// wait instead of a failed generation. Only a real failure, or exhausting
+  /// [_chunkRetryBudget], reaches the caller.
+  Future<IdentityGenerationResult> _generateChunk({
+    required String idempotencyKey,
+    required int size,
+    required int created,
+    required int total,
+    required ValueNotifier<String> progress,
+  }) {
+    return retryWhileServerBusy<IdentityGenerationResult>(
+      budget: _chunkRetryBudget,
+      onRetry: (_) => progress.value =
+          'Generated $created of $total units — still working on the next '
+          'batch…',
+      attempt: () => client.batch.generateIdentities(
+        workspaceId: widget.controller.workspaceId,
+        batchId: widget.batch.id!,
+        quantity: size,
+        idempotencyKey: idempotencyKey,
+      ),
+    );
   }
 
   Future<void> _export() async {
