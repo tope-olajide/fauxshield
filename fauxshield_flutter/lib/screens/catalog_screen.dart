@@ -1194,52 +1194,90 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
         ],
       ),
     );
-    if (confirmed == true) {
+    if (confirmed != true) {
+      quantity.dispose();
+      return;
+    }
+
+    final total = int.tryParse(quantity.text) ?? widget.batch.quantity;
+    if (total < 1) {
       if (mounted) {
-        // Serializing units can take a while; block the UI with feedback.
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const Center(
-            child: Card(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Generating serialized units…'),
-                  ],
-                ),
+        showMessage(context, 'Enter a quantity of at least 1.', error: true);
+      }
+      quantity.dispose();
+      return;
+    }
+
+    // Each unit costs a PBKDF2 hash (~0.3s of CPU), so one large request
+    // overruns the client connection timeout and the API gateway, which
+    // surfaces as an opaque CORS/504 error. Generate in small idempotent
+    // chunks instead and report progress between them.
+    const chunkSize = 20;
+    final progress = ValueNotifier<String>('Generating serialized units…');
+    final runId = DateTime.now().millisecondsSinceEpoch;
+    var created = 0;
+    var remaining = total;
+    var chunkIndex = 0;
+    if (mounted) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  ValueListenableBuilder<String>(
+                    valueListenable: progress,
+                    builder: (context, value, _) => Text(value),
+                  ),
+                ],
               ),
             ),
           ),
-        );
-      }
-      try {
+        ),
+      );
+    }
+    try {
+      while (remaining > 0) {
+        final size = remaining > chunkSize ? chunkSize : remaining;
+        // The chunk index keeps each key unique within the run, while the
+        // run id keeps keys from colliding across attempts.
         final result = await client.batch.generateIdentities(
           workspaceId: widget.controller.workspaceId,
           batchId: widget.batch.id!,
-          quantity: int.tryParse(quantity.text) ?? widget.batch.quantity,
-          idempotencyKey:
-              'gen-${widget.batch.id!.uuid}-${DateTime.now().millisecondsSinceEpoch}',
+          quantity: size,
+          idempotencyKey: 'gen-${widget.batch.id!.uuid}-$runId-$chunkIndex',
         );
-        if (mounted) {
-          showMessage(context, '${result.created} units generated.');
-        }
-      } catch (error) {
-        if (mounted) {
-          showMessage(
-            context,
-            error is ApiException ? error.message : error.toString(),
-            error: true,
-          );
-        }
+        created += result.created;
+        remaining -= size;
+        chunkIndex++;
+        progress.value = 'Generated $created of $total units…';
       }
       if (mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
+        showMessage(context, '$created units generated.');
       }
+    } catch (error) {
+      if (mounted) {
+        final detail = error is ApiException ? error.message : error.toString();
+        showMessage(
+          context,
+          created > 0
+              ? 'Stopped after $created of $total units: $detail '
+                    'Run generation again for the remaining units.'
+              : detail,
+          error: true,
+        );
+      }
+    } finally {
+      progress.dispose();
+    }
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
     }
     quantity.dispose();
     _page = 0;
