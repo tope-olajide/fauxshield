@@ -1,233 +1,219 @@
-# FauxShield — anti-counterfeit command center
+# FauxShield
 
-Every physical unit a brand makes gets a signed QR code and a packaging PIN. A
-shopper scans the pack and gets an authoritative verdict in seconds — no app
-install, no account, no special hardware. Behind that answer the brand gets
-something a printed code has never given them: unit-level identity, live fraud
-intelligence, evidence attached to every suspicious event, and a way to act on
-it. One server does all of it — the API, the streaming channel, the background
-jobs, the database, and the web pages — built end to end on **Serverpod 4** and
-**Flutter**.
+**Anti-counterfeit infrastructure for physical products.** Give every product unit a verifiable identity, detect suspicious activity as it happens, and give teams the evidence and tools to respond.
 
-**[Live platform](https://fauxshield.serverpod.space/)**
-· [consumer verification](https://fauxshield.serverpod.space/verify)
-· [operator app](https://fauxshield.serverpod.space/app)
-· [developer documentation](https://fauxshield.serverpod.space/docs)
-· API `https://fauxshield.api.serverpod.space`
+FauxShield assigns each physical unit a signed QR identity and a unique packaging PIN. A shopper can verify a product from a browser—without installing an app, creating an account, or using special hardware. Behind the consumer-facing verdict, brands get unit-level traceability, live fraud signals, an auditable investigation trail, and workflows for alerts and recalls.
 
-### Three things to try in two minutes
+The platform is built with **Serverpod 4, Dart, and Flutter**. One Serverpod backend serves the API, database, streaming events, background jobs, public web pages, and developer documentation.
 
-1. **Open the command center.**
-   [/app](https://fauxshield.serverpod.space/app) → create an account →
-   **Open demo workspace**. You land in a complete brand: products, batches,
-   serialized units, a recall, consumer reports, a populated fraud queue, and
-   two attack investigations already in progress.
-2. **Verify a pack like a shopper.**
-   Open **Verify a product** in the app and press **Demo unit** (or take a
-   token and packaging PIN from any unit in the catalogue). That is the real
-   pipeline: token resolution, device binding, a row-locked PIN check, a
-   verdict, and a fraud evaluation. The identical flow is public at
-   [/verify](https://fauxshield.serverpod.space/verify) for a pack in a
-   shopper's hand — no account, no app.
-3. **Run an attack and watch it land.**
-   **More → Simulations → Clone attack**, then open **Live**. Scans stream in,
-   the fraud engine fires, and an alert opens with its evidence, risk score,
-   and map. Nothing is scripted for the demo: the simulation goes through the
-   same verification and fraud code path as a real scan.
+## Try FauxShield
 
-## The problem
-
-Counterfeiting is not a branding inconvenience. It kills people, it destroys
-livelihoods, and it scales because nothing in a physical supply chain can
-currently prove that one specific pack is genuine.
-
-- **1 in 10 medical products** in low- and middle-income countries is
-  substandard or falsified. A fake antimalarial is not a wasted purchase: it is
-  an untreated infection, a preventable death, and one more contribution to
-  antimicrobial resistance. The same holds for vaccines and for the antibiotics
-  people take instead of seeing a doctor.
-- **30–60% of seeds and pesticides** in some regions are reported counterfeit.
-  For a smallholder, one fake bag of seed erases an entire season of income —
-  and the forgery is indistinguishable at the point of sale, when the decision
-  is actually made.
-- **40% of products** in some African markets are estimated to be counterfeit
-  or substandard, across cosmetics, food, drinks, electronics, and auto parts
-  where a fake can mean a chemical burn, a fire, or a crash.
-- **$500B+** is lost every year to counterfeiting and piracy. Brands absorb
-  lost revenue and the reputational cost of fakes wearing their name; consumers
-  absorb the harm with no way to check anything.
-
-**The missing layer is evidence at the unit level.** Regulators and regional
-programmes — NAFDAC in Nigeria, the Lomé Initiative, INTERPOL's pharmaceutical
-operations — act on seizures, and they act well, but a seizure is a snapshot
-after the fact. Enforcement cannot see which factory run a suspected pack came
-from, whether the same code was scanned in two countries last night, or whether
-a recalled batch is still being verified. Brands cannot see it either.
-
-The existing answers to that gap each stop too early:
-
-| Approach | Where it breaks |
+| Resource | Link |
 | --- | --- |
-| **Static QR code** | Trivially copied. The fake pack resolves exactly like the real one, and the brand learns nothing. |
-| **SMS verification** | A message per scan: expensive at millions of units, friction for the shopper, and no record left behind for the brand. |
-| **Holograms, NFC tags, scanners** | Special materials or a device on every inspection, which prices out most manufacturers — and still produces no data. |
+| Live platform | [fauxshield.serverpod.space](https://fauxshield.serverpod.space/) |
+| Consumer verification | [Verify a product](https://fauxshield.serverpod.space/verify) |
+| Operator command center | [Open the app](https://fauxshield.serverpod.space/app) |
+| Developer documentation | [API, SDK, CLI, and MCP docs](https://fauxshield.serverpod.space/docs) |
+| API host | `https://fauxshield.api.serverpod.space` |
 
-None of them connect a pack to its manufacturing batch, notice when a code
-reappears somewhere impossible, or give a brand and a regulator a defensible
-record of what happened. That is the gap FauxShield fills: **identity you can
-prove, evidence you can act on.** The printed code is the entry point; the
-product is the identity, the fraud intelligence, and the response behind it.
 
-## What it does
+## Contents
 
-### Serialize a brand's physical units
-- **Products → batches → units.** Every unit gets a random 128-bit QR token, an
-  HMAC-SHA256 signature over the token, and a unique 6-digit packaging PIN.
-- PINs are stored as PBKDF2 hashes for verification and AES-GCM ciphertext for
-  retrievable reveals — a PIN reveal is always written to the audit log.
-- Idempotent generation: retried `generateIdentities` calls return the original
-  result instead of duplicating 50,000 units.
-- CSV/TSV export for print houses, operation-scoped API keys for machine access.
+- [Why FauxShield](#why-fauxshield)
+- [How it works](#how-it-works)
+- [Features](#features)
+- [Architecture](#architecture)
+- [How FauxShield uses Serverpod](#how-fauxshield-uses-serverpod)
+- [Getting started locally](#getting-started-locally)
+- [Developer platform](#developer-platform)
+- [Testing and quality checks](#testing-and-quality-checks)
+- [Deploy to Serverpod Cloud](#deploy-to-serverpod-cloud)
+- [Repository layout](#repository-layout)
+- [Security and deployment notes](#security-and-deployment-notes)
+- [License](#license)
 
-### Verify a unit like a consumer
-- Public `/verify` page (no account) with token entry, PIN entry, verdict, and a
-  "report this product" form.
-- The Flutter app has the same flow built in for operators, including one-tap
-  "demo unit" loading.
-- Session replay protection: sessions are bound to a device fingerprint, expire
-  on a sliding 15-minute window, and only an allow-listed presentation ever
-  leaves the server.
+## Why FauxShield
 
-### Catch fraud in real time
-- The fraud engine evaluates six checks on every scan — clone detection (same
-  token in distant places), velocity anomalies, PIN attacks, batch duplication,
-  distributor leakage, and grey-market scans from restricted countries — inside
-  a bounded time budget, against a per-workspace policy. Two more protections
-  run in the write path: PIN lockout after repeated failures, and
-  offline-backfill reconciliation. Eight in total, and the reason a *copy*
-  becomes a detectable event instead of a free win.
-- Alerts are deduplicated, scored, and auto-lock units when policy says so.
-- Every event — scans, alerts, recalls, offline ingest, simulation progress — is
-  published to a Serverpod **streaming** channel and appears in the operator
-  app's live feed instantly.
-- Signed webhooks (`t=…,v1=…` HMAC scheme) push the same events to customer
-  systems, with retries, backoff, delivery inspection, and manual redelivery.
+Counterfeiting can cause more than lost sales. In medicines, agricultural inputs, food, cosmetics, electronics, and vehicle parts, a fake product can damage health, threaten livelihoods, and undermine trust in legitimate brands.
 
-### Rehearse attacks
-- Four scripted simulations — clone attack, PIN brute force, scan burst, grey
-  market leak — run **through the real pipeline**. They produce real sessions,
-  real signals, and real alerts, so the team can practise its response with the
-  live feed open.
-- Simulations can run inline, step by step, or paced over time as a background
-  future call.
+A few indicators show the scale of the problem:
 
-### Work offline
-- Inspectors queue scans on device. Serverpod's **offline sync** mirrors synced
-  rows, a recurring future call converts them into authoritative verification
-  sessions, and verdicts are written back to the device rows.
-- There is also a direct batch-ingest endpoint for devices that reconnect and
-  want immediate verdicts.
+- **Medical products:** The World Health Organization estimates that more than one in ten medicines in low- and middle-income countries are substandard or falsified. [WHO: Substandard and falsified medical products](https://www.who.int/health-topics/substandard-and-falsified-medical-products/)
+- **Agricultural inputs:** An Access to Seeds Foundation report cites an estimate from Uganda's National Bureau of Standards that around 30% of seed on the Ugandan market is fake. This is a country-specific estimate, not an estimate for all of Africa. [Access to Seeds Foundation: Counterfeit seed](https://www.accesstoseeds.org/index/eastern-southern-africa/key-findings/counterfeit-seed/)
+- **International trade:** The OECD and EUIPO estimated that international trade in counterfeit and pirated products reached as much as **US$464 billion in 2019**, or 2.5% of world trade. This estimate excludes counterfeit goods produced and consumed domestically and pirated digital products distributed online. [OECD/EUIPO: Global Trade in Fakes](https://www.oecd.org/en/publications/global-trade-in-fakes_74c81154-en.html)
 
-### Run the command center
-- Analytics dashboard with verification trends, outcome mix, top countries, alert
-  counts, and a daily rollup job.
-- Full team management (owner/admin/member/viewer roles with 22 permissions),
-  invitations with one-time codes, audit log, notification preferences, webhook
-  and API-key administration.
-- A **one-click demo workspace** with real seeded data: brand, products, batches,
-  240 serialized units, authentic verifications, a recall, consumer reports, and
-  two simulations — so reviewers can explore every screen immediately.
+These estimates measure different things and should not be treated as directly comparable. Together, they illustrate why product verification needs to be accessible to consumers and useful to the organizations responsible for product integrity.
 
----
+### Why common approaches fall short
+
+| Approach | Limitation |
+| --- | --- |
+| Static QR codes | A code can be copied. Without unit-level controls and monitoring, a copied label can appear just as valid as the original. |
+| SMS verification | Can introduce cost and friction at scale, and may leave brands without the investigation context they need. |
+| Holograms and specialist tags | Add packaging or inspection costs and do not, by themselves, provide a live evidence and response workflow. |
+
+The gap is not simply the lack of a label. It is the lack of a reliable connection between a specific physical unit, its batch and distribution context, verification activity, and the actions a brand takes when something looks wrong.
+
+**FauxShield combines product identity, verification, fraud intelligence, and response in one platform.** The QR code is the entry point—not the whole security model.
+
+## How it works
+
+1. **Create product identities.** Organize products into batches and generate unique, signed identities for individual units.
+2. **Label each unit.** Export QR identity data for packaging and associate a unique packaging PIN with each unit.
+3. **Verify at the point of sale.** A consumer opens the verification page, enters the token and PIN, and receives a verdict without creating an account.
+4. **Evaluate the event.** FauxShield applies workspace policies and checks for suspicious patterns, including geographically implausible reuse and repeated PIN failures.
+5. **Investigate and respond.** Alerts include evidence; teams can review activity, manage recalls, and send signed event webhooks to other systems.
+
+## Features
+
+### 1. Product and unit serialization
+
+- **Product → batch → unit model:** Maintain a traceable relationship between a product, its manufacturing batch, and each serialized unit.
+- **Per-unit identity:** Each unit receives a random 128-bit QR token and an HMAC-SHA256 signature over that token.
+- **Packaging PIN:** Each unit also receives a unique six-digit PIN.
+- **Protected PIN storage:** PINs are stored as PBKDF2 hashes for verification and AES-GCM ciphertext for controlled retrieval. Each PIN reveal is recorded in the audit log.
+- **Idempotent generation:** Retrying `generateIdentities` returns the original result rather than creating duplicate identities—for example, when a large generation request is retried.
+- **Print and system integration:** Export identities in CSV or TSV format and use operation-scoped API keys for machine access.
+
+### 2. Consumer and operator verification
+
+- **Public verification page:** The `/verify` page supports token and PIN entry, returns a verdict, and lets consumers report a product.
+- **Operator verification:** The Flutter app includes the verification flow and a one-tap **Demo unit** action.
+- **Replay protection:** Verification sessions are bound to a device fingerprint and use a sliding 15-minute expiry window.
+- **Controlled presentation:** Only an allow-listed presentation is returned to the client, rather than exposing internal records wholesale.
+
+### 3. Real-time fraud detection
+
+FauxShield evaluates six fraud checks for each scan, within a bounded time budget and against workspace policy:
+
+1. **Clone detection** — the same token is presented in distant locations.
+2. **Velocity anomalies** — scan frequency or volume is suspicious.
+3. **PIN attacks** — repeated or suspicious PIN attempts are detected.
+4. **Batch duplication** — activity suggests duplicated identities within a batch.
+5. **Distributor leakage** — patterns suggest product leakage from an expected channel.
+6. **Restricted-country scans** — activity originates from countries restricted by the workspace policy.
+
+Two additional protections operate in the write path: PIN lockout after repeated failures and reconciliation of offline backfill. Together, these are the eight checks and protections described by the current implementation.
+
+- Alerts are deduplicated and scored; policy can automatically lock a unit.
+- Scans, signals, alerts, recalls, offline ingestion, and simulation progress are published to a Serverpod streaming channel and appear in the operator app's live feed.
+- Signed webhooks use a `t=…,v1=…` HMAC scheme and support retries, backoff, delivery inspection, and manual redelivery.
+
+### 4. Attack simulations
+
+Use four scripted simulations to exercise the same pipeline used by real verification events:
+
+- Clone attack
+- PIN brute force
+- Scan burst
+- Grey-market leak
+
+Simulations create real sessions, signals, and alerts, allowing teams to practise their response against the live event feed. They can run inline, step by step, or at a paced interval through a background future call.
+
+### 5. Offline inspection
+
+- Inspectors can queue scans on-device while offline.
+- Serverpod's offline-sync layer mirrors synced records to the server.
+- A recurring future call turns synced rows into authoritative verification sessions and writes the resulting verdict back to the device records.
+- A direct batch-ingest endpoint is also available for devices that reconnect and need immediate verdicts.
+
+### 6. Operations and governance
+
+- **Analytics:** Verification trends, outcome mix, top countries, alert counts, and daily rollups.
+- **Team access:** Owner, admin, member, and viewer roles, governed by 22 permissions.
+- **Invitations:** One-time invitation codes.
+- **Auditability:** An audit log for sensitive operations and investigation activity.
+- **Administration:** Notification preferences, API keys, and webhook management.
+- **Demo workspace:** One-click seed data containing a brand, products, batches, 240 serialized units, verification events, a recall, consumer reports, and two simulations.
 
 ## Architecture
 
+The operator app and public consumer flow use the same backend services. Business rules are centralized in the server rather than separately implemented across the web app, SDKs, CLI, or MCP server.
+
+```mermaid
+flowchart LR
+    Consumer["Consumer browser<br/>/verify"] <--> Server["Serverpod 4 server<br/>Dart"]
+    Operator["Flutter operator app<br/>Web, mobile, desktop"] <-->|JSON-RPC| Server
+    SDKs["Dart, Node.js, Python SDKs"] <-->|API| Server
+    CLI[CLI] <-->|API| Server
+    MCP["MCP server / AI agents"] <-->|API| Server
+    Server <--> DB[(PostgreSQL)]
+    Server --> Stream[Workspace event stream]
+    Stream --> Operator
+    Server --> Jobs[Future calls / background jobs]
+    Server --> Hooks[Signed customer webhooks]
 ```
-┌──────────────────────────────┐     ┌─────────────────────────────────────┐
-│  Flutter operator app        │     │  Serverpod server (Dart)            │
-│  (web served at /app,        │     │                                     │
-│   mobile & desktop)          │◄───►│  • 15 endpoint classes              │
-│  • dashboard, live feed      │ JSON│  • verification pipeline            │
-│  • alerts, catalog, scans    │ RPC │  • fraud engine → alerts → webhooks │
-│  • simulations, team, audit  │     │  • streaming channel (live events)  │
-└──────────────────────────────┘     │  • future calls: webhook drain,     │
-                                     │    offline conversion, rollups,     │
-┌──────────────────────────────┐     │    maintenance sweep                │
-│  Consumer web (server-side   │     │  • web routes: landing, /verify     │
-│  rendered, no account)       │◄───►│  • embedded PostgreSQL (dev)        │
-│  • /verify?t=<token> + PIN   │     └─────────────────────────────────────┘
-└──────────────────────────────┘
-```
 
-The server registers **17 routes**: the 15 endpoint classes in
-`lib/src/endpoints/` plus the two that Serverpod's authentication module
-contributes (`emailIdp`, `jwtRefresh`). The generated client, the SDKs, and the
-API reference cover the 15 platform endpoints — the auth routes are Serverpod's
-own, so they are documented by Serverpod.
+### Server responsibilities
 
-## How Serverpod is used
+- Typed API endpoints and generated protocol definitions
+- Product, batch, identity, verification, fraud, alert, recall, and demo services
+- Workspace authorization and API-key scope enforcement
+- Live event streaming
+- Background processing for webhook delivery, offline scan conversion, analytics rollups, maintenance, and paced simulations
+- Server-rendered landing, features, pricing, about, documentation, and consumer verification pages
+- PostgreSQL persistence and migrations
 
-This is not a Dart app with a database bolted on; the framework is doing the
-work a smaller project would have hand-rolled. Each row names the Serverpod
-capability, what FauxShield does with it, and where to read it.
+The server registers **17 routes**: 15 FauxShield endpoint classes under `lib/src/endpoints/` plus the `emailIdp` and `jwtRefresh` routes contributed by Serverpod authentication. The generated client, SDKs, and FauxShield API reference cover the 15 platform endpoints; the authentication routes are provided and documented by Serverpod.
 
-| Serverpod capability | What FauxShield does with it | Where to look |
+## How FauxShield uses Serverpod
+
+Serverpod is the foundation of the application—not just a database adapter. It supplies the typed protocol, authentication primitives, streaming, offline synchronization, background jobs, and server-side web routing.
+
+| Serverpod capability | How FauxShield uses it | Where to look |
 | --- | --- | --- |
-| **Endpoints & the generated protocol** | 15 endpoint classes with typed parameters, typed exceptions, and an allow-listed presentation. Every client — the Flutter app, the Dart package, the Node.js and Python SDKs, the CLI, and the MCP server — is generated from the same definitions, so none of them can drift from the server. | `lib/src/endpoints/`, `fauxshield_client/` |
-| **Models as the schema** | 84 `.spy.yaml` models and enums generate the server classes, the Dart client, the documentation reference, and the PostgreSQL schema. A model change produces one migration to review; nothing is maintained in two places. | `lib/src/models/`, `migrations/` |
-| **Authentication** | Serverpod's email identity provider handles registration, verification codes, password resets, and refresh tokens. In development the code is printed to the console instead of emailed; in production it goes out through the Serverpod Cloud email service configured in `lib/server.dart`. Sessions are Serverpod JWTs; `@unauthenticatedClientCall` marks the consumer endpoints that must work without one. | `lib/server.dart`, `lib/src/endpoints/verification_endpoint.dart` |
-| **Authorization over those sessions** | Callers are resolved to a workspace and one of four roles (22 permissions) inside the server on every call — never from the client. API keys are a second credential type with their own scopes and rate limits. | `lib/src/services/rbac.dart`, `api_key_service.dart` |
-| **Streaming** | `watchWorkspace` opens a Serverpod method stream per workspace (`workspace:<id>`). Scans, signals, alerts, recalls, and simulation progress are pushed as they happen; the app reconnects automatically and falls back to polling if the socket dies. | `verification_endpoint.dart`, `fauxshield_flutter/lib/screens/live_feed_screen.dart` |
-| **Future calls** | Four recurring jobs keep the system converging without a cron box: `webhook-drain` (30s), `offline-scan-converter` (45s), `daily-rollup` (15m), and `maintenance-sweep` (30m). A one-off future call also drives paced attack simulations step by step, which is how the demo shows an investigation unfolding over time. | `lib/src/future_calls/` |
-| **Offline sync** | `OfflineScanRecord` is declared `database: sync`, so field devices converge through Serverpod's sync layer and the converter turns each synced row into a real, policy-evaluated verification session, writing the authoritative verdict back to the device row. | `lib/src/models/`, `lib/src/services/offline_ingest_service.dart` |
-| **The database layer** | Row-locked transactions (`LockMode.forUpdate`) on PIN submission and unit minting so concurrent scans cannot double-count; `updateWhere`/`deleteWhere` for bulk operations; pagination and aggregates for the analytics rollups. | `lib/src/services/verification_service.dart`, `identity_service.dart` |
-| **The web server** | The landing page, `/features`, `/pricing`, `/about`, the 42-page `/docs` portal, and the consumer `/verify` flow are server-rendered WidgetRoutes with Mustache templates, static assets, and cache-busted URLs — served by the same process as the API, with no second front end to deploy. | `lib/src/web/`, `web/templates/` |
-| **Project structure & configuration** | The repository *is* a Serverpod workspace: server, generated client, Flutter app, migrations, and Dockerfile side by side, with per-environment config (`development`, `test`, `production`) and secret files that never enter Git history in production. | `pubspec.yaml`, `config/`, `Dockerfile` |
-| **Testing** | The suite runs against `serverpod_test`'s session builder and an embedded PostgreSQL that Serverpod starts itself — no Docker, no external database, `dart test` and done. | `test/`, `config/test.yaml` |
-| **Deployment** | Serverpod Cloud builds the server from this repository, provisions PostgreSQL, applies the migrations, and serves the API and the web pages under one URL. The same Dockerfile also runs anywhere. | `docs/DEPLOYMENT.md` |
+| Endpoints and generated protocol | 15 endpoint classes with typed parameters, typed exceptions, and allow-listed presentation data. Clients share the same API definitions. | `lib/src/endpoints/`, `fauxshield_client/` |
+| Models as schema | 84 `.spy.yaml` models and enums generate server classes, the Dart client, API reference data, and PostgreSQL schema. Model changes produce migrations for review. | `lib/src/models/`, `migrations/` |
+| Authentication | Email identity provider, registration codes, password resets, and refresh tokens. Development codes are printed to the server console; staging/production email uses the configured Serverpod Cloud email service. | `lib/server.dart`, `lib/src/endpoints/verification_endpoint.dart` |
+| Authorization | Workspace membership and role permissions are resolved server-side on every call. API keys have their own scopes and rate limits. | `lib/src/services/rbac.dart`, `api_key_service.dart` |
+| Streaming | `watchWorkspace` opens a workspace-scoped method stream such as `workspace:<id>`. Events are pushed as they occur; the app reconnects and falls back to polling when the socket is unavailable. | `verification_endpoint.dart`, `fauxshield_flutter/lib/screens/live_feed_screen.dart` |
+| Future calls | Recurring jobs process webhook delivery, offline scan conversion, daily rollups, and maintenance. A one-off future call can drive paced simulations. | `lib/src/future_calls/` |
+| Offline sync | `OfflineScanRecord` uses `database: sync`. Synced rows are converted into policy-evaluated verification sessions, with verdicts written back to the relevant records. | `lib/src/models/`, `lib/src/services/offline_ingest_service.dart` |
+| Database operations | Row-locked transactions protect PIN submission and identity minting; bulk update/delete, pagination, and aggregate queries support operations and analytics. | `lib/src/services/verification_service.dart`, `identity_service.dart` |
+| Web server | Server-rendered WidgetRoutes and Mustache templates serve public pages, docs, and consumer verification from the same process as the API. | `lib/src/web/`, `web/templates/` |
+| Configuration and project structure | Server, generated client, Flutter app, migrations, and Dockerfile are maintained in one Serverpod workspace, with environment-specific configuration. | `pubspec.yaml`, `config/`, `Dockerfile` |
+| Testing | Tests use `serverpod_test` and Serverpod's embedded PostgreSQL test setup. The documented local test flow does not require a separate Docker database. | `test/`, `config/test.yaml` |
+| Deployment | Serverpod Cloud builds the server, provisions PostgreSQL, applies migrations, and hosts the API and web routes. The Dockerfile can also be used in other environments. | `docs/DEPLOYMENT.md` |
 
-Two consequences are worth calling out, because they are the reason the product
-is as coherent as it is:
+Two design choices follow from this structure:
 
-- **The API is the product.** The operator app, the consumer page, the CLI, the
-  SDKs, and the MCP server all call the same endpoints, so nothing is reachable
-  only through a user interface and nothing is reimplemented per client.
-- **Domain logic lives in one place.** Endpoints validate, resolve the caller's
-  workspace and permission, and delegate to services (`verification_service`,
-  `fraud_engine`, `alert_service`, `recall`, `webhooks`, `demo_seeder`). That is
-  why a simulation produces the same alerts as a real attack.
+- **The API is the product.** The operator app, consumer page, SDKs, CLI, and MCP server all use the same server-side capabilities.
+- **Domain logic lives in one place.** Endpoints validate requests, resolve workspace identity and permissions, and delegate to services such as the verification service, fraud engine, alert service, recall service, webhook handling, and demo seeder. Simulations therefore exercise the same pipeline as real activity.
 
----
-
-## Getting started
+## Getting started locally
 
 ### Prerequisites
-- Dart SDK 3.12.2+ (bundled with Flutter 3.32+; this repo was built with
-  Flutter 3.47.6 / Dart 3.13.5)
-- Flutter SDK (only needed to rebuild the app; a prebuilt web bundle lives in
-  `fauxshield_server/web/app`)
-- No Docker required — development uses Serverpod's embedded PostgreSQL.
 
-### 1. Run the server
+- Dart SDK **3.12.2 or later**. The project was built with Flutter 3.47.6 / Dart 3.13.5.
+- Serverpod CLI available on your `PATH`.
+- Flutter SDK only if you want to rebuild or run the operator app separately. A prebuilt web bundle is included under `fauxshield_server/web/app`.
+- Docker is not required for the documented local development flow; Serverpod uses embedded PostgreSQL.
 
-The recommended way to run the project is the Serverpod CLI, which boots the
-embedded PostgreSQL, applies pending migrations, and watches for changes with
-hot reload:
+### 1. Start the server
+
+From the repository root:
 
 ```bash
-# from the repository root
 cd fauxshield_server
 serverpod start
 ```
 
-Press `Q` to shut down. First startup creates the data directory under
-`.serverpod/development/pgdata` and applies the migrations in the repository.
+The Serverpod CLI starts the development database, applies pending migrations, and watches for changes. The first run creates the local data directory under `.serverpod/development/pgdata`.
 
-- API: http://localhost:8080
-- Landing page, `/verify`, and the prebuilt operator app at `/app`:
-  http://localhost:8082
+Local URLs:
 
-Prefer a plain foreground run (CI, headless environments) instead?
+| Service | URL |
+| --- | --- |
+| API | `http://localhost:8080` |
+| Insights | `http://localhost:8081` |
+| Landing page | `http://localhost:8082/` |
+| Consumer verification | `http://localhost:8082/verify` |
+| Operator app | `http://localhost:8082/app` |
+| Developer docs | `http://localhost:8082/docs` |
+
+Press `Q` in the Serverpod CLI to stop the server.
+
+For a plain foreground run, such as in a headless environment:
 
 ```bash
 cd fauxshield_server
@@ -235,44 +221,45 @@ dart pub get
 dart run bin/main.dart --mode development --apply-migrations
 ```
 
-`--apply-migrations` is only needed on the first run (or after a model change).
-Secrets live in `config/passwords.yaml` (dev-only values checked in on purpose
-for the hackathon; rotate them for any real deployment).
+Use `--apply-migrations` on the first run or after a model change. Development secrets are in `fauxshield_server/config/passwords.yaml`; these values are for local development and must be replaced before a real deployment.
 
 ### 2. Open the operator app
 
-Use the served build at http://localhost:8082/app, or run it with hot reload:
+Open the prebuilt app at [http://localhost:8082/app](http://localhost:8082/app), or run Flutter with hot reload:
 
 ```bash
 cd fauxshield_flutter
 flutter pub get
 flutter run -d chrome
-# or: flutter run             # mobile / desktop targets
+# Or run on a supported mobile or desktop target:
+flutter run
 ```
 
-Create an account with any email + password, then choose **Open demo workspace**
-on the onboarding screen. The demo seeds a complete brand (products, batches,
-units, verifications, a recall, alerts, simulations) so every screen has data.
+Create an account with an email address and password, then select **Open demo workspace**. The demo workspace includes the sample products, batches, units, verifications, recall, alerts, and simulations needed to explore the interface.
 
-> **Where's my email verification code?** No email is sent in development.
-> The code is written to the server console right after you sign up, as a line
-> like `Registration code for you@brand.test: <a1b2c3d4>` — copy it into the
-> app's verification step. Starting the server with the `serverpod` CLI shows
-> the same line as a popup alert and copies the code to your clipboard.
-> Password-reset codes work the same way. Real emails are only sent in
-> `staging`/`production` run modes, through the Serverpod Cloud email service
-> configured in `fauxshield_server/lib/server.dart`.
+**Where is my email verification code?** In development, no email is sent. The code appears in the server console after registration, in a message similar to:
 
-### 3. Try the consumer flow
+```text
+Registration code for you@brand.test: <verification-code>
+```
 
-In the app, open **Verify a product** and press **Demo unit** to load a signed
-token from the demo workspace, then enter its packaging PIN. You get a real
-verdict from the same code path a shopper hits. To see the shopper's own view,
-take a unit's token and PIN from the catalogue, open
-http://localhost:8082/verify?t=<token>, and enter the PIN there — then flip to
-the app's live feed and watch the scan arrive.
+Copy it into the app's verification step. When started with the Serverpod CLI, the same code may appear in a popup alert and be copied to the clipboard. Password-reset codes work the same way. Real emails are sent in staging/production run modes through the email service configured in `fauxshield_server/lib/server.dart`.
 
-### 4. Rebuild the web app (optional)
+### 3. Try consumer verification
+
+In the operator app, open **Verify a product** and select **Demo unit** to load a demo token. Enter its packaging PIN to submit a real verification through the platform pipeline.
+
+To test the public consumer experience, copy a unit token and PIN from the catalog, then open:
+
+```text
+http://localhost:8082/verify?t=<token>
+```
+
+Enter the PIN on that page and watch the resulting scan appear in the operator app's live feed.
+
+### 4. Rebuild the Flutter web app (optional)
+
+A prebuilt web bundle is included, so this step is only needed after changing the Flutter app:
 
 ```bash
 cd fauxshield_flutter
@@ -280,19 +267,21 @@ flutter build web --release --base-href /app/
 cp -r build/web/. ../fauxshield_server/web/app/
 ```
 
-> Note: the workspace pins a one-line patched copy of `sqlite_async` under
-> `third_party/` so `dart2js` can compile the client-side database dependency.
-> See `third_party/sqlite_async/README_GUARD.md`.
+The workspace uses a one-line patched copy of `sqlite_async` under `third_party/` so `dart2js` can compile the client-side database dependency. See `third_party/sqlite_async/README_GUARD.md` before changing that dependency.
 
-### 5. Use the command line client
+### 5. Use the CLI
 
-`fauxshield_cli` is a plain Dart console package over the same JSON-RPC API, so
-it needs no Flutter runtime and no browser. It is the third client of the same
-server, alongside the operator app and the consumer web flow.
+The CLI is a Dart console client that uses the same JSON-RPC API. It does not require the Flutter runtime or a browser.
+
+Install it:
 
 ```bash
 dart pub global activate fauxshield_cli
+```
 
+Example commands:
+
+```bash
 fauxshield auth login --email you@brand.test --password '<your password>'
 fauxshield auth whoami
 fauxshield products list
@@ -301,42 +290,35 @@ fauxshield identities list --page-size 10
 fauxshield alerts list --severity critical
 fauxshield alerts show --alert <uuid>
 
-# Run the consumer flow without a browser
+# Verify a product from the terminal:
 fauxshield verify --token <token> --pin <pin>
 ```
 
-Command groups: `auth`, `workspace`, `products`, `batches`, `identities`,
-`alerts`, `verifications`, `recalls`, `simulations`, `analytics`, `audit`,
-`team`, `keys`, `webhooks`, `notifications`, `offline`, `demo`, and `verify` —
-the whole API, not just the read paths.
-Every command takes `--json` for scripting. Automation should sign in with an
-API key, which carries its own scopes and rate limit:
+The CLI includes these command groups: `auth`, `workspace`, `products`, `batches`, `identities`, `alerts`, `verifications`, `recalls`, `simulations`, `analytics`, `audit`, `team`, `keys`, `webhooks`, `notifications`, `offline`, `demo`, and `verify`.
+
+Every command supports `--json` for scripting. For automation, use an API key with only the scopes required by the job:
 
 ```bash
 fauxshield keys create --label ci --scopes productsRead,batchesRead,analyticsRead
-fauxshield auth login --api-key fs_live_...      # or export FAUXSHIELD_API_KEY
+fauxshield auth login --api-key fs_live_...
+# Or provide FAUXSHIELD_API_KEY in the environment.
 ```
 
-Minting a key is a session operation, and a few operations are reserved for a
-signed-in person rather than a key — revealing PINs, changing workspace
-settings, running simulations, and managing keys. Everything else runs happily
-off a scoped key.
+Creating keys is a signed-in session operation. PIN reveals, workspace settings changes, simulations, and key management also require a signed-in person; other operations can use appropriately scoped keys.
 
-`FAUXSHIELD_URL`, `FAUXSHIELD_API_KEY`, `FAUXSHIELD_TOKEN`, and
-`FAUXSHIELD_PASSWORD` override the stored config, so it runs unattended in CI.
-`fauxshield --help` lists everything, and
-[`fauxshield_cli/README.md`](fauxshield_cli/README.md) documents each group.
+`FAUXSHIELD_URL`, `FAUXSHIELD_API_KEY`, `FAUXSHIELD_TOKEN`, and `FAUXSHIELD_PASSWORD` can override stored configuration for unattended use, including CI. Run `fauxshield --help` for the full command list and see [`fauxshield_cli/README.md`](fauxshield_cli/README.md) for the command-by-command reference.
 
-### 6. Use it from an AI agent
+### 6. Connect an AI agent with MCP
 
-`fauxshield_mcp` exposes the same API as Model Context Protocol tools, so an
-agent (Claude Desktop, Cursor, or anything else that speaks MCP) can read the
-fraud queue, pull evidence, and — with a key that has write scopes — work
-alerts and recalls, always attributed in the audit log.
+The `fauxshield_mcp` package exposes platform capabilities as Model Context Protocol tools. MCP-compatible clients can read the fraud queue and retrieve evidence; with appropriately scoped write credentials, they can also work with alerts and recalls. Actions remain attributable in the audit log.
+
+Install the server:
 
 ```bash
 dart pub global activate fauxshield_mcp
 ```
+
+Example MCP configuration:
 
 ```json
 {
@@ -353,168 +335,177 @@ dart pub global activate fauxshield_mcp
 }
 ```
 
-The tool surface and the client snippets are documented in
-[`fauxshield_mcp/README.md`](fauxshield_mcp/README.md).
+Set `FAUXSHIELD_READ_ONLY` to `true` when the agent should only read data. Only grant write-capable credentials to agents and workflows that need them. See [`fauxshield_mcp/README.md`](fauxshield_mcp/README.md) for the available tools and client configuration examples.
 
----
+## Developer platform
 
-## Tests
+FauxShield publishes several clients for the same API. The hosted developer portal currently includes a 42-page documentation site with a persistent sidebar, full-text search, generated API reference, SDK guides, CLI and MCP references, and task-oriented guides.
+
+The reference is generated from the machine-readable contract in `fauxshield_contract/`. Endpoint, model, and enum pages are generated from that contract, and CI checks that the reference stays aligned with the implementation.
+
+### Available clients
+
+| Client | Install | Default API host |
+| --- | --- | --- |
+| Dart SDK — [`fauxshield_client`](https://pub.dev/packages/fauxshield_client) | `dart pub add fauxshield_client` | Supplied by the caller; the app reads it from `config.json` |
+| Node.js SDK — [`fauxshield`](https://www.npmjs.com/package/fauxshield) | `npm install fauxshield` | `https://fauxshield.api.serverpod.space` |
+| Python SDK — [`fauxshield-sdk`](https://pypi.org/project/fauxshield-sdk/) | `pip install fauxshield-sdk` | `https://fauxshield.api.serverpod.space` |
+| CLI — [`fauxshield_cli`](https://pub.dev/packages/fauxshield_cli) | `dart pub global activate fauxshield_cli` | `https://fauxshield.api.serverpod.space` |
+| MCP server — [`fauxshield_mcp`](https://pub.dev/packages/fauxshield_mcp) | `dart pub global activate fauxshield_mcp` | `https://fauxshield.api.serverpod.space` |
+
+For detailed installation, authentication, API usage, SDK patterns, CLI commands, and MCP client setup, start with the [developer documentation](https://fauxshield.serverpod.space/docs). Package-level references are also maintained in [`fauxshield_cli/README.md`](fauxshield_cli/README.md) and [`fauxshield_mcp/README.md`](fauxshield_mcp/README.md).
+
+### API and client parity
+
+Run the parity check from the repository root:
+
+```bash
+python tools/check_parity.py
+```
+
+The current check reports coverage for **86 of 86 methods** and **76 of 76 models and enums** across the client contract. It also checks that SDKs default to the hosted API. These counts describe the current generated contract and should be refreshed when the API changes.
+
+See [`docs/DEVELOPER_PLATFORM.md`](docs/DEVELOPER_PLATFORM.md) for the platform audit, architecture decisions, verification results, and remaining authorization work.
+
+### Web entry points
+
+When the local server is running on port `8082`, these pages are available:
+
+| Page | Purpose | Local URL |
+| --- | --- | --- |
+| Landing | Live platform stats and demo product code | [http://localhost:8082/](http://localhost:8082/) |
+| Features | Product capabilities | [http://localhost:8082/features](http://localhost:8082/features) |
+| Pricing | Deployment options | [http://localhost:8082/pricing](http://localhost:8082/pricing) |
+| About | Project context and implementation | [http://localhost:8082/about](http://localhost:8082/about) |
+| Documentation | Concepts, API reference, SDK, CLI, and MCP guides | [http://localhost:8082/docs](http://localhost:8082/docs) |
+| Consumer verification | Token, PIN, verdict, and product reporting | [http://localhost:8082/verify](http://localhost:8082/verify) |
+| Operator app | Flutter command center | [http://localhost:8082/app](http://localhost:8082/app) |
+| API | Serverpod JSON-RPC API | [http://localhost:8080](http://localhost:8080) |
+| Insights | Serverpod Insights | [http://localhost:8081](http://localhost:8081) |
+
+Public product and documentation pages use a **Dashboard** action that opens `/app`; the operator app directs visitors without a session to its sign-in screen. The consumer `/verify` page is designed as a separate shopper flow and does not route consumers into the operator interface.
+
+## Testing and quality checks
+
+Run the server suite:
 
 ```bash
 cd fauxshield_server
 dart test
 ```
 
-Covers the core crypto (HMAC, PBKDF2, AES-GCM), the verification pipeline
-(outcomes, replay protection, PIN lockout), the fraud pipeline (clone/PIN/offline
-signals and alert evidence), recalls, API key authentication, the product
-recycle bin, product image storage, and the demo seeder — 70 tests, all green.
+The server suite covers core cryptography (HMAC, PBKDF2, and AES-GCM), verification outcomes, replay protection, PIN lockout, fraud signals and alert evidence, recalls, API-key authentication, product recycle-bin behavior, product-image storage, and demo seeding. The current repository reports **70 server tests**.
 
-The clients are tested on their own terms, because they are what operators and
-agents actually drive the API with:
+Run the CLI and MCP tests:
 
 ```bash
-cd fauxshield_cli && dart test    # 13 tests: version parity, exit codes, API key
-cd fauxshield_mcp && dart test    # 26 tests: config, tool surface, read-only guard, stdio handshake
+cd fauxshield_cli && dart test
+cd fauxshield_mcp && dart test
 ```
 
-The Flutter app is analyzed clean with `flutter analyze`, and every package
-(`fauxshield_server`, `fauxshield_cli`, `fauxshield_mcp`, `fauxshield_client`)
-is analyzed clean with `dart analyze`. CI runs all of it on every push:
-`.github/workflows/tests.yml`, and pushing a version tag publishes the SDKs to
-PyPI and npm from `.github/workflows/release-python.yml` and
-`.github/workflows/release-npm.yml`. The three Dart packages are on pub.dev
-(`fauxshield_client`, `fauxshield_cli`, `fauxshield_mcp`), published with
-`dart pub publish`.
+The current client suites report **13 CLI tests** and **26 MCP tests**, including version parity, exit codes, API-key handling, configuration, MCP tool coverage, read-only enforcement, and the stdio handshake.
 
----
+Static analysis commands:
+
+```bash
+dart analyze
+flutter analyze
+```
+
+CI runs formatting, analysis, and tests on pushes through `.github/workflows/tests.yml`. Version tags publish the Node.js and Python SDKs through `.github/workflows/release-npm.yml` and `.github/workflows/release-python.yml`. The Dart packages (`fauxshield_client`, `fauxshield_cli`, and `fauxshield_mcp`) are published to pub.dev with `dart pub publish`.
 
 ## Deploy to Serverpod Cloud
 
-The repository is deployment-ready: Dockerfile, production config, prebuilt
-Flutter web bundle, and migration files are all in `fauxshield_server/`.
+The repository includes a Dockerfile, production configuration, a prebuilt Flutter web bundle, and database migrations under `fauxshield_server/`.
 
-```bash
-# 1. Install/auth with the Serverpod Cloud CLI (from the repository root)
-serverpod cloud auth login
+1. Authenticate with Serverpod Cloud:
 
-# 2. Link this server to a new cloud project and deploy
-cd fauxshield_server
-serverpod cloud launch          # follow the prompts; creates Postgres + URLs
+   ```bash
+   serverpod cloud auth login
+   ```
 
-# 3. Later deploys
-serverpod cloud deploy
+2. From the server directory, launch a cloud project. Follow the prompts to provision PostgreSQL and create the service URLs:
 
-# 4. Provide the app secrets (values from config/passwords.yaml)
-serverpod cloud password set hmacSecretKey
-serverpod cloud password set pinEncryptionKey
-serverpod cloud password set webhookEncryptionKey
-serverpod cloud password set demoSeedSecret
+   ```bash
+   cd fauxshield_server
+   serverpod cloud launch
+   ```
 
-# 5. Useful commands
-serverpod cloud status
-serverpod cloud log
-```
+3. Deploy subsequent changes:
 
-Serverpod Cloud builds the server from this repository, provisions PostgreSQL,
-applies the migrations, and serves the same three entry points (landing,
-`/verify`, `/app`). See `docs/DEPLOYMENT.md` for details and a pre-flight
-checklist.
+   ```bash
+   serverpod cloud deploy
+   ```
 
----
+4. Configure the required secrets using values created for the target environment:
 
-## Developer platform
+   ```bash
+   serverpod cloud password set hmacSecretKey
+   serverpod cloud password set pinEncryptionKey
+   serverpod cloud password set webhookEncryptionKey
+   serverpod cloud password set demoSeedSecret
+   ```
 
-The same server hosts the developer documentation at `/docs`: 42 pages with a
-persistent sidebar, full-text search, an API reference generated from the
-machine-readable contract in `fauxshield_contract/`, SDK pages for Dart, Node.js,
-and Python, a CLI reference, an MCP reference, and task guides. Every endpoint,
-model, and enum page is generated, so the reference cannot describe an API the
-server does not have — CI fails when it is out of date.
+5. Check deployment status and logs:
 
-Clients published against the same API:
+   ```bash
+   serverpod cloud status
+   serverpod cloud log
+   ```
 
-| Client | Install | Default API |
-| --- | --- | --- |
-| Dart ([`fauxshield_client`](https://pub.dev/packages/fauxshield_client)) | `dart pub add fauxshield_client` | host supplied by the caller; the app reads it from `config.json` |
-| Node.js ([`fauxshield`](https://www.npmjs.com/package/fauxshield)) | `npm install fauxshield` | `https://fauxshield.api.serverpod.space` |
-| Python ([`fauxshield-sdk`](https://pypi.org/project/fauxshield-sdk/)) | `pip install fauxshield-sdk` | `https://fauxshield.api.serverpod.space` |
-| CLI ([`fauxshield_cli`](https://pub.dev/packages/fauxshield_cli)) | `dart pub global activate fauxshield_cli` | `https://fauxshield.api.serverpod.space` |
-| MCP ([`fauxshield_mcp`](https://pub.dev/packages/fauxshield_mcp)) | `dart pub global activate fauxshield_mcp` | `https://fauxshield.api.serverpod.space` |
-
-`python tools/check_parity.py` compares all of them against the contract and
-reports the coverage — currently 86 of 86 methods, 76 of 76 models and enums —
-and fails if any client stops defaulting to the hosted API.
-
-See `docs/DEVELOPER_PLATFORM.md` for the audit, the architecture decision, the
-verification results, and what still needs authorization.
-
-### Entry points
-
-| Entry point | What it is | URL (local dev) |
-| --- | --- | --- |
-| Landing page | Live platform stats + demo product code | http://localhost:8082/ |
-| Features | What each module does, in detail | http://localhost:8082/features |
-| Pricing | The three supported deployment options | http://localhost:8082/pricing |
-| About | Why it exists and how it was built | http://localhost:8082/about |
-| Documentation | Developer portal: setup, concepts, generated API reference, SDK, CLI, and MCP guides | http://localhost:8082/docs |
-| Consumer verification | Scan → PIN → verdict, with product reports | http://localhost:8082/verify |
-| Operator app | Flutter web command center (also runs on mobile/desktop) | http://localhost:8082/app |
-| Command line | Products, batches, units, and alerts from a terminal | `fauxshield` (step 5) |
-| API + Insights | Serverpod JSON-RPC API and Insights | http://localhost:8080 · :8081 |
-
-Every public page — the landing page, features, pricing, about, and the
-documentation — offers a single **Dashboard** action that opens `/app`, rather
-than a sign in / sign up pair: the operator app already routes a visitor without
-a session to its own sign in screen. The consumer `/verify` page has its own
-header and offers no operator path, so a shopper scanning a pack never gets an
-invitation to sign in.
-
----
+Serverpod Cloud builds the server, provisions PostgreSQL, applies migrations, and serves the API and web entry points. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the full deployment guide and pre-flight checklist.
 
 ## Repository layout
 
-The repository root is the Dart workspace: the Serverpod server, the generated
-client, and the Flutter app sit side by side.
+The repository root is a Dart workspace containing the Serverpod server, generated client, Flutter app, CLI, and MCP server.
 
-```
-fauxshield/                      # repository root
-├── fauxshield_server/          # Serverpod 4 server (the product)
+```text
+fauxshield/
+├── fauxshield_server/             # Serverpod 4 backend and web routes
 │   ├── lib/
-│   │   ├── server.dart         # boot: auth, web routes, recurring tasks
+│   │   ├── server.dart            # Startup, auth, routes, recurring tasks
 │   │   └── src/
-│   │       ├── models/         # 84 .spy.yaml models
-│   │       ├── core/           # crypto, constants, geo, webhook signing
-│   │       ├── services/       # verification, fraud, alerts, recall, demo…
-│   │       ├── endpoints/      # 15 endpoint classes
-│   │       ├── future_calls/   # recurring background jobs
-│   │       └── web/            # landing, docs, and consumer verification pages
-│   ├── web/                    # templates, css, prebuilt Flutter app
-│   ├── migrations/             # database migrations
-│   └── test/                   # unit + integration tests
-├── fauxshield_flutter/         # Flutter operator command center
+│   │       ├── models/            # .spy.yaml models and enums
+│   │       ├── core/              # Crypto, constants, geo, webhook signing
+│   │       ├── services/          # Verification, fraud, alerts, recalls, demo
+│   │       ├── endpoints/         # 15 platform endpoint classes
+│   │       ├── future_calls/      # Recurring and paced background jobs
+│   │       └── web/               # Landing, docs, consumer verification
+│   ├── web/                       # Templates, CSS, prebuilt Flutter bundle
+│   ├── migrations/                # Database migrations
+│   └── test/                      # Unit and integration tests
+├── fauxshield_flutter/            # Flutter operator command center
 │   └── lib/
-│       ├── screens/            # dashboard, live feed, alerts, catalog…
-│       ├── app/                # theme + workspace state
-│       ├── widgets/ utils/     # shared UI
+│       ├── screens/               # Dashboard, feed, alerts, catalog, etc.
+│       ├── app/                   # Theme and workspace state
+│       ├── widgets/               # Shared UI components
+│       ├── utils/                 # Shared utilities
 │       └── main.dart
-├── fauxshield_cli/             # Dart console client for operators and scripts
-│   ├── bin/fauxshield.dart     # entry point
-│   ├── lib/src/commands/       # one file per command group
-│   └── README.md               # install, credentials, every command
-├── fauxshield_mcp/             # MCP server so an agent can drive the API
-│   ├── bin/fauxshield_mcp.dart # stdio entry point
-│   ├── lib/src/tools/          # catalog, operations, response tools
-│   └── README.md               # client setup and the tool surface
-├── fauxshield_client/          # generated Dart client (do not edit)
-├── third_party/sqlite_async/   # one-line patch for web builds (see README)
-├── docs/                       # deployment guide + demo script
-├── .github/workflows/          # CI: analyze, format, tests, npm + PyPI releases
-└── AGENTS.md                   # notes for AI agents working in this repo
+├── fauxshield_cli/                # Dart command-line client
+│   ├── bin/fauxshield.dart        # CLI entry point
+│   ├── lib/src/commands/          # Command groups
+│   └── README.md                  # CLI usage and command reference
+├── fauxshield_mcp/                # MCP server for AI-agent integrations
+│   ├── bin/fauxshield_mcp.dart    # MCP stdio entry point
+│   ├── lib/src/tools/             # Catalog, operations, response tools
+│   └── README.md                  # MCP setup and available tools
+├── fauxshield_client/             # Generated Dart client (do not edit manually)
+├── fauxshield_contract/           # Machine-readable API contract
+├── third_party/sqlite_async/      # Web-build compatibility patch
+├── docs/                          # Deployment guide and demo script
+├── tools/                         # API/client parity checks
+├── .github/workflows/             # CI and SDK release workflows
+└── AGENTS.md                      # Repository notes for coding agents
 ```
 
----
+## Security and deployment notes
+
+- **Replace development secrets before deployment.** Rotate the values in `config/passwords.yaml` for the deployed environment and configure the secrets through the deployment platform.
+- **Use least-privilege API keys.** Create keys with only the scopes needed by a script, integration, or agent.
+- **Treat PIN reveals as sensitive operations.** They are auditable and should be restricted to trusted, authenticated operators.
+- **Keep MCP read-only unless writes are required.** Set `FAUXSHIELD_READ_ONLY=true` and provide read-scoped credentials for agents that do not need to change records.
+- **Review production configuration.** Before using the platform with real product identities or customer data, follow `docs/DEPLOYMENT.md` and validate the target environment's email, database, cryptographic secrets, webhook configuration, and access policy.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+FauxShield is licensed under the MIT License. See [`LICENSE`](LICENSE).
