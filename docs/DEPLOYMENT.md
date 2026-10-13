@@ -166,10 +166,9 @@ Verified against the live deployment:
    `{"apiUrl":"https://fauxshield.api.serverpod.space"}`, plus 200s for
    `/app/index.html`, `/app/main.dart.js`, `/app/flutter_bootstrap.js` and the
    cache-busted `/web/css/...` asset.
-5. In a browser: follow **Try demo code** from the landing page. The demo
-   workspace is seeded on the first authenticated call to `demo.seed`, so the
-   landing page only shows a demo code and PIN after someone signs in to
-   `/app` once and chooses **Open demo workspace**.
+5. In a browser: open `/app`, sign in, and choose **Open demo workspace**. The
+   demo workspace is seeded on the first authenticated call to `demo.seed`, so
+   the landing page's live counts only move once a workspace exists.
 6. In the app: **Dashboard** shows stats, **Live** shows events, and
    **Simulations → Clone attack** produces alerts in **Alerts**.
 

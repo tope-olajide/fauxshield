@@ -7,8 +7,8 @@ import 'site_chrome.dart';
 /// Structure and visual language follow the reference site (hero, crisis,
 /// solution, how it works, features, fraud intelligence, offline, developer
 /// platform, use cases, security, closing call to action). The copy describes
-/// what this build actually does, and the counters and demo code are read from
-/// the live database on every request.
+/// what this build actually does, and the counters are read from the live
+/// database on every request.
 class LandingPageWidget extends TemplateWidget {
   LandingPageWidget() : super(name: 'landing');
 
@@ -18,10 +18,6 @@ class LandingPageWidget extends TemplateWidget {
     required int identities,
     required int verifications,
     required int alerts,
-    String? demoToken,
-    String? demoProductName,
-    String? demoBrandName,
-    String? demoPin,
   }) {
     return LandingPageWidget()
       ..values.addAll(
@@ -39,12 +35,6 @@ class LandingPageWidget extends TemplateWidget {
         'identities': identities,
         'verifications': verifications,
         'alerts': alerts,
-        'hasDemo': demoToken != null && demoToken.isNotEmpty,
-        'demoToken': demoToken,
-        'demoProductName': demoProductName,
-        'demoBrandName': demoBrandName,
-        'hasDemoPin': demoPin != null && demoPin.isNotEmpty,
-        'demoPin': demoPin,
         'crisisStats': _crisisStats(),
         'crisisImpact': _crisisImpact(),
         'shortfalls': _shortfalls(),

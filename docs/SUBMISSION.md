@@ -24,6 +24,7 @@ blank to fill once the recording is uploaded.
 | Developer documentation | https://fauxshield.serverpod.space/docs |
 | API (JSON-RPC) | https://fauxshield.api.serverpod.space |
 | Video (2 min) | _paste the upload URL here once recorded_ |
+| Reviewer account | _paste the demo account email + password here_ — the form's access/notes field is the place for it. Reviewers sign in at `/app`; **Open demo workspace** loads the seeded brand in one click. |
 | CLI / SDKs | `dart pub global activate fauxshield_cli` · `fauxshield_mcp` · `npm install fauxshield` · `pip install fauxshield-sdk` · `dart pub add fauxshield_client` |
 
 ## Short description (≈ 60 words)
@@ -64,7 +65,7 @@ Seventeen registered routes, one database, one deploy.
 
 | Criterion | Where it shows |
 | --- | --- |
-| **Does it work (30%)** | The whole flow is live and unauthenticated where it should be: `/verify` runs token resolution → PIN → verdict against the deployed database, `/app` is the real operator app, and the demo workspace is seeded through the same services as production data. 70 server tests (unit + integration, embedded PostgreSQL, no Docker), 13 CLI and 26 MCP tests, CI on every push. |
+| **Does it work (30%)** | The whole flow is live: `/verify` runs token resolution → PIN → verdict against the deployed database (no account needed for a real pack), `/app` is the real operator app, and reviewers sign in to a seeded demo workspace that is created through the same services as production data. 70 server tests (unit + integration, embedded PostgreSQL, no Docker), 13 CLI and 26 MCP tests, CI on every push. |
 | **Use of the Serverpod stack (25%)** | Endpoints and generated protocol; 84 `.spy.yaml` models generating schema and migrations; Serverpod's email identity provider with JWTs; `watchWorkspace` streaming; four recurring future calls plus paced simulation steps; `database: sync` offline records; row-locked transactions; the web server rendering the public pages; `serverpod_test`; Serverpod Cloud deploy. The README's "How Serverpod is used" table names the file for each one. |
 | **Craft and technical creativity (25%)** | Cryptographic identity (HMAC-bound tokens, PBKDF2 PINs, AES-GCM reveals, audited reveals), replay and device binding, deduplicating alert pipeline with evidence, attack simulations that run through the real pipeline, offline-first field work, a 42-page generated documentation portal, and four published clients (Dart, Node.js, Python, CLI) plus an MCP server, all parity-checked against a generated contract. |
 | **Usefulness (20%)** | One clear user, one clear problem: a brand that cannot tell its own product from a copy, and a shopper who cannot tell a real pack from a fake. Medicines, seeds, food, cosmetics, electronics, and auto parts are all named in the README's problem section and on `/features` and `/about`. |
@@ -74,13 +75,14 @@ Seventeen registered routes, one database, one deploy.
 `docs/DEMO_SCRIPT.md` is the shot list (target 1:55, two browser windows plus
 the operator app). The scenes assume the deployed instance:
 
-1. `https://fauxshield.serverpod.space/` — the landing page with live counters
-   and the demo code + packaging PIN, then `/verify` for an authentic verdict.
-2. `/verify` — report the product, then show it land in the app's **Alerts**.
-3. `/app` — dashboard, then the **Live** feed during a simulation.
+1. `/app` signed in to the demo workspace — the landing page's live counters,
+   then the dashboard.
+2. `/verify` with a unit's token — the PIN prompt, then an authentic verdict.
+   Report the product, and show the report land in **Alert center**.
+3. The app's **Live** feed while a simulation runs.
 4. **More → Simulations → Clone attack** — verification events, a clone signal,
    a critical alert with evidence and a map.
-5. Close on the catalog → **Recall batch**.
+5. Close on the catalogue → **Recall batch**.
 
 Record at 1440p, keep the cursor deliberate, and let the live feed show the
 work. Upload (unlisted is fine, but a public link is safer for judges), then

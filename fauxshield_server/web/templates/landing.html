@@ -47,21 +47,6 @@
               Verify a product
             </a>
           </div>
-
-          {{#hasDemo}}
-          <div class="demo-strip">
-            <span>
-              There is a live demo here: {{demoBrandName}}{{#demoProductName}}
-              &middot; {{demoProductName}}{{/demoProductName}}
-            </span>
-            {{#hasDemoPin}}
-            <span>Packaging PIN <strong class="demo-pin">{{demoPin}}</strong></span>
-            {{/hasDemoPin}}
-            <a class="btn btn-secondary btn-sm" href="/verify?t={{demoToken}}">
-              Try the demo code
-            </a>
-          </div>
-          {{/hasDemo}}
         </div>
       </section>
 

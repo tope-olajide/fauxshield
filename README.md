@@ -17,17 +17,18 @@ jobs, the database, and the web pages — built end to end on **Serverpod 4** an
 
 ### Three things to try in two minutes
 
-1. **Verify a pack like a shopper.**
-   Open [the landing page](https://fauxshield.serverpod.space/) and take the
-   live demo code and its packaging PIN, then enter them on
-   [/verify](https://fauxshield.serverpod.space/verify). That is the real
-   pipeline: token resolution, device binding, a row-locked PIN check, a
-   verdict, and a fraud evaluation.
-2. **Open the command center.**
+1. **Open the command center.**
    [/app](https://fauxshield.serverpod.space/app) → create an account →
    **Open demo workspace**. You land in a complete brand: products, batches,
    serialized units, a recall, consumer reports, a populated fraud queue, and
    two attack investigations already in progress.
+2. **Verify a pack like a shopper.**
+   Open **Verify a product** in the app and press **Demo unit** (or take a
+   token and packaging PIN from any unit in the catalogue). That is the real
+   pipeline: token resolution, device binding, a row-locked PIN check, a
+   verdict, and a fraud evaluation. The identical flow is public at
+   [/verify](https://fauxshield.serverpod.space/verify) for a pack in a
+   shopper's hand — no account, no app.
 3. **Run an attack and watch it land.**
    **More → Simulations → Clone attack**, then open **Live**. Scans stream in,
    the fraud engine fires, and an alert opens with its evidence, risk score,
@@ -264,11 +265,12 @@ units, verifications, a recall, alerts, simulations) so every screen has data.
 
 ### 3. Try the consumer flow
 
-Open http://localhost:8082/, take the demo product code, then enter its
-packaging PIN (both are shown on the landing page) on the `/verify` page. You
-will get a real verdict, and if you flip to the app's live feed you can watch it
-arrive. No demo workspace yet? The landing page picks one up as soon as the
-first demo workspace exists.
+In the app, open **Verify a product** and press **Demo unit** to load a signed
+token from the demo workspace, then enter its packaging PIN. You get a real
+verdict from the same code path a shopper hits. To see the shopper's own view,
+take a unit's token and PIN from the catalogue, open
+http://localhost:8082/verify?t=<token>, and enter the PIN there — then flip to
+the app's live feed and watch the scan arrive.
 
 ### 4. Rebuild the web app (optional)
 

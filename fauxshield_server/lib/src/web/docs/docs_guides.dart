@@ -683,7 +683,7 @@ serverpod start
   need an email provider to create an account.
 </p>
 ${paramTable(const <DocsParam>[
-              DocsParam(name: '/', type: 'page', defaultValue: 'landing page with live counts and a demo code'),
+              DocsParam(name: '/', type: 'page', defaultValue: 'landing page with the live counts'),
               DocsParam(name: '/verify', type: 'page', defaultValue: 'the consumer flow, the same one a QR code points at'),
               DocsParam(name: '/app', type: 'app', defaultValue: 'the operator app'),
               DocsParam(name: '/docs', type: 'page', defaultValue: 'this documentation'),

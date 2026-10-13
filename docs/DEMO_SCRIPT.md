@@ -7,10 +7,9 @@ live feed do the talking.
 ## Before recording
 
 - Deployed (or local) server is running with a seeded demo workspace.
-- Two browser windows ready:
-  1. Landing page `https://<host>/`
-  2. `/verify` page
 - Operator app at `https://<host>/app`, signed in, demo workspace open.
+- A second window on the `/verify` page, with one unit's token and PIN copied
+  out of the catalogue beforehand, so the shopper scene needs no fumbling.
 - Close extra tabs; silence notifications.
 
 ## Shot list
@@ -18,7 +17,7 @@ live feed do the talking.
 | Time | Scene | On screen | Narration |
 | --- | --- | --- | --- |
 | 0:00–0:12 | **Hook** | Landing page. Slow scroll past the counters: products, serialized units, verifications, fraud alerts. | "Counterfeit goods cost brands billions. FauxShield serializes every unit a brand makes and verifies it in seconds — all on Serverpod 4." |
-| 0:12–0:35 | **Consumer flow** | Click **Try demo code** → `/verify` shows the product, tap through to the PIN prompt → type the demo PIN shown on the landing page → verdict appears: **Authentic**. | "A shopper scans the code, enters the PIN from under the scratch panel, and gets an authoritative verdict — no account, no app. The session is device-bound, replay-protected, and the server only ever returns an allow-listed view." |
+| 0:12–0:35 | **Consumer flow** | Cut to the `/verify` window with the token already in the URL: the product resolves, the PIN prompt appears, type the PIN → verdict appears: **Authentic**. Then cut back to the app's **Verify a product** screen running the same flow with **Demo unit**. | "A shopper scans the code, enters the PIN from under the scratch panel, and gets an authoritative verdict — no account, no app. The session is device-bound, replay-protected, and the server only ever returns an allow-listed view." |
 | 0:35–0:50 | **Report + recall** | Scroll to the result, tap **Report this product**, send a quick report. Switch to the app's **Alerts** tab: the consumer report is already in the triage queue. | "Suspicious products turn into consumer reports that land in the brand's triage queue immediately." |
 | 0:50–1:15 | **Command center** | Operator app → **Dashboard** (stats, trend, outcome mix) → **Live** feed while a simulation runs. | "Operators get a live command center. Every scan, signal, and alert streams in over Serverpod's streaming channel." |
 | 1:15–1:45 | **Attack rehearsal** | **More → Simulations → Clone attack** (fast pace). Cut to **Live** feed: verification events, then a clone signal, then a critical alert. Open the alert: evidence, signals, map. | "Teams rehearse real attacks through the real pipeline: a clone attack scans one token across distant cities until the fraud engine fires. Signals, risk score, and evidence are attached to the alert automatically." |
