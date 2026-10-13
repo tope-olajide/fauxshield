@@ -111,6 +111,11 @@ class GeoService {
   /// no lookup is configured, the service does not answer, or it answers
   /// without usable fields. It never falls back to the demo table: an invented
   /// city in the operator's feed is worse than no city at all.
+  ///
+  /// Every way it can come back empty is logged, because a silent null is
+  /// indistinguishable from a place that genuinely has no location, and that is
+  /// how a mistyped template or a lookup service that started rate limiting us
+  /// went unnoticed.
   Future<GeoResult?> _resolveHttp(Session session, String ipAddress) async {
     final template =
         urlTemplateOverride ??
@@ -119,6 +124,11 @@ class GeoService {
           PlatformSecretNames.geoLookupUrlTemplate,
         );
     if (template == null || !template.contains('{ip}')) {
+      session.log(
+        'geo.lookup_unconfigured provider=http: set geoLookupUrlTemplate with '
+        'a {ip} placeholder. Scans carry no location until that is set.',
+        level: LogLevel.warning,
+      );
       return null;
     }
     final url = template.replaceAll('{ip}', Uri.encodeComponent(ipAddress));
@@ -126,9 +136,21 @@ class GeoService {
       final response = await _client
           .get(Uri.parse(url))
           .timeout(FauxShieldLimits.geoLookupTimeout);
-      if (response.statusCode != 200) return null;
+      if (response.statusCode != 200) {
+        session.log(
+          'geo.lookup_failed ip=$ipAddress status=${response.statusCode}',
+          level: LogLevel.warning,
+        );
+        return null;
+      }
       final decoded = jsonDecode(response.body);
-      if (decoded is! Map<String, dynamic>) return null;
+      if (decoded is! Map<String, dynamic>) {
+        session.log(
+          'geo.lookup_failed ip=$ipAddress reason=unexpected_body',
+          level: LogLevel.warning,
+        );
+        return null;
+      }
 
       final country = _stringValue(decoded, const ['country', 'country_name']);
       final countryCode = _stringValue(decoded, const [
@@ -144,6 +166,10 @@ class GeoService {
       ]);
 
       if (country.isEmpty && countryCode.isEmpty && city.isEmpty) {
+        session.log(
+          'geo.lookup_failed ip=$ipAddress reason=no_location_fields',
+          level: LogLevel.warning,
+        );
         return null;
       }
       return GeoResult(
@@ -157,8 +183,12 @@ class GeoService {
         latitude: latitude,
         longitude: longitude,
       );
-    } catch (_) {
+    } catch (error) {
       // Geo enrichment is best effort: verification must never fail on it.
+      session.log(
+        'geo.lookup_failed ip=$ipAddress reason=$error',
+        level: LogLevel.warning,
+      );
       return null;
     }
   }

@@ -16,7 +16,13 @@ abstract final class FauxShieldLimits {
   static const Duration fraudEvaluationBudget = Duration(seconds: 2);
 
   /// Budget for one geo lookup.
-  static const Duration geoLookupTimeout = Duration(milliseconds: 500);
+  ///
+  /// This wraps a real HTTPS call to a geolocation service, so it has to cover
+  /// a cold connection: DNS, TCP, TLS, and the response. Measured against
+  /// ipwho.is the round trip alone ran 0.6-0.8s, and a 500ms budget failed
+  /// intermittently — which surfaced to consumers as an unknown location, and
+  /// before the fabricated fallback was removed, as an invented city.
+  static const Duration geoLookupTimeout = Duration(milliseconds: 1500);
 
   /// Maximum rows returned by a synchronous identity export.
   static const int maxExportRows = 10000;
