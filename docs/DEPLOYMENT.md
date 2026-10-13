@@ -93,8 +93,22 @@ the YAML config files.
       `hmacSecretKey` and `pinEncryptionKey` must not change once data exists:
       rotating them invalidates printed QR codes and stored PINs.
 
-- [ ] **Geo provider.** Development and the cloud both run the deterministic
-      `demo` provider, so scans resolve to a city without an external service.
+- [ ] **Geo provider.** Development and the cloud both run the `demo`
+      provider out of the box, which answers from a built-in city list plus a
+      hash of the address. It is deterministic, but for an address its list does
+      not cover it invents a city, so its answer must not be presented as a real
+      consumer location. To look the city up instead:
+
+      ```bash
+      serverpod cloud password set geoProvider http           # managed secret
+      serverpod cloud password set geoLookupUrlTemplate 'https://ipwho.is/{ip}'
+      ```
+
+      Managed secrets are injected as `SERVERPOD_PASSWORD_*` and take precedence
+      over `config/passwords.yaml`, which is uploaded with the development
+      values. With `http`, a lookup that fails leaves the location unknown, and
+      the device timezone the verify page sent fills in; the demo list is never
+      used as a stand-in for a real answer.
 
 - [ ] **Product images are in object storage.** Uploaded images go through
       `pod.storage['public']`, which `server.dart` wires with
