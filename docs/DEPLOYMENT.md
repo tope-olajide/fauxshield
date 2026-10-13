@@ -160,8 +160,10 @@ Verified against the live deployment:
    with no unhandled exceptions.
 2. `curl https://fauxshield.serverpod.space/` → 200 with the landing page.
 3. `curl "https://fauxshield.serverpod.space/verify?t=<unknown token>"` →
-   200 and `This code is not registered by any brand on FauxShield.`, which
-   exercises the database lookup and the scan logging.
+   200 and `This code is not registered by any brand on FauxShield.` for a
+   well-formed token, or `That code does not look like a FauxShield code.` for
+   a malformed one. Either way the page returns 200 and the request exercises
+   the database lookup and the scan logging.
 4. `curl https://fauxshield.serverpod.space/app/assets/assets/config.json` →
    `{"apiUrl":"https://fauxshield.api.serverpod.space"}`, plus 200s for
    `/app/index.html`, `/app/main.dart.js`, `/app/flutter_bootstrap.js` and the
@@ -171,6 +173,40 @@ Verified against the live deployment:
    the landing page's live counts only move once a workspace exists.
 6. In the app: **Dashboard** shows stats, **Live** shows events, and
    **Simulations → Clone attack** produces alerts in **Alerts**.
+
+## Refreshing the live demo before judging
+
+The landing page reads its counters straight off the database — workspaces,
+products, serialized units, verification sessions, and alerts are total row
+counts — so it is the fastest check on whether the demo looks alive:
+
+```bash
+curl -s https://fauxshield.serverpod.space/ | grep -o '"stat-value">[0-9]*'
+```
+
+A healthy `DemoSeeder` run leaves **3 products, 4 batches, around 240 serialized
+units**, an authentic verification history, the fake reports and clone signals
+that raise alerts, and one recalled batch. If the counters read `0 fraud alerts`
+or a single product, the demo workspace is stale or was edited by hand and
+should be rebuilt — `demo.seed` only resets when the caller also passes the
+`demoSeedSecret`, so visitors can browse without being able to wipe it:
+
+```bash
+# Does the demo workspace exist? No sign-in needed.
+fauxshield demo status --public --url https://fauxshield.api.serverpod.space
+
+# Sign in as the account the reviewers will use (or build a token first).
+fauxshield auth login --url https://fauxshield.api.serverpod.space
+
+# Rebuild it. --yes skips the confirmation prompt; the secret is required.
+FAUXSHIELD_DEMO_SECRET=<demoSeedSecret> fauxshield demo reset --yes \
+  --url https://fauxshield.api.serverpod.space --email <reviewer email>
+
+# The counters should move on the next request.
+```
+
+Everything the seeder creates is disposable by design: it is the only workspace
+marked `demoMode`, and rebuilding it deletes whatever was added to it by hand.
 
 ## Point the clients at the deployment
 
