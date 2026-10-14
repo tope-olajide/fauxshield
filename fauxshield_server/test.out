@@ -1,0 +1,96 @@
+Running build hooks...Running build hooks...00:00 +0: loading test\integration\api_key_auth_test.dart
+00:00 +0: test\integration\api_key_auth_test.dart: Given API key authentication (setUpAll)
+00:08 +0: test\integration\fraud_pipeline_test.dart: Given the FauxShield fraud pipeline (setUpAll)
+00:08 +0: test\integration\geo_location_test.dart: Given a consumer scan (setUpAll)
+00:08 +0: test\integration\product_image_storage_test.dart: Given product images (setUpAll)
+00:09 +1: test\integration\product_image_storage_test.dart: Given product images (setUpAll)
+00:09 +2: test\integration\product_image_storage_test.dart: Given product images (setUpAll)
+00:09 +3: test\integration\product_image_storage_test.dart: Given product images (setUpAll)
+00:10 +4: test\integration\product_image_storage_test.dart: Given product images (setUpAll)
+00:10 +5: test\integration\product_image_storage_test.dart: Given product images (setUpAll)
+00:10 +6: test\integration\product_image_storage_test.dart: Given product images (setUpAll)
+00:11 +7: test\integration\product_image_storage_test.dart: Given product images (setUpAll)
+00:11 +8: test\integration\product_image_storage_test.dart: Given product images (setUpAll)
+00:12 +8: test\integration\fraud_pipeline_test.dart: Given the FauxShield fraud pipeline a PIN brute force simulation produces pin attack signals
+00:12 +9: test\integration\fraud_pipeline_test.dart: Given the FauxShield fraud pipeline a PIN brute force simulation produces pin attack signals
+00:12 +10: test\integration\geo_location_test.dart: Given a consumer scan (tearDownAll)
+00:12 +11: test\integration\geo_location_test.dart: Given a consumer scan (tearDownAll)
+00:12 +12: test\integration\geo_location_test.dart: Given a consumer scan (tearDownAll)
+00:13 +13: test\integration\geo_location_test.dart: Given a consumer scan (tearDownAll)
+00:13 +14: test\integration\geo_location_test.dart: Given a consumer scan (tearDownAll)
+00:14 +15: test\integration\geo_location_test.dart: Given a consumer scan (tearDownAll)
+00:14 +16: test\integration\geo_location_test.dart: Given a consumer scan (tearDownAll)
+00:15 +17: test\integration\geo_location_test.dart: Given a consumer scan (tearDownAll)
+00:15 +18: test\integration\geo_location_test.dart: Given a consumer scan (tearDownAll)
+00:20 +18: test\integration\product_recycle_bin_test.dart: Given the product recycle bin (setUpAll)
+00:24 +18: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (setUpAll)
+00:24 +18: test\unit\docs_link_test.dart: Given every page of the documentation its internal links resolve to a page that exists
+00:24 +19: test\integration\product_recycle_bin_test.dart: Given the product recycle bin deleting a product hides it from the catalog until restored
+00:25 +20: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow recall flips verification outcomes and lifting restores it
+00:25 +21: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline verifies an authentic unit end to end with the packaging PIN
+00:26 +22: test\unit\docs_link_test.dart: Given every page of the documentation its internal links resolve to an anchor that exists
+00:26 +23: test\unit\docs_link_test.dart: Given every page of the documentation its internal links resolve to an anchor that exists
+00:26 +24: test\unit\docs_link_test.dart: Given every page of the documentation its internal links resolve to an anchor that exists
+00:27 +25: test\unit\docs_link_test.dart: Given every page of the documentation its internal links resolve to an anchor that exists
+00:27 +26: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline reports already verified when the same unit is scanned again
+00:27 +27: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline reports already verified when the same unit is scanned again
+00:27 +28: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:27 +29: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:27 +30: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:27 +31: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:27 +32: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:27 +33: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:28 +34: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:28 +35: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:28 +36: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:28 +37: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:28 +38: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:28 +39: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:28 +40: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:28 +41: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:30 +42: test\integration\recall_and_demo_test.dart: Given the FauxShield recall flow (tearDownAll)
+00:31 +42: test\unit\docs_template_test.dart: Given the docs page template every page renders with no unresolved placeholders
+00:32 +43: test\unit\docs_template_test.dart: Given the docs page template every page renders with no unresolved placeholders
+00:33 +44: test\unit\docs_template_test.dart: Given the docs page template every page renders with no unresolved placeholders
+00:33 +45: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree (setUpAll)
+00:33 +46: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree (setUpAll)
+00:33 +47: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree (setUpAll)
+00:33 +48: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree (setUpAll)
+00:33 +49: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree (setUpAll)
+00:33 +50: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree (setUpAll)
+00:33 +51: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree (setUpAll)
+00:33 +51: test\integration\recall_and_demo_test.dart: Given the demo seeder (setUpAll)
+00:34 +52: test\integration\recall_and_demo_test.dart: Given the demo seeder (setUpAll)
+00:34 +52: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree purge erases the product, its batches, and its units
+00:34 +53: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree purge erases the product, its batches, and its units
+00:34 +54: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree purge erases the product, its batches, and its units
+00:34 +55: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree purge erases the product, its batches, and its units
+00:34 +56: test\integration\product_recycle_bin_test.dart: Given a recycled product with a full tree purge erases the product, its batches, and its units
+00:34 +57: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline (tearDownAll)
+00:35 +58: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline (tearDownAll)
+00:35 +59: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline (tearDownAll)
+00:35 +60: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline (tearDownAll)
+00:35 +61: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline (tearDownAll)
+00:35 +62: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline (tearDownAll)
+00:35 +63: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline (tearDownAll)
+00:35 +64: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline (tearDownAll)
+00:35 +65: test\integration\verification_pipeline_test.dart: Given the FauxShield verification pipeline (tearDownAll)
+00:36 +65: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:36 +66: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:36 +67: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:36 +68: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:36 +69: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:36 +70: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:36 +71: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:36 +72: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:37 +73: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:37 +74: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:37 +75: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:37 +76: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:37 +77: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:37 +78: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:37 +79: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:37 +80: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:37 +81: test\integration\recall_and_demo_test.dart: Given the demo seeder seeds a browsable demo workspace with products, verifications and alerts
+00:49 +82: test\integration\recall_and_demo_test.dart: Given the demo seeder (tearDownAll)
+00:50 +82: All tests passed!
